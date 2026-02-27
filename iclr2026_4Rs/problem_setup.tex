@@ -1,0 +1,201 @@
+% !TEX root = ./iclr2026_conference.tex
+\vspace{-0.5em}
+\section{Problem setup and blanket assumptions}
+% \vspace{-0.5em}
+\paragraph{Variational inequalities.}  
+Let's recall first the basic framework of finite-sum variational inequalities (VIs), which will underlie our analysis. 
+Let $X \subseteq \R^d$ be a nonempty closed convex set and $F:\R^d \to \R^d$ a single-valued operator. 
+The variational inequality problem $\mathrm{VI}(X,F)$ asks for a point $x^\star \in X$ such that
+\begin{equation} \tag{VIP}
+    \langle F(x^*), x - x^*\rangle \geq 0, \quad \forall x \in X \label{VIP}
+\end{equation}
+In our setting, we focus on the unconstrained finite-sum case with $X=\R^d$ and
+\(
+F(x) = \frac{1}{n} \sum_{i=0}^{n-1} F_i(x),
+\)
+where each $F_i:\R^d \to \R^d$ typically represents the gradient contribution of a data point in some dataset $\mathcal{D}$.
+To build intuition, we illustrate the framework through a few canonical examples below:\\
+%
+%
+%The Variational Inequality problem is rigorously introduced along with the assumptions that will be necessary as well as an overview of the core techniques applied in order to establish our theoretical results. 
+%\paragraph{The Variational Inequality Framework}
+%Consider the Variational Inequality Problem (VIP): find $x^* \in \mathbb{R}^d$ such that it holds that
+%\begin{equation} \tag{VIP}
+%    \langle F(x^*), x - x^*\rangle \geq 0, \quad \forall x \in \mathbb{R}^d \label{VIP}
+%\end{equation}
+%where $F: \mathbb{R}^d \rightarrow \mathbb{R}^d$ is the associated VIP operator. In many machine learning problems, the underlying VI operator has a finite-sum form $ 
+%    F(x) = \frac{1}{n} \sum\limits_{i=0}^{n-1} F_i(x),$ 
+%where each $F_i: \mathbb{R}^d \rightarrow \mathbb{R}^d$ corresponds typically to the evaluation of the gradient at a different data point of the dataset $\mathcal{D}$.
+%
+%The Variational Inequality framework originally introduced [date] [for problems in game theory] encapsulates a wide range of current applications. Exemplary problems include the following: \\
+\textbf{Example 2.1: Solving Non-linear equations.} A solution $x^*$ to the \eqref{VIP} corresponds to a root of the equation $F(x) = \textbf{0}$, allowing casting any non-linear equation as a specific instantiation of the Variational Inequality framework. The well-known example of that form includes the Navier-Stokes equations in computational dynamics \citep{hao2021gradient}. \\
+\textbf{Example 2.2: Empirical Risk Minimization.} For any $\mathcal{C}^1-$smooth loss function $\ell:\R^d \rightarrow \R$, a solution $x^*$ to the \eqref{VIP} with $F(x) = \nabla \ell(x)$ is a critical point (KKT solution) to the associated empirical risk minimization problem, consisting the cornerstone of machine learning objectives. \\
+\textbf{Example 2.3: Nash Equilibria \& Saddle-point Problems.}
+Consider $N$ players, each having an action set in $\R^d$ and a convex cost function $c_i: \R^d\rightarrow \R$. A Nash Equilibrium \eqref{NE} is a joint-action profile $x^* = (x^*_i)_{i=1}^N$ that satisfies
+\begin{equation}\tag{NE}
+    c_i(x^*) \leq c_i(x_i; x^*_{-i}), \quad \forall i, x_i \in \R^d \label{NE}
+\end{equation}
+For convex cost functions $c_i: \R^d \rightarrow \R$, a \eqref{NE} coincides with the solution of a \eqref{VIP} with operator $F(x) = \left(\nabla_{x_{i}} c_i(x)\right)_{i=1}^N$. 
+In the particular case of two players and a (quasi) convex-concave objective $\mathcal{L}: \R^d \times \R^d \rightarrow \R$, the solution $x^* = (x_1^*, x_2^*)$ to the \eqref{VIP} with $F(x) = (\nabla \mathcal{L}(x), - \nabla \mathcal{L}(x))$ is a saddle point of $\mathcal{L}$ satisfying
+\begin{equation*}
+    \mathcal{L}(x^*_1, x_2) \leq \mathcal{L}(x^*_1, x^*_2) \leq \mathcal{L}(x_1, x^*_2), \quad \forall x_1, x_2 \in \R^d \nonumber
+\end{equation*}
+Saddle-point problems and applications of \eqref{NE} are ubiquitous, pertaining from training Generative Adversarial Networks (GANs) to multi-agent reinforcement learning and auction/bandit problems \citep{daskalakis2017training, zhang2021multi, pfau2016connecting}.\vspace{-1em}
+\paragraph{Blanket assumptions.}  
+We now state the standing assumptions for our analysis, beginning with the existence of a solution $x^\star$ to \eqref{VIP}.
+%\paragraph{Blanket Assumptions}
+%We present below the main assumptions that will underlie the analysis to follow. We initially impose the standard assumption that there exists a solution $x^*$ to the associated \eqref{VIP}. 
+\begin{assumption} \label{assumt: sol_set_non_empty}
+    The solution set $\mathcal{X}^*$ of \eqref{VIP} is nonempty and there exists $x^* \in \mathcal{X}^*, R \in \mathbb{R} $ such that $\|x^*\|_2 \leq R$.
+\end{assumption}%\vspace{-1em}
+The next assumption introduces the class of operators $F$ of the associated \eqref{VIP} for which our stochastic gradient algorithms will be analyzed for.  
+\begin{assumption}[$\lambda$-weak $\mu$-quasi strong monotonicity] \label{assumpt: weak_quasi_strong_monotonicity}
+    The operator $F$ is $\lambda$-weak $\mu$-quasi strongly monotone, i.e. there exist $\lambda \geq 0, \mu > 0$ such that for some $x^*\in\mathcal{X}^*$ it holds that 
+    \begin{eqnarray}
+        \langle F(x), x - x^*\rangle &\geq& \mu \|x - x^*\|^2 - \lambda, \quad \forall x \in \mathbb{R}^d 
+    \end{eqnarray}
+\end{assumption}
+\begin{wrapfigure}{r}{0.38\textwidth}
+    \centering
+    \vspace{-1em}
+    \includegraphics[width=0.3\textwidth]{./figures/weakly.png}
+    \vspace{-1em}
+    \caption{A simple example of a function satisfying 
+    Assumption~\ref{assumpt: weak_quasi_strong_monotonicity} is 
+    $f(x, y) = (x^2 + 7 \sin(x)) + xy - (y^2 - 7 \cos(y))$, 
+    where the assumption holds with $(\mu,\lambda) = (1,25)$.}
+    \label{fig:weak_example}
+    \vspace{-2em}
+\end{wrapfigure}
+    %\vspace{-1.2em}
+
+Assumption~\ref{assumpt: weak_quasi_strong_monotonicity} for $\lambda = 0$ coincides with the well-known notions of quasi-strong monotonicity \citep{loizou2020stochastic}, strong stability condition \citep{mertikopoulos2019learning}, and strongly coherent VIPs \citep{song2020optimistic} in the optimization literature. It can be seen as a relaxation of the classical notion of strong monotonicity/convexity, which requires
+$
+\langle F(x) - F(x'),\, x - x'\rangle \;\geq\; \mu \|x - x'\|^2, 
+%\quad
+ \forall x,x'\in \R^d.
+$
+For $\lambda > 0$, Assumption~\ref{assumpt: weak_quasi_strong_monotonicity} represents a further relaxation, motivated by dissipative dynamical systems and weakly convex optimization \citep{raginsky2017non, erdogdu2018global}, and it encompasses non-monotone games as well as a variety of problems in statistical learning theory \citep{tan2023online}.
+
+%\begin{wrapfigure}{r}{0.38\textwidth}
+%    \centering
+%    \vspace{-1em}
+%    \includegraphics[width=0.36\textwidth]{./figures/weakly.png}
+%    \vspace{-1em}
+%    \caption{Illustration of a function satisfying Assumption~\ref{assumpt: weak_quasi_strong_monotonicity} with $(\mu,\lambda)=(1,25)$.}
+%    \label{fig:weak_example}
+%\end{wrapfigure}
+%
+%Assumption~\ref{assumpt: weak_quasi_strong_monotonicity} for $\lambda = 0$ coincides with the well-known notions of quasi-strong monotonicity \citep{loizou2020stochastic}, strong stability condition \citep{mertikopoulos2019learning}, and strongly coherent VIPs \citep{song2020optimistic} in the optimization literature. Specifically, it consists of a relaxation of the classical notion of strong monotonicity/convexity, requiring that $\langle F(x) - F(x'), x - x'\rangle \geq \mu \|x - x'\|^2, \forall x, x'\in \R^d$. For $\lambda > 0$, Assumption~\ref{assumpt: weak_quasi_strong_monotonicity} represents a further relaxation motivated by dissipative dynamical systems and weakly convex optimization \citep{raginsky2017non, erdogdu2018global}, and encompasses non-monotone games and various problems in statistical learning theory \citep{tan2023online}. A simple example of a function satisfying Assumption~\ref{assumpt: weak_quasi_strong_monotonicity} is $f(x, y) = (x^2 + 7 \sin(x)) + xy - (y^2 - 7 \cos(y))$, where the assumption holds with $(\mu, \lambda) = (1,25)$.
+
+
+%
+%Assumption~\ref{assumpt: weak_quasi_strong_monotonicity} for $\lambda = 0$ coincides with the well-known notions of quasi-strong monotonicity \citep{loizou2020stochastic}, strong stability condition \citep{mertikopoulos2019learning}, and strongly coherent VIPs \citep{song2020optimistic} in the optimization literature. Specifically, it consists a relaxation of the classical notion of strong monotonicity/convexity, requiring that $\langle F(x) - F(x'), x - x'\rangle \geq \mu \|x - x'\|^2, \forall x, x'\in \R^d$. For $\lambda > 0$, Assumption~\ref{assumpt: weak_quasi_strong_monotonicity} represents a further relaxation motivated by dissipative dynamical systems and weakly convex optimization \citep{raginsky2017non, erdogdu2018global} and encompassing non-monotone games and various problems in statistical learning theory \citep{tan2023online}. A simple example of a function satisfying Assumption~\ref{assumpt: weak_quasi_strong_monotonicity} is $f(x, y) = (x^2 + 7 \sin(x)) + xy - (y^2 - 7 \cos(y))$, where the aforementioned assumption is satisfied with $(\mu, \lambda) = (1, 25)$. -->Put a picture with wrap figure {./figures/weak.png}
+
+A common assumption in the literature of smooth optimization that we will utilize is that the operators in the finite-sum structure of the \eqref{VIP} are Lipschitz continuous.%\vspace{-4em}
+
+
+\begin{assumption}[Lipschitz continuity]\label{assumpt: lipschitz}
+Each $F_i$ is $L_i$-Lipschitz:
+\[
+\|F_i(x_1)-F_i(x_2)\| \le L_i\|x_1-x_2\|,
+\qquad \forall x_1,x_2\in\R^d,\; i\in[n],
+\]
+with $L_{\max}=\max_{i\in[n]}L_i$.
+\end{assumption}
+\vspace{-0.4em}
+Unlike standard analyses assuming unbiased oracles with bounded variance
+(e.g., \citep{loizou2021stochastic,hsieh2019convergence,lin2020finite,mishchenko2020revisiting}),
+random reshuffling induces bias via inter-step dependence.  
+Such conditions may fail even for simple quadratics.  
+Instead, we work directly with Lipschitz continuity and impose only a mild moment bound:
+\begin{assumption}[Bounded moments at the solution]\label{assumpt: 4th-moment bounded}
+At some $x^*\in\mathcal{X}^*$, the oracle values have finite second and fourth moments:
+\[
+\sigma_*^2:=\tfrac{1}{n}\sum_{i=1}^n\|F_i(x^*)\|^2<\infty,
+\qquad 
+\sigma_*^4:=\tfrac{1}{n}\sum_{i=1}^n\|F_i(x^*)\|^4<\infty.
+\]
+\end{assumption}
+\vspace{-0.3em}
+Assumption~\ref{assumpt: 4th-moment bounded} is mild: it does not require global boundedness of gradients, but only that the oracle values $F_i(x^*)$ admit finite second and fourth moments at the solution.  
+Building on this, we extend the variance bound of~\citet[Prop.~A.2, p.~16]{emmanouilidis2024stochastic} to higher-order moments:  
+\begin{proposition}\label{prop}
+Let Assumptions~\ref{assumt: sol_set_non_empty}--\ref{assumpt: lipschitz} hold. Then, for any $x\in\R^d$ it holds that
+\begin{align*}
+&\text{(i)}~~\frac1n\sum_{i=1}^n \|F_i(x)-F(x)\|^2
+\;\le\;
+2\Big(\tfrac1n\sum_{i=1}^n L_i^2\Big)\|x-x^*\|^2 \;+\; 2\sigma_*^2,\\[0.5em]
+&\text{(ii)}~~\frac1n\sum_{i=1}^n \|F_i(x)-F(x)\|^4
+\;\le\;
+128\Big(\tfrac1n\sum_{i=1}^n L_i^4\Big)\|x-x^*\|^4 \;+\; 128\sigma_*^4.
+\end{align*}
+\end{proposition}
+%%%%% ΟΛΔ%%%%%%%
+% \begin{assumption}[Lipschitz continuity] \label{assumpt: lipschitz}
+% Each $F_i$ is $L_i$-Lipschitz, i.e.,
+% \[
+% \|F_i(x_1)-F_i(x_2)\| \le L_i\|x_1-x_2\|, 
+% \quad \forall x_1,x_2\in\R^d,\; i\in[n],
+% \]
+% and we set $L_{\max}=\max_{i\in[n]} L_i$.
+% \end{assumption}
+% Unlike standard analyses of stochastic methods for \eqref{VIP}\footnote{See \citep{loizou2021stochastic,hsieh2019convergence} and references therein.}, which assume unbiased oracles ($\ex[F_i(x)] = F(x)$) and impose bounded-variance or growth conditions\footnote{E.g., $\ex[\|F_i(x)-F(x)\|^2] \le c$ for some $c>0$, or $\ex[\|F_i(x)\|^2] \le c_1\|F(x)\|^2+c_2$ with $c_1,c_2>0$.
+% \\See \citep{lin2020finite,lin2020gradient,mishchenko2020revisiting}.}, random reshuffling induces bias through inter-step dependence.  
+% Such assumptions can severely limit applicability, failing even for simple quadratics on unconstrained domains.  
+% We instead derive variance bounds directly from Lipschitz continuity, following \citet{emmanouilidis2024stochastic,choudhury2023single}, and impose only a mild fourth-moment condition at $x^*$.  
+% Specifically, under Assumption~\ref{assumpt: lipschitz}, \cite{emmanouilidis2024stochastic} show that the statistical variance of finite sum satisfies
+% \(
+% \frac{1}{n}\sum_{i=0}^{n-1}\|F_i(x)-F(x)\|^2 
+% \le A\|x-x^*\|^2 + 2\sigma_*^2,
+% \)
+% where $A = \tfrac{2}{n}\sum_{i=0}^{n-1}L_i^2$ and $\sigma_*^2 = \tfrac{1}{n}\sum_{i=0}^{n-1}\|F_i(x_*)\|^2$. In our work, we generalize this property for the fourth-moment, adopting a similar assumption:
+% \begin{assumption}[Fourth-moment boundedness] \label{assumpt: 4th-moment bounded}
+% At $x^* \in \mathcal{X}^*$, the stochastic oracles have finite fourth moment, i.e., $\sigma_*^4 < \infty$.
+% % , and assume $\exists \Tilde{c} > 0: \sigma_*^4 = \Tilde{c} \sigma_*^2 < \infty$.
+% \end{assumption}
+% Assumption~\ref{assumpt: 4th-moment bounded} is very mild: rather than requiring gradients to be bounded globally, it only asks that the oracle values $F_i(x^*)$ be finite at the solution—already sufficient for a finite fourth moment. 
+% with the following proposition:
+% \begin{proposition}\label{prop: 4th_norm_avg_bound}
+% Let Assumption~\ref{assumpt: lipschitz} hold. For any $x\in\mathbb{R}^d$ and any reference point $x^*\in\mathbb{R}^d$, it holds that
+% \[
+% \frac{1}{n}\sum_{i=1}^n \norm{F_i(x)-F(x)}^{4}
+% \;\le\;
+% 128\Bigg(\frac{1}{n}\sum_{i=1}^n L_i^{4}\Bigg)\norm{x-x^*}^{4}
+% \;+\;128\,\sigma_*^{4},
+% \text{where $\displaystyle \sigma_*^{4}:=\frac{1}{n}\sum_{i=1}^n \norm{F_i(x^*)}^{4}$.}\]
+% \end{proposition}
+% With these assumptions in place, we are ready to present formally our algorithm and present the main components of theoretical guarantees.
+
+%%%%%%%%%ΟΛΔ%%%%%%%%%%%
+%now introduce the methodology and proof techniques underlying our theoretical guarantees.
+
+
+%With these assumptions, we are equipped to develop the methodology and proof techniques underlying our theoretical guarantees.
+%\newpage
+%
+%Unlike standard analyses of stochastic methods for \eqref{VIP}\footnote{See \citep{loizou2021stochastic,hsieh2019convergence,lin2020finite,lin2020gradient,mishchenko2020revisiting} and therein.}, which assume unbiased oracles $(\ex[F_i(x)] = F(x))$ and impose bounded-variance or growth conditions\footnote{E.g., $\ex[\|F_i(x)-F(x)\|^2] \leq c$ for some $c>0$, or $\ex[\|F_i(x)\|^2] \leq c_1\|F(x)\|^2+c_2$ with $c_1,c_2>0$.}, random reshuffling induces bias through inter-step dependence. 
+%However, the aforementioned assumptions might constrain the applicability of the results in a narrow set of functions, as they might not be satisfied even for quadratics in an unconstrained domain. 
+%We circumvent this by deriving variance bounds directly from Lipschitz continuity in the spirit of \citet{emmanouilidis2024stochastic,choudhury2023single}, avoiding restrictive assumptions, and by requiring only a mild fourth-moment condition at $x^*$.
+%Specifically, under Assumption~\ref{assumpt: lipschitz} the variance of the stochastic oracles can be smoothly controlled by the inequality $$\frac{1}{n} \sum_{i=0}^{n-1} \|F_i(x) - F(x)\|^2 \leq A \|x - x^*\|^2 + 2 \sigma_*^2$, where $A = \frac{2}{n} \sum_{i=0}^{n-1} L_i^2$ and $\sigma_*^2 = \frac{1}{n} \sum_{i=0}^{n-1} \|F_i(x_*)\|^2$$. 
+%
+%
+%In order to establish bounds on the higher moments of the operators in our results, we require the following regularity condition on the fourth moment of the stochastic oracles at the optimum $x^* \in \mathcal{X}^*$.  
+%\begin{assumption}\label{assumpt: 4th-moment bounded}
+%    The fourth moment of the stochastic oracles at $x^*\in \mathcal{X}^*$ is bounded and there exists a constant $c > 0$ such that $\left(\sigma_*^2\right)^2 = c \sigma_*^2 < +\infty$.
+%\end{assumption}
+%
+%With those assumptions at hand, we introduce the methodology and core proof techniques used in order to derive our theoretical guarantees. 
+%
+%
+%%\footnote{$(\sigma_^2)^2 = c \sigma_*^2 < \infty$ for some $c>0$.}
+%The algorithm analyzed uses a stochastic oracle $F_i$ at each iteration for updating the current state. Prior works involving stochastic algorithms for \eqref{VIP} commonly assume the existence of an unbiased stochastic oracle, i.e. $\ex\left[F_i(x)\right] = F(x)$, simplifying the analysis of the dynamics \cite{loizou2021stochastic, vlatakis2024stochastic}. However, in random reshuffling the stochastic oracles between consecutive steps are dependent with each other, resulting to a biased estimator that intriguingly complicates the analysis of the algorithm. A meticulous analysis of the bias introduced in the dynamics is conducted in order to establish the rate of convergence in our results without the assumption of unbiased estimators.
+%\newpage
+%Additionally, an assumption on the variance of the stochastic oracles is typically introduced in the analysis of stochastic algorithms for finite-sum \eqref{VIP}. Prior works require bounded variance of the stochastic oracle at every point, i.e. $\forall x \in \R^d: \ex\left[\|F_i(x) - F(x)\|^2\right] \leq c,$ for $c > 0$, or a growth condition that necessitates the existence of $c_1, c_2 > 0$ such that $\ex\left[\|F_i(x)\|^2\right] \leq c_1 \|F(x)\|^2 + c_2$ \citep{lin2020finite, lin2020gradient, mishchenko2020revisiting}. However, the aforementioned assumptions might constrain the applicability of the results in a narrow set of functions, as they might not be satisfied even for quadratics in an unconstrained domain. In contrast, in light of a new series of results \citep{emmanouilidis2024stochastic, choudhury2023single}, we utilize the Lipschitz property of each $F_i$ to provide closed-form expressions for the upper bound on the variance. Specifically, under Assumption~\ref{assumpt: lipschitz} the variance of the stochastic oracles can be smoothly controlled by the inequality $\frac{1}{n} \sum_{i=0}^{n-1} \|F_i(x) - F(x)\|^2 \leq A \|x - x^*\|^2 + 2 \sigma_*^2$, where $A = \frac{2}{n} \sum_{i=0}^{n-1} L_i^2$ and $\sigma_*^2 = \frac{1}{n} \sum_{i=0}^{n-1} \|F_i(x_*)\|^2$. 
+%
+%In order to establish bounds on the higher moments of the operators in our results, we require the following regularity condition on the fourth moment of the stochastic oracles at the optimum $x^* \in \mathcal{X}^*$.  
+%\begin{assumption}\label{assumpt: 4th-moment bounded}
+%    The fourth moment of the stochastic oracles at $x^*\in \mathcal{X}^*$ is bounded and there exists a constant $c > 0$ such that $\left(\sigma_*^2\right)^2 = c \sigma_*^2 < +\infty$.
+%\end{assumption}
+
+

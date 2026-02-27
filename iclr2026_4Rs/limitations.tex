@@ -1,0 +1,36 @@
+\section*{Limitations}
+\paragraph{Limitations of the structural assumption.}
+A central structural assumption in our analysis is that the operator $F$ satisfies 
+$\lambda$-weak $\mu$-quasi-strong monotonicity. This condition is broad enough to include 
+several meaningful non-monotone problem classes—such as dissipative dynamical systems, 
+weakly convex optimization, and locally contractive variational inequalities—and is standard 
+in modern analyses of stochastic fixed-point and operator-splitting methods 
+(e.g., Hsieh et al., 2019; Mertikopoulos and Zhou, 2019; Chavdarova et al., 2021). 
+However, it is important to emphasize the following limitations.
+
+\begin{enumerate}
+    \item \textbf{Not applicable to general nonconvex--nonconcave min--max problems.}  
+    The assumption does \emph{not} hold for arbitrary adversarial problems such as deep GANs, 
+    multi-agent RL environments, or smooth non-monotone games with persistent rotational dynamics. 
+    These settings may lack even local stability 
+    (e.g., Daskalakis et al.\ 2018; Fiez et al.\ 2020). 
+    Accordingly, our theoretical guarantees should not be interpreted as applying to fully adversarial 
+    or worst-case min--max formulations.
+
+    \item \textbf{Local nature of the assumption.}  
+    Quasi-strong monotonicity is inherently a \emph{local} regularity condition: smooth operators 
+    that are monotone in a neighborhood of a solution satisfy it on that region 
+    (Lemma~A.4, Hsieh et al.\ 2019). This requires smoothness and regularity that may not hold in 
+    problems involving discontinuities, clipping, piecewise-linear losses, or hard constraints. 
+    In such cases, the assumption may fail even locally.
+
+    \item \textbf{Not capturing highly oscillatory or anti-monotone operators.}  
+    Allowing $\lambda>0$ permits controlled violation of monotonicity, but the assumption still 
+    does not model strongly anti-monotone or highly oscillatory operators. Extending our analysis to 
+    Minty variational inequalities, hypomonotone operators, or other generalized monotonicity 
+    classes remains an interesting direction for future work.
+\end{enumerate}
+
+Despite these limitations, we believe the assumption remains meaningful for a broad set of 
+structured, smooth VIPs where local stability is present. We hope that this explicit discussion 
+helps avoid any misunderstanding about the scope of applicability of our results.

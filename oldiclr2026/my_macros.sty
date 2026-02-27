@@ -1,0 +1,1113 @@
+%**********************************************************************
+%***    2.	CORE PACKAGES
+%**********************************************************************
+
+%----------------------------------------------------------------------
+%% Basic math tools
+%----------------------------------------------------------------------
+\usepackage{amsmath}		% for AMS macros
+\usepackage{amssymb}		% for AMS symbols
+\usepackage{amsfonts}		% for AMS fonts
+\usepackage{amsthm}		% for theorems
+\usepackage{algorithm, algorithmic}
+\usepackage{mathtools}		% for advanced math
+\usepackage{xspace}         % for space after macro
+
+% \mathtoolsset{%
+% %above-intertext-sep = -1ex		% for equation spacing
+% %below-intertext-sep = -2ex		% for equation spacing
+% %showonlyrefs,	% to show only referenced equations
+% }
+
+%%%%%%%%%%% Uncomment if want to be used %%%%%%%%%%%%%%%%%%
+% %----------------------------------------------------------------------
+% %% Encoding (beware of conflicts)
+% %----------------------------------------------------------------------
+% \usepackage[utf8]{inputenc}		% for source encoding
+% \usepackage[T1]{fontenc}		% for font encoding
+
+
+% %----------------------------------------------------------------------
+% %% Math alphabets
+% %----------------------------------------------------------------------
+% \usepackage[%		% for math font selection
+% cal=cm,
+% %scr=euler,
+% %frak=euler
+% ]
+% {mathalfa}
+
+
+% %**********************************************************************
+% %***    3. FONTS
+% %**********************************************************************
+
+% %----------------------------------------------------------------------
+% %% Blackboard bold
+% %----------------------------------------------------------------------
+% \usepackage{dsfont}		% for blackboard bold font
+% %\let\mathbb=\mathds
+
+
+% %----------------------------------------------------------------------
+% %% Sans serif
+% %----------------------------------------------------------------------
+% %\usepackage{cabin}		% sans serif
+% %\usepackage{sourcesanspro}
+
+
+% %----------------------------------------------------------------------
+% %----------------------------------------------------------------------
+% %% Typewriter font
+% %----------------------------------------------------------------------
+% %\usepackage[ttdefault,scale=1.07]{AnonymousPro}
+% \renewcommand*\ttdefault{txtt}
+% %\renewcommand*\ttdefault{lmvtt}
+% %\renewcommand{\ttdefault}{cmtt}
+% %\usepackage[scaled]{inconsolata}
+
+
+% %----------------------------------------------------------------------
+% %% Libertine
+% %----------------------------------------------------------------------
+% %\usepackage[sf,mono=false]{libertine}
+% %\usepackage[libertine,libaltvw,cmintegrals,varbb]{newtxmath}
+
+
+% %----------------------------------------------------------------------
+% %% Times
+% %----------------------------------------------------------------------
+% \usepackage[varg]{txfonts}
+% %\let\mathbb=\varmathbb
+
+%%%%%%%%%%% END of Uncomment if want to be used %%%%%%%%%%%%%%%%%%
+
+%**********************************************************************
+%***    4. ANCILLARY PACKAGES
+%**********************************************************************
+%***    DO NOT CHANGE ORDER OF PACKAGES AS THIS
+%***    COULD HAVE UNINTENDED CONSEQUENCES 
+%**********************************************************************
+
+%----------------------------------------------------------------------
+%% Acronyms
+%----------------------------------------------------------------------
+\usepackage{acronym}		% for acronyms
+\renewcommand*{\aclabelfont}[1]{\acsfont{#1}}		% for acronym label font
+\newcommand{\acli}[1]{\emph{\acl{#1}}}		% for italicized acro
+\newcommand{\aclip}[1]{\emph{\aclp{#1}}}		% for italicized acro (plural)
+\newcommand{\acdef}[1]{\emph{\acl{#1}} \textup{(\acs{#1})}\acused{#1}}		% for acro def
+\newcommand{\acdefp}[1]{\emph{\aclp{#1}} \textup{(\acsp{#1})}\acused{#1}}	% for acro def (plural)
+
+
+%----------------------------------------------------------------------
+%% Captions
+%----------------------------------------------------------------------
+\usepackage[labelfont={bf,small},labelsep=colon,font=small]{caption}	% for caption control
+%\usepackage{subfigure}
+\usepackage{subcaption}		% for subfigures
+% \captionsetup[algorithm]{labelfont=bf,labelsep=colon}		% for algorithms
+\captionsetup[sub]{labelfont=bf}
+%\captionsetup[subfigure]{labelfont=bf,justification=r}		% for subfigures
+% \captionsetup[subcaption]{labelfont=bf,justification=centering}		% for subfigures
+%\captionsetup[table]{labelfont=normalfont,labelsep=colon}		% for tables
+
+
+%----------------------------------------------------------------------
+%% Colors
+%----------------------------------------------------------------------
+\usepackage[dvipsnames,svgnames]{xcolor}		% for color
+% \colorlet{MyRed}{FireBrick!50!Crimson}
+% \colorlet{MyBlue}{DodgerBlue!75!black}
+% \colorlet{MyGreen}{DarkGreen!85!black}
+% \colorlet{MyViolet}{DarkMagenta}
+
+% \colorlet{MyLightBlue}{DodgerBlue!20}
+% \colorlet{MyLightGreen}{MyGreen!20}
+
+% \colorlet{PrimalColor}{MyBlue}
+% \colorlet{PrimalFill}{MyLightBlue}
+% \colorlet{DualColor}{MyRed}
+
+% \colorlet{RevColor}{MyRed}
+% \colorlet{LinkColor}{MediumBlue}
+
+
+%----------------------------------------------------------------------
+%% Document layout
+%----------------------------------------------------------------------
+\newcommand{\afterhead}{.}		% for changing headings
+\newcommand{\ackperiod}{}		% for AMS bug in acknowledgments
+\newcommand{\para}[1]{\paragraph{\textbf{#1\afterhead}}}
+\newcommand{\itempar}[1]{\paragraph{\raisebox{1pt}{\footnotesize$\blacktriangleright$}\;\textbf{#1\afterhead}}}
+
+
+%----------------------------------------------------------------------
+%% Extra symbols
+%----------------------------------------------------------------------
+\usepackage{cancel}		% for cancelling terms
+\usepackage{latexsym}		% for symbols
+\usepackage{wrapfig}
+\usepackage{pifont}		% for dingbats
+\newcommand{\cmark}{\ding{51}}		% for checkmark
+\newcommand{\xmark}{\ding{55}}		% for x-cross
+
+\newcommand{\attn}{{\color{MyRed}\upshape\textbf{[!!]}}\xspace}		% for attention
+\newcommand{\needref}[1]{{\color{MyRed}\upshape\textbf{[??]}}\xspace}	% for missing refs
+
+
+%----------------------------------------------------------------------
+%% Figures and graphics
+%----------------------------------------------------------------------
+\usepackage{tikz}		% for figures
+\usepackage{tikz-cd}		% for figures
+\usetikzlibrary{calc,patterns}		% for basic tikz figures
+\usepackage{pgfplots}
+
+
+%----------------------------------------------------------------------
+%% Lists and tables
+%----------------------------------------------------------------------
+\usepackage{array}		% for flexible tables
+\usepackage{booktabs}		% for better tables
+\usepackage[inline,shortlabels]{enumitem}		% for lists
+\setenumerate{itemsep=\smallskipamount,topsep=\smallskipamount,left=\parindent}
+\setitemize{itemsep=\smallskipamount,topsep=\smallskipamount,left=\parindent}
+%\usepackage{multirow}
+
+
+%----------------------------------------------------------------------
+%% Microtypography
+%----------------------------------------------------------------------
+\usepackage[kerning=true]{microtype}		% for microtypography
+
+
+%----------------------------------------------------------------------
+%% Various
+%----------------------------------------------------------------------
+\usepackage{tabto}		% for spacing
+\usepackage{xspace}		% for flexible spaces
+
+
+
+%**********************************************************************
+%***    5. REFERENCES
+%**********************************************************************
+
+%----------------------------------------------------------------------
+%% Bibliographic citations
+%----------------------------------------------------------------------
+\usepackage[sort&compress]{natbib}		% for citations
+% \def\bibfont{\footnotesize}
+% \def\bibsep{\smallskipamount}
+% \def\bibhang{24pt}
+\def\BIBand{and}
+\def\newblock{\ }
+\bibpunct[, ]{[}{]}{,}{n}{,}{,}
+
+% \newcommand{\citef}[1]{\citeauthor{#1} \textpar{\citeyear{#1}}}
+% \newcommand{\citeft}[1]{\citeauthor{#1},~\citeyear{#1}}
+% \newcommand{\citefp}[1]{\textpar{\citeft{#1}}}
+
+
+%----------------------------------------------------------------------
+%% Hyperlinks
+%----------------------------------------------------------------------
+\usepackage{hyperref}
+\hypersetup{
+colorlinks=true,
+linktocpage=true,
+%pdfstartpage=1,
+pdfstartview=FitH,
+breaklinks=true,
+pdfpagemode=UseNone,
+pageanchor=true,
+pdfpagemode=UseOutlines,
+plainpages=false,
+bookmarksnumbered,
+bookmarksopen=false,
+bookmarksopenlevel=1,
+hypertexnames=false,
+pdfhighlight=/O,
+%hyperfootnotes=true,
+%nesting=true,
+%frenchlinks,
+urlcolor=LinkColor,linkcolor=LinkColor,citecolor=LinkColor,	% for on-screen
+%urlcolor=black, linkcolor=black, citecolor=black, %pagecolor=black,	% for printing
+%pagecolor=RoyalBlue,
+pdftitle={},
+pdfauthor={},
+pdfsubject={},
+pdfkeywords={},
+pdfcreator={pdfLaTeX},
+pdfproducer={LaTeX with hyperref}
+}
+
+%\newcommand{\EMAIL}[1]{\email{\href{mailto:#1}{#1}}}
+%\newcommand{\URLADDR}[1]{\urladdr{\href{#1}{#1}}}
+
+
+%----------------------------------------------------------------------
+%% Cleverefs (must go after hyperref)
+%----------------------------------------------------------------------
+%\numberwithin{equation}{section}		% for cleveref (when using cleveref and hyperref)
+\usepackage[sort&compress,capitalize,nameinlink]{cleveref}		% for cleveref formatting
+%\crefname{algorithm}{Alg.}{Algs.}
+\crefname{algo}{Algorithm}{Algorithms}
+\crefname{assumption}{Assumption}{Assumptions}
+\crefname{case}{Case}{Cases}
+\newcommand{\crefrangeconjunction}{\textendash}		% for cleveref conjunctions
+%\creflabelformat{equation}{#2\textup{(#1)}#3}
+%\crefrangeformat{equation}{\upshape(#3#1#4)\textendash(#5#2#6)}
+%\creflabelformat{part}{(#2#1#3)}
+
+\usepackage{chngcntr}
+\usepackage{apptools}
+\AtAppendix{\counterwithin{lemma}{section}}
+\AtAppendix{\counterwithin{definition}{section}}
+\AtAppendix{\counterwithin{theorem}{section}}
+
+
+%----------------------------------------------------------------------
+%% Only referenced equations
+%----------------------------------------------------------------------
+%\usepackage{autonum}		% for citing referenced only / must go last
+
+
+
+%**********************************************************************
+%***    6. ENVIRONMENTS
+%**********************************************************************
+
+%----------------------------------------------------------------------
+%% Algorithms
+%----------------------------------------------------------------------
+%\usepackage{algorithm}		% for algorithm environments
+\usepackage{algpseudocode}		% for algorithm macros
+% \renewcommand{\algorithmiccomment}[1]{\hfill\textsf{\#} #1}		% for algorithm comments
+
+
+%----------------------------------------------------------------------
+%% Theorem tools
+%----------------------------------------------------------------------
+\usepackage{thmtools}		% for theorem tools
+\usepackage{thm-restate}		% for restating theorems
+
+
+%----------------------------------------------------------------------
+%% Theorem-like
+%----------------------------------------------------------------------
+\theoremstyle{plain}
+% \newtheorem{theorem}{Theorem}% for theorems
+% \newtheorem*{inftheorem*}{Informal Theorem}		% for theorems
+% \newtheorem{corollary}{Corollary}		% for corollaries
+% \newtheorem{lemma}{Lemma}		% for lemmas
+% \newtheorem{proposition}{Proposition}		% for propositions
+\newtheorem{proofstep}{Step}		% for proof steps
+
+\newtheorem{conjecture}{Conjecture}		% for conjectures
+\newtheorem{claim}{Claim}		% for claims
+
+\newtheorem*{corollary*}{Corollary}		% for corollaries (unnumbered)
+
+
+%----------------------------------------------------------------------
+%% Definition-like
+%----------------------------------------------------------------------
+% \theoremstyle{definition}
+% \newtheorem{definition}{Definition}		% for definitions
+% \newtheorem{assumption}{Assumption}		% for assumptions
+
+% \newtheorem{example}{Example}		% for examples
+% \newtheorem{fact}{Fact}
+% \newtheorem*{definition*}{Definition}		% for definitions (unnumbered)
+% \newtheorem*{assumption*}{Assumptions}		% for assumptions (unnumbered)
+% \newtheorem*{example*}{Example}		% for examples (unnumbered)
+
+\makeatletter		% for custom tags
+\newcommand{\asmtag}[1]{% \asmtag{<tag>}
+ \let\oldtheassumption\theassumption% Store \theassumption
+ \renewcommand{\theassumption}{#1}% Redefine it to a fixed value
+ \g@addto@macro\endassumption{% At \end{assumption}, ...
+   \addtocounter{assumption}{0}% ...restore assumption counter value and...
+   \global\let\theassumption\oldtheassumption}% ...restore \theassumption
+ }
+\makeatother
+
+
+%----------------------------------------------------------------------
+%% Remark-like
+%----------------------------------------------------------------------
+\theoremstyle{remark}
+\newtheorem{remark}{Remark}		% for remarks
+
+\newtheorem*{remark*}{Remark}		% for remarks (unnumbered)
+
+
+%----------------------------------------------------------------------
+%% Environment end
+%----------------------------------------------------------------------
+\def\endenv{\hfill\lozenge\smallskip}
+\renewcommand{\qedsymbol}{{$\blacksquare$}}		% for qed symbol
+
+
+%----------------------------------------------------------------------
+%% Proofs
+%----------------------------------------------------------------------
+%\newenvironment{Proof}[1][Proof]{\begin{proof}[#1]}{\end{proof}}		% for redefining proofs
+\renewcommand{\qedsymbol}{$\blacksquare$}		% for qed symbol
+%\smartqed		% flush right qed marks, e.g. at end of proof
+
+\newcounter{proofpart}
+\newenvironment{proofpart}[1]
+{\vspace{3pt}
+\refstepcounter{proofpart}%
+\par\textit{Part~\arabic{proofpart}:~#1}.\,}
+{\smallskip}
+
+
+%----------------------------------------------------------------------
+%% Numbering
+%----------------------------------------------------------------------
+%\numberwithin{equation}{section}		% for equation numbering (beware of cleveref)
+%\numberwithin{theorem}{section}		% for theorem numbering
+%\numberwithin{definition}{section}		% for definition numbering
+%\numberwithin{remark}{section}		% for remark numbering
+% \numberwithin{example}{section}		% for example numbering
+
+
+
+%**********************************************************************
+%***    7. EDITING & COMMENTING
+%**********************************************************************
+\usepackage[showdeletions]{color-edits}		% for editing macros / use [suppress] for final
+%\usepackage[suppress]{color-edits}		% for editing macros / use [suppress] for final
+\usepackage[normalem]{ulem}		% for strikeout text
+
+% \newcommand{\debug}[1]{{\color{RevColor}#1}}		% for macro coloring
+\newcommand{\debug}[1]{#1}		% for removing macro coloring
+
+\newcommand{\revise}[1]{{\color{RevColor}#1}}		% for revision markup
+\newcommand{\remove}[1]{{\color{gray}#1}}		% for removal markup
+\newcommand{\ok}[1]{{\color{MyGreen}#1}}		% for revision markup
+\newcommand{\lookout}[1]{{\bfseries\color{MyRed}[#1]}}		% for attention
+
+\def\beginrev{\color{RevColor}}		% for revision markup
+\def\beginrmv{\color{gray}}		% for removal markup
+\def\beginok{\color{MyGreen}}		% for ok markup
+\def\endedit{\color{black}}		% for ending markup
+
+\newcommand{\explain}[1]{\tag*{\#\:#1}}
+
+
+
+%**********************************************************************
+%***    8. MACROS
+%**********************************************************************
+\newcommand{\newmacro}[2]{\newcommand{#1}{\debug{#2}}}		% for shorthand definitions
+\newcommand{\newop}[2]{\DeclareMathOperator{#1}{\debug{#2}}}		% for shorthand definitions
+
+
+%**********************************************************************
+%***    MACROS: GENERAL
+%**********************************************************************
+
+%----------------------------------------------------------------------
+%% Delimiters
+%----------------------------------------------------------------------
+\DeclarePairedDelimiter{\braces}{\{}{\}}		% for braces
+\DeclarePairedDelimiter{\bracks}{[}{]}		% for brackets
+\DeclarePairedDelimiter{\parens}{(}{)}		% for parentheses
+
+\DeclarePairedDelimiter{\abs}{\lvert}{\rvert}		% for absolute value
+\DeclarePairedDelimiter{\ceil}{\lceil}{\rceil}		% for ceiling
+\DeclarePairedDelimiter{\floor}{\lfloor}{\rfloor}		% for floor
+\DeclarePairedDelimiter{\clip}{[}{]}		% for clipping
+\DeclarePairedDelimiter{\negpart}{[}{]_{-}}		% for negative part
+\DeclarePairedDelimiter{\pospart}{[}{]_{+}}		% for positive part
+
+\DeclarePairedDelimiter{\setof}{\{}{\}}		% for sets
+\DeclarePairedDelimiterX{\setdef}[2]{\{}{\}}{#1:#2}		% for set builder notation
+\DeclarePairedDelimiterX{\inner}[2]{\langle}{\rangle}{#1,#2}		% for scalar product
+\DeclarePairedDelimiterXPP{\exclude}[1]{\mathopen{}\setminus}{\{}{\}}{}{#1}		% for exclusion
+
+
+%----------------------------------------------------------------------
+%% Number fields
+%----------------------------------------------------------------------
+% \newcommand{\F}{\mathbb{F}}		% generic field
+% \newcommand{\N}{\mathbb{N}}		% for naturals
+% \newcommand{\Z}{\mathbb{Z}}		% for integers
+% \newcommand{\Q}{\mathbb{Q}}		% for rationals
+% \newcommand{\R}{\mathbb{R}}		% for reals
+% \newcommand{\C}{\mathbb{C}}		% for complex numbers (may clash)
+
+
+%----------------------------------------------------------------------
+%% Operators
+%----------------------------------------------------------------------
+% \DeclareMathOperator*{\argmax}{arg\,max}		% for argmax
+% \DeclareMathOperator*{\argmin}{arg\,min}		% for argmin
+\DeclareMathOperator*{\intersect}{\bigcap}		% for intersections
+\DeclareMathOperator*{\union}{\bigcup}		% for unions
+
+\DeclareMathOperator{\aff}{aff}		% for affine hull
+\DeclareMathOperator{\lspan}{span}		% for linear span
+\DeclareMathOperator{\bd}{bd}		% for boundary
+\DeclareMathOperator{\littleoh}{o}		% for Landau o
+\DeclareMathOperator{\bigoh}{\mathcal{O}}		% for Landau O
+\DeclareMathOperator{\card}{card}		% for cardinality
+\DeclareMathOperator{\cl}{cl}		% for closure
+\DeclareMathOperator{\conv}{conv}		% for convex hull (but see also \simplex)
+\DeclareMathOperator{\crit}{crit}		% for critical set
+% \DeclareMathOperator{\diag}{diag}		% for diagonal matrices
+\DeclareMathOperator{\diam}{diam}		% for diameter
+\DeclareMathOperator{\dist}{dist}		% for distance
+% \DeclareMathOperator{\dom}{dom}		% for domain
+\DeclareMathOperator{\eig}{eig}		% for eigenvalues
+\DeclareMathOperator{\ess}{ess}		% for essential
+\DeclareMathOperator{\grad}{\nabla}		% for gradient
+\DeclareMathOperator{\Hess}{Hess}		% for Hessian
+\DeclareMathOperator{\ind}{ind}		% for index
+\DeclareMathOperator{\im}{im}		% for image
+\DeclareMathOperator{\intr}{int}		% for interior
+\DeclareMathOperator{\Jac}{Jac}		% for Jacobian
+\DeclareMathOperator{\one}{\mathds{1}}		% for indicator
+\DeclareMathOperator{\proj}{pr}		% for projection
+\DeclareMathOperator{\prox}{prox}		% for prox
+% \DeclareMathOperator{\rank}{rank}		% for rank
+\DeclareMathOperator{\relint}{ri}		% for relative interior
+\DeclareMathOperator{\sign}{sgn}		% for sign
+\DeclareMathOperator{\supp}{supp}		% for support
+\DeclareMathOperator{\Sym}{Sym}		% for symmetric
+\DeclareMathOperator{\tr}{tr}		% for trace
+\DeclareMathOperator{\unif}{unif}		% for uniform distribution
+\DeclareMathOperator{\vol}{vol}		% for volume
+
+
+%----------------------------------------------------------------------
+%% Text and formatting
+%----------------------------------------------------------------------
+\newcommand{\cf}{cf.\xspace}		% for consistency
+\newcommand{\eg}{e.g.,\xspace}		% for consistency
+\newcommand{\ie}{i.e.,\xspace}		% for consistency
+\newcommand{\vs}{vs.\xspace}		% for consistency
+\newcommand{\viz}{viz.\xspace}		% for consistency
+
+\newcommand{\textbrac}[1]{\textup[#1\textup]}		% for upshape brackets
+\newcommand{\textpar}[1]{\textup(#1\textup)}		% for upshape parentheses
+
+\newcommand{\dis}{\displaystyle}		% for forcing display style
+\newcommand{\txs}{\textstyle}		% for forcing inline style
+
+
+%----------------------------------------------------------------------
+%% Various
+%----------------------------------------------------------------------
+\newcommand{\alt}[1]{#1'}		% for variant version
+\newcommand{\altalt}[1]{#1''}		% for second variant
+\newcommand{\avg}[1]{\bar#1}		% for averaging (X by default)
+
+\newmacro{\dd}{\:d}		% for integration
+%\newcommand{\ddt}[1]{\frac{d#1}{dt}}		% for Leibniz
+\newcommand{\ddt}{\frac{d}{dt}}		% for Leibniz
+\newcommand{\del}{\partial}		% for derivatives
+\newcommand{\eps}{\varepsilon}		% for better epsilon
+\newcommand{\pd}{\partial}		% for derivatives
+\newcommand{\wilde}{\widetilde}		% for wide tildes
+
+\newcommand{\insum}{\sum\nolimits}		% for compact sums
+\newcommand{\inprod}{\prod\nolimits}		% for compact products
+
+\newmacro{\const}{c}		% for generic constant
+\newmacro{\constalt}{c'}		% for generic constant alternative
+\newmacro{\Const}{\rho}		% for generic constant
+%\newmacro{\coef}{\lambda}		% for generic coefficient -> see below
+\newmacro{\coefalt}{\mu}		% for generic coefficient
+\usepackage{xparse}
+% \NewDocumentCommand{\coef}{O{\lambda}}{\debug{#1}}
+\newmacro{\param}{\theta}		% for parameter
+\newmacro{\params}{\Theta}		% for set of parameters
+
+\newmacro{\pexp}{p}		% for first exponent
+\newmacro{\qexp}{q}		% for second exponent
+\newmacro{\rexp}{r}		% for third exponent
+
+\newmacro{\radius}{r}
+
+
+
+%**********************************************************************
+%***    MACROS: SPECIFIC
+%**********************************************************************
+
+%----------------------------------------------------------------------
+%% Algorithms (indexing)
+%----------------------------------------------------------------------
+\newmacro{\beforestart}{0}		% for before start index
+\newmacro{\start}{0}		% for start index
+\newmacro{\afterstart}{1}		% for second index
+\newmacro{\running}{\start,\afterstart,\dotsc}		% for running
+\newmacro{\halfrunning}{1,3/2,2\dotsc}		% for running
+
+\newmacro{\run}{t}		% for main sequence index
+\newmacro{\runalt}{s}		% for variant index
+\newmacro{\runaltalt}{\tau}		% for second variant
+\newmacro{\nRuns}{T}		% for total number of runs
+\newmacro{\runs}{\mathcal{\nRuns}}		% for set of indices
+
+
+%----------------------------------------------------------------------
+%% Algorithms (states and recursions)
+%----------------------------------------------------------------------
+\newmacro{\state}{x}		% for main iterate
+\newmacro{\statealt}{y}		% for variant state
+\newmacro{\statealtalt}{z}		% for second variant
+
+% \newcommand{\new}[1][\point]{#1^{+}}		% for new iterate (x by default)
+
+
+\newcommand{\beforeinit}[1][\state]{\debug{#1}_{\beforestart}}		% for zeroth iterate (X by default)
+\newcommand{\init}[1][\state]{\debug{#1}_{\start}}		% for initial iterate (X by default)
+\newcommand{\afterinit}[1][\state]{\debug{#1}_{\afterstart}}		% for second iterate (X by default)
+
+\newcommand{\beforeiter}[1][\state]{\debug{#1}_{\runalt-1}}		% for before running iterate (X by default)
+\newcommand{\iter}[1][\state]{\debug{#1}_{\runalt}}		% for running iterate (X by default)
+\newcommand{\afteriter}[1][\state]{\debug{#1}_{\runalt+1}}		% for after running iterate (X by default)
+
+\newcommand{\beforeprev}[1][\state]{\debug{#1}_{\run-2}}		% for previous iterate (X by default)
+\newcommand{\prev}[1][\state]{\debug{#1}_{\run-1}}		% for previous iterate (X by default)
+\newcommand{\curr}[1][\state]{\debug{#1}_{\run}}		% for current iterate (X by default)
+\renewcommand{\next}[1][\state]{\debug{#1}_{\run+1}}		% for next iterate (X by default)
+
+\newcommand{\beforelast}[1][\state]{\debug{#1}_{\nRuns-1}}		% for before last iterate (X by default)
+\newcommand{\last}[1][\state]{\debug{#1}_{\nRuns}}		% for last iterate (X by default)
+\newcommand{\afterlast}[1][\state]{\debug{#1}_{\nRuns+1}}		% for after last iterate (X by default)
+
+
+%----------------------------------------------------------------------
+%% Dynamical systems
+%----------------------------------------------------------------------
+\newmacro{\tstart}{0}		% for time start
+\renewcommand{\time}{\debug{t}}		% for continuous time
+\newmacro{\timealt}{s}		% for dummy continuous time
+\newmacro{\horizon}{T}		% for horizon
+
+\newmacro{\traj}{x}		% for trajectory
+\newmacro{\trajalt}{y}		% for variant trajectory
+\newmacro{\trajaltalt}{z}		% for second variant
+
+\newmacro{\flowmap}{\Theta}		% for (semi)flow map
+\DeclarePairedDelimiterXPP{\flowof}[2]{\flowmap_{#1}}{(}{)}{}{#2}		% for flow
+
+
+%----------------------------------------------------------------------
+%% Game theory
+%----------------------------------------------------------------------
+\newop{\Nash}{NE}		% for Nash equilibria
+\newop{\CE}{CE}		% for correlated equilibria
+\newop{\CCE}{CCE}		% for Hannan set
+\newop{\NI}{NI}		% for Nikaido-Isoda function
+
+\newop{\brep}{br}		% for best responses
+\newop{\reg}{Reg}		% for regret
+\newop{\preg}{\overline{Reg}}		% for pseudo-regret
+\newop{\val}{val}		% for value function
+
+\newcommand{\strat}{\point}		% for mixed strategy
+\newcommand{\stratalt}{\pointalt}		% for variant strategy
+\newcommand{\strats}{\points}		% for set of mixed strategies
+\newcommand{\intstrats}{\intpoints}		% for set of interior strategies
+\newcommand{\eq}{\sol}		% for Nash equilibrium
+\newcommand{\eqs}{\sols}		% for set of Nash equilibria
+
+\newmacro{\play}{i}		% for player index
+\newmacro{\playalt}{j}		% for variant player index
+\newmacro{\playaltlalt}{k}		% for second variant
+\newmacro{\nPlayers}{N}		% for number of players
+\newmacro{\players}{\mathcal{\nPlayers}}		% for set of players
+
+\newmacro{\pure}{\alpha}		% for pure strategy
+\newmacro{\purealt}{\beta}		% for variant pure strategy
+\newmacro{\purealtalt}{\gamma}		% for second variant
+\newmacro{\nPures}{A}		% for number of pure strategies
+\newmacro{\pures}{\mathcal{\nPures}}		% for set of pure strategies
+
+\newmacro{\loss}{\ell}		% for loss function
+\newmacro{\pay}{u}		% for payoff function
+\newmacro{\payv}{v}		% for payoff vector
+\newmacro{\pot}{f}		% for potential function
+
+\newmacro{\game}{\mathcal{G}}		% for game
+\newmacro{\gamefull}{\game(\players,\points,\pay)}		% for full game
+
+\newmacro{\fingame}{\Gamma}		% for finite game
+\newmacro{\fingamefull}{\Gamma(\players,\pures,\pay)}		% for full finite game
+
+
+%----------------------------------------------------------------------
+%% Geometry
+%----------------------------------------------------------------------
+\newmacro{\gmat}{g}		% for metric tensor
+\newmacro{\gdist}{\dist_{\gmat}}
+\newmacro{\mfld}{M}		% for manifold
+\newmacro{\form}{\omega}		% for generic form
+
+\newmacro{\tvec}{z}		% for tangent vector
+\newmacro{\uvec}{u}		% for unit vector
+\newmacro{\basin}{\mathbb{B}}
+\newmacro{\ball}{\basin}		% for ball
+\newmacro{\sphere}{\mathbb{S}}		% for sphere
+
+
+%----------------------------------------------------------------------
+%% Graph theory
+%----------------------------------------------------------------------
+\newmacro{\graph}{\mathcal{G}}
+\newmacro{\vertices}{\mathcal{V}}
+\newmacro{\edges}{\mathcal{E}}
+
+
+%----------------------------------------------------------------------
+%% Linear algebra (matrices)
+%----------------------------------------------------------------------
+\newmacro{\mat}{A}		% for generic matrix
+\newmacro{\matalt}{c}		% for generic matrix
+\newmacro{\hmat}{H}		% for Hessian matrix
+
+\newop{\row}{row}		% for row space
+\newop{\col}{col}		% for row space
+
+\newmacro{\ones}{\mathbf{1}}		% for matrix of ones
+\newmacro{\eye}{I}		% for identity matrix
+\newmacro{\zer}{\mathbf{0}}		% for zero matrix
+
+\newcommand{\mg}{\succ}		% for positive-definite
+\newcommand{\mgeq}{\succcurlyeq}		% for positive-semidefinite
+\newcommand{\ml}{\prec}		% for negative-definite
+\newcommand{\mleq}{\preccurlyeq}		% for negative-semidefinite
+
+
+%----------------------------------------------------------------------
+%% Linear algebra (norms)
+%----------------------------------------------------------------------
+\DeclarePairedDelimiter{\norm}{\Big\lVert}{\Big\rVert}		% for norm
+\DeclarePairedDelimiterXPP{\dnorm}[1]{}{\lVert}{\rVert}{_{\ast}}{#1}		% for dual norm
+%\newcommand{\dnorm}[1]{\norm{#1}_{\ast}}		% for dual norm
+
+\DeclarePairedDelimiterXPP{\onenorm}[1]{}{\lVert}{\rVert}{_{1}}{#1}		% for dual norm
+\DeclarePairedDelimiterXPP{\twonorm}[1]{}{\lVert}{\rVert}{_{2}}{#1}		% for dual norm
+\DeclarePairedDelimiterXPP{\supnorm}[1]{}{\lVert}{\rVert}{_{\infty}}{#1}		% for dual norm
+
+
+%----------------------------------------------------------------------
+%% Linear algebra (pairings)
+%----------------------------------------------------------------------
+\DeclarePairedDelimiter{\bra}{\langle}{\rvert}		% for bras
+\DeclarePairedDelimiter{\ket}{\lvert}{\rangle}		% for kets
+\DeclarePairedDelimiterX{\braket}[2]{\langle}{\rangle}{#1,#2}		% for brakets
+
+
+%----------------------------------------------------------------------
+%% Linear algebra (vector spaces)
+%----------------------------------------------------------------------
+\newmacro{\vecspace}{\mathcal{V}}		% for generic vector space
+\newmacro{\subspace}{\mathcal{W}}		% for vector subspace
+
+\newmacro{\coord}{i}		% for coordinate index
+\newmacro{\coordalt}{j}		% for variant coordinate
+\newmacro{\coordaltalt}{k}		% for second variant
+\newmacro{\nCoords}{n}		% for number of coordinates
+\newmacro{\dims}{\nCoords}		% for dimension
+\newmacro{\vdim}{\nCoords}		% for dimension (legacy alias)
+
+\newmacro{\pvec}{z}		% for primal vector
+\newmacro{\pvecalt}{r}		% for primal vector
+\newmacro{\bvec}{e}		% for basis vector
+\newmacro{\bvecs}{\mathcal{E}}		% for basis vectors
+\newmacro{\cvec}{b}     % for column vector
+\newmacro{\cvecalt}{d}     % for column vector
+
+
+%----------------------------------------------------------------------
+%% Linear algebra (vector space duality)
+%----------------------------------------------------------------------
+\newmacro{\pspace}{\vecspace}		% for primal space
+\newmacro{\dspace}{\vecspace^{\ast}}		% for dual space
+
+\newmacro{\dvec}{\dpoint}		% for dual vector
+\newmacro{\dbvec}{\eps}		% for dual basis vectors
+
+\newmacro{\dpoint}{y}		% for generic dual point
+\newmacro{\dpointalt}{\alt\dpoint}		% for variant dual point
+\newmacro{\dpointaltalt}{\altalt\dpoint}		% for second variant
+\newmacro{\dpoints}{\mathcal{Y}}		% for set of dual points
+
+\newmacro{\dstate}{Y}		% for dual state
+\newmacro{\dbase}{v}		% for dual base
+
+
+%----------------------------------------------------------------------
+%% Logic and set theory
+%----------------------------------------------------------------------
+\newcommand{\defeq}{\coloneqq}		% for direct definition
+\newcommand{\eqdef}{\eqqcolon}		% for reverse definition
+
+\newcommand{\from}{\colon}		% for function definition
+\newcommand{\too}{\rightrightarrows}		% for correspondences
+\newcommand{\injects}{\hookrightarrow}		% for injections
+\newcommand{\surjects}{\twoheadrightarrow}		% for surjections
+\newcommand{\comp}[1]{#1^{\mathtt{c}}}		% for complement
+
+
+%----------------------------------------------------------------------
+%% Optimization (basics)
+%----------------------------------------------------------------------
+\newop{\Opt}{Opt}		% for value of problem
+\newop{\Sol}{Sol}		% for solution of problem
+\newop{\gap}{Gap}	
+\newop{\dualitygap}{Duality-Gap}		% for gap function
+% for gap function
+\newop{\orcl}{Or}		% for oracle
+
+\newmacro{\tfun}{f}		% for test function
+\newmacro{\obj}{f}		% for objective function
+\newmacro{\objalt}{g}		% for variant objective (smooth etc.)
+\newmacro{\sobj}{F}		% for stochastic objective
+
+\newmacro{\gvec}{g}		% for gradient vector
+\newmacro{\oper}{A}		% for operator
+\newmacro{\vecfield}{v}		% for vector field (selection etc.)
+%\newmacro{\payfield}{v}		% for payoff field (selection etc.)
+
+\newcommand{\sol}[1][\point]{#1^{\ast}}		% for solution point (x by default)
+\newcommand{\sols}{\sol[\points]}		% for set of solutions
+\newmacro{\solvec}{\vecfield(\sol)}		% for vector at a solution
+\newmacro{\solpay}{\eq[\payv]}		% for vector at a solution
+
+\newcommand{\test}[1][\point]{\hat#1}		% for test point (x by default)
+
+\newmacro{\signal}{V}		% for signal
+\newmacro{\step}{\gamma}		% for step-size
+\newmacro{\learn}{\eta}		% for learning rate
+
+\newmacro{\vbound}{G}		% for vector bound
+\newmacro{\lips}{\ell}		% for Lipschitz modulus
+\newmacro{\strong}{\mu}		% for strong convexity modulus
+\newmacro{\smooth}{\beta}		% for strong smoothness modulus
+
+
+%----------------------------------------------------------------------
+%% Optimization (convex analysis)
+%----------------------------------------------------------------------
+\newop{\tspace}{T}		% for tangent space
+\newop{\tcone}{TC}		% for tangent cone
+\newop{\dcone}{\tcone^{\ast}}		% for dual cone
+\newop{\ncone}{NC}		% for normal cone
+\newop{\pcone}{PC}		% for polar cone
+\newop{\hull}{\Delta}		% for hull
+
+\newmacro{\cvx}{\mathcal{C}}		% for generic convex set
+\newmacro{\subd}{\partial}		% for subdifferential
+\newcommand{\subsel}{\nabla}		% for subdifferential
+
+
+%----------------------------------------------------------------------
+%% Optimization (min-max)
+%----------------------------------------------------------------------
+\newmacro{\minmax}{\mathcal{L}}		% for minmax objective
+
+\newmacro{\minvar}{{\point_{1}}}		% for minimization variable
+\newmacro{\minvaralt}{\alt\minvar}		% for variant minvar
+\newmacro{\minvars}{\points_{1}}		% for set of minvars
+\newmacro{\minsol}{\sol[\minvar]}		% for min solution
+
+\newmacro{\maxvar}{\point_{2}}		% for maximization variable
+\newmacro{\maxvaaltr}{\alt\maxvar}		% for variant maxvar
+\newmacro{\maxvars}{\points_{2}}		% for set of maxvars
+\newmacro{\maxsol}{\sol[\maxvar]}		% for max solution
+
+
+%----------------------------------------------------------------------
+%% Optimization (mirror descent)
+%----------------------------------------------------------------------
+\newop{\Eucl}{\Pi}		% for Euclidean projection
+\newop{\logit}{\Lambda}		% for logit map
+\newop{\dkl}{KL}		% for Kullback Leibler
+
+\newmacro{\hreg}{h}		% for regularizer
+\newmacro{\hconj}{\hreg^{\ast}}		% for regularizer
+\newmacro{\breg}{D}		% for Bregman divergence
+\newmacro{\mprox}{P}		% for Bregman prox-mapping
+\newmacro{\mirror}{Q}		% for mirror map
+\newmacro{\fench}{F}		% for Fenchel coupling
+\newmacro{\depth}{H}		% for regularizer depth
+\newmacro{\hstr}{K}		% for strong convexity constant
+\newmacro{\hker}{\theta}		% for regularizer kernel
+
+\newmacro{\proxdom}{\points_{\hreg}}		% for prox-domain
+\newmacro{\proxdomi}{\points_{\hreg_{\play}}}		% for prox-domain of player i
+\newmacro{\zone}{\mathbb{D}}		% for Bregman zone
+
+\DeclarePairedDelimiterXPP{\proxof}[2]{\mprox_{#1}}{(}{)}{}{#2}		% for Bregman prox step
+
+\newcommand{\lazy}[1]{#1^{\textup{lazy}}}		% for lazy iterate
+\newcommand{\eager}[1]{#1^{\textup{eager}}}		% for eager iterate
+
+
+%----------------------------------------------------------------------
+%% Points and sets
+%----------------------------------------------------------------------
+\newmacro{\point}{x}		% for generic point
+\newmacro{\pointalt}{\alt\point}		% for variant point
+\newmacro{\pointaltalt}{\altalt\point}		% for second variant
+\newmacro{\points}{\mathcal{X}}		% for set of points
+\newmacro{\intpoints}{\relint\points}		%for point set interior
+
+\newmacro{\base}{p}		% for reference point
+\newmacro{\basealt}{q}		% for variant reference point
+\newmacro{\basealtalt}{u}		% for second variant
+
+\newmacro{\open}{\mathcal{U}}		% for open sets
+\newmacro{\closed}{\mathcal{C}}		% for closed sets
+\newmacro{\cpt}{\mathcal{K}}		% for compact sets
+\newmacro{\nhd}{\mathcal{U}}		% for neighborhoods
+
+
+%----------------------------------------------------------------------
+%% Probability
+%----------------------------------------------------------------------
+\newop{\ex}{\mathbb{E}}		% for expectations
+\newop{\prob}{\mathbb{P}}		% for probability
+% \newop{\Var}{Var}		% for variance
+\newop{\simplex}{\hull}		% for simplices
+
+\providecommand\given{}		% empty command for conditionals
+
+\DeclarePairedDelimiterXPP{\exof}[1]{\ex}{\Big[}{\Big]}{}{%		% for conditional expectations
+\renewcommand\given{\nonscript\,\delimsize\vert\nonscript\,\mathopen{}} #1}
+
+\DeclarePairedDelimiterXPP{\probof}[1]{\prob}{(}{)}{}{%		% for conditional probabilities
+\renewcommand\given{\nonscript\:\delimsize\vert\nonscript\:\mathopen{}} #1}
+
+\DeclarePairedDelimiterXPP{\oneof}[1]{\one}{\{}{\}}{}{%		% for conditional expectations
+\renewcommand\given{\nonscript\,\delimsize\vert\nonscript\,\mathopen{}} #1}
+
+\newmacro{\sample}{\omega}		% for sample
+\newmacro{\samples}{\Omega}		% for set of samples
+
+\newmacro{\seed}{\theta}		% for seed
+\newmacro{\seeds}{\Theta}		% for seed space
+
+\newmacro{\filter}{\mathcal{F}}		% for filtration
+\newmacro{\probspace}{(\samples,\filter,\prob)}		% for probability space
+
+\newmacro{\history}{\mathcal{H}}		% for filtrations
+
+\newcommand{\as}{\debug{\textpar{a.s.}}\xspace}		% for almost surely
+\newmacro{\event}{E}       % for event
+\newmacro{\eventalt}{H}       % for variant event
+
+\newmacro{\mean}{\mu}		% for mean of distribution
+\newmacro{\sdev}{\sigma}		% for mean of distribution
+\newmacro{\variance}{\sdev^{2}}		% for mean of distribution
+
+
+%----------------------------------------------------------------------
+%% Stochastic approximation
+%----------------------------------------------------------------------
+\newcommand{\est}[1]{\hat #1}		% for estimates
+
+\newmacro{\proper}{\tau}		% for proper time
+\newcommand{\apt}[2][]{\state_{#1}(#2)}		% for APT (X by default)
+
+\newmacro{\error}{Z}		% for error
+\newmacro{\noise}{U}		% for noise
+\newmacro{\bias}{b}		% for bias
+\newmacro{\brown}{W}		% for Wiener process
+
+\newmacro{\serror}{\theta}		% for scalar error
+\newmacro{\snoise}{\xi}		% for scalar noise
+\newmacro{\sbias}{\psi}		% for scalar bias
+
+\newmacro{\sbound}{\sigma}		% for signal bound
+\newmacro{\bbound}{B}		% for bias bound
+\newmacro{\noisepar}{\sdev}		% for noise parameter
+\newmacro{\noisevar}{\variance}		% for noise variance
+
+
+%**********************************************************************
+%***    MACROS: AUTHOR-SPECIFIC
+%**********************************************************************
+
+%----------------------------------------------------------------------
+%% GENERIC AUTHOR MACROS
+%----------------------------------------------------------------------
+\addauthor[Generic Author]{GA}{DarkGreen}
+\newcommand{\GA}{\GAmargincomment}
+
+%----------------------------------------------------------------------
+%% AG MACROS
+%----------------------------------------------------------------------
+% \addauthor[Angel]{AG}{DarkMagenta}
+% \addauthor[Yudong]{YC}{orange}
+% \addauthor[Qiaomin]{QX}{DarkBlue}
+
+
+% \newcommand{\AG}{\AGmargincomment}
+% \newcommand{\YC}{\YCmargincomment}
+% \newcommand{\QX}{\QXmargincomment}
+
+\newmacro{\op}{V} %for operator
+\newmacro{\solb}{\mathrm{R}} %for bound of the solution
+\newmacro{\growth}{L} %for the linear growth
+\newmacro{\wqsmscale}{\mu} %for the scaling parameter of wqsm
+\newmacro{\wqsmshift}{\lambda} %for the shifting parameter of wqsm
+\newcommand{\steps}[1]{\gamma^{\text{\tiny #1}}}
+\newcommand{\stepsalt}[1]{\alpha^{\text{\tiny #1}}}
+\newmacro{\stepalt}{\alpha}
+\newcommand{\deltaminor}[1]{\delta^{\braces{\text{\tiny #1}}}}
+\newcommand{\cnstminor}[1]{c_1^{\braces{\text{\tiny #1}}}} %constant for minorization
+\newcommand{\cnstminoralt}[1]{c_2^{\braces{\text{\tiny #1}}}} %constant for minorization
+\newcommand{\cnstsminor}[1]{(c_1,c_2)^{\braces{\text{\tiny {#1}}}}} %for pair of constants in minor
+\newmacro{\rvar}{g}
+\newmacro{\kyrt}{\delta_{\text{\tiny{ KYRT}}}}
+\newmacro{\energy}{\mathcal{E}}
+\newcommand{\meas}[1]{\nu^{\text{\tiny #1}}}
+\newmacro{\irr}{\psi}
+\newcommand{\distr}[2]{\pi_{#2}^{\braces{\text{\tiny #1}}}}
+\newmacro{\set}{C}
+\newmacro{\tf}{\phi}
+\newcommand{\tconst}[1]{\rho^{\braces{\text{\tiny #1}}}}
+\newcommand{\tconstalt}[1]{\kappa^{\braces{\text{\tiny #1}}}}
+\newcommand{\law}{\text{law}}
+\newmacro{\normal}{\mathcal{N}}
+\newmacro{\thres}{\theta}
+\newmacro{\borel}{\mathcal{B}}
+\newcommand{\snorm}{\norm{\state_\time-\state^*}}
+\newcommand{\ssnorm}{\norm{\state-\state^*}}
+
+\newmacro{\sgda}{\text{SGDA}}
+\newmacro{\seg}{\text{SEG}}
+\newcommand{\Expep}[1]{\ex\left[#1 \Big| \filter_k\right]}
+
+\usepackage{amsthm}
+% \let\proof\undefined
+% Algorithm
+% \usepackage{algorithm}
+% \renewcommand{\algorithmiccomment}[1]{\hfill // #1}
+
+% \renewcommand{\algorithmicrequire}{\textbf{Input:}}
+% \renewcommand{\algorithmicensure}{\textbf{Output:}}
+
+\newcommand{\dquote}[1]{``#1"}
+
+\newcommand{\colorword}[2]{{\color{#2}#1}}
+
+%% Math commands 
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\Var}{\operatorname{\textrm{Var}}}
+\newcommand{\goto}{\rightarrow}
+\newcommand{\sgn}{\mathop\mathrm{sgn}}
+\newcommand{\N}{\mathcal{N}}
+\newcommand{\A}{\mathcal{A}}
+\newcommand{\F}{\mathcal{F}}
+\renewcommand{\P}{\operatorname{\mathbb{P}}}
+\newcommand{\E}{\operatorname{\mathbb{E}}}
+\newcommand{\e}{\mathrm{e}}
+\renewcommand\d{\operatorname{\mathrm{d}}}
+\newcommand{\deq}{\overset{\mathrm{d}}{=}}
+\newcommand{\EE}{\operatorname{\mathbb{E}}}
+% \newcommand{\eps}{{\epsilon}}
+\newcommand{\cO}{\operatorname{\mathcal{O}}}
+\newcommand{\RR}{\operatorname{\mathbb{R}}}
+
+\newcommand{\nullspace}{{\mathcal N}}
+\newcommand{\range}{{\mathcal R}}
+\newcommand{\Rank}{\mathop{\bf Rank}}
+\newcommand{\Tr}{\mathop{\bf Tr}}
+% \newcommand{\diag}{\mathop{\bf diag}}
+% \newcommand{\card}{\mathop{\bf card}}
+% \newcommand{\rank}{\mathop{\bf rank}}
+% \newcommand{\conv}{\mathop{\bf conv}}
+% \newcommand{\prox}{\mathbf{prox}}
+% \newcommand{\proj}{\mathbf{proj}}
+
+\newcommand{\Expect}{\mathop{\bf E{}}}
+\newcommand{\Prob}{\mathop{\bf Prob}}
+\newcommand{\Co}{{\mathop {\bf Co}}} % convex hull
+% \newcommand{\dist}{\mathop{\bf dist{}}}
+\newcommand{\argmin}{\mathop{\rm argmin}}
+\newcommand{\argmax}{\mathop{\rm argmax}}
+\newcommand{\epi}{\mathop{\bf epi}} % epigraph
+\newcommand{\Vol}{\mathop{\bf vol}}
+\newcommand{\dom}{\mathop{\bf dom}} % domain
+% \newcommand{\intr}{\mathop{\bf int}}
+% \newcommand{\sign}{\mathop{\bf sign}}
+
+% \newcommand{\gap}{\mathrm{gap}}
+
+% \newcommand{\cf}{{\it cf. }}
+% \newcommand{\examp}{{\it e.g.}}
+% \newcommand{\ie}{{\it i.e. }}
+% \newcommand{\etc}{{\it etc. }}
+
+% parenthesis
+% \newcommand{\autopar}[1]{{\left(#1\right)}}
+% \newcommand{\automedpar}[1]{{\left[#1\right]}}
+% \newcommand{\autobigpar}[1]{{\left\{#1\right\}}}
+% \newcommand{\autoabs}[1]{{\left|#1\right|}}
+% \newcommand{\autonorm}[1]{{\left\|#1\right\|}}
+% \newcommand{\autoprod}[1]{{\left\langle#1\right\rangle}}
+
+% For content
+\setcounter{tocdepth}{2}
+
+% % For theorem
+\usepackage{color}
+\usepackage[dvipsnames]{xcolor}
+
+\usepackage{colortbl}
+\definecolor{bgcolor}{rgb}{0.8,1,1}
+\definecolor{bgcolor2}{rgb}{0.8,1,0.8}
+\definecolor{niceblue}{rgb}{0.0,0.19,0.56}
+
+% \newcommand{\qed}{\hfill$\blacksquare$}
+
+%%%%%%%%%% SHADED COLORS %%%%%%%%%%%%%%%%
+\usepackage{amsthm}
+% \let\proof\undefined
+\usepackage{mdframed}
+\usepackage{thmtools}
+
+\definecolor{shadecolor}{gray}{0.9}
+\declaretheoremstyle[
+headfont=\normalfont\bfseries,
+notefont=\mdseries, notebraces={(}{)},
+bodyfont=\normalfont,
+postheadspace=0.5em,
+spaceabove=1pt,
+mdframed={
+  skipabove=8pt,
+  skipbelow=8pt,
+  hidealllines=true,
+  backgroundcolor={shadecolor},
+  innerleftmargin=4pt,
+  innerrightmargin=4pt}
+]{shaded}
+
+
+\declaretheorem[style=shaded,within=section]{definition}
+\declaretheorem[style=shaded,sibling=definition]{theorem}
+\declaretheorem[style=shaded,sibling=definition]{proposition}
+\declaretheorem[style=shaded,sibling=definition]{assumption}
+\declaretheorem[style=shaded,sibling=definition]{corollary}
+% \declaretheorem[style=shaded,sibling=definition]{conjecture}
+\declaretheorem[style=shaded,sibling=definition]{lemma}
+% \declaretheorem[style=shaded,sibling=definition]{remark}
+\declaretheorem[style=shaded,sibling=definition]{example}
+
+
+
+\usepackage{pifont}
+%

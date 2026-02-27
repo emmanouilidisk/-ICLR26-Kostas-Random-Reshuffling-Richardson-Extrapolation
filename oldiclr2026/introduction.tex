@@ -1,0 +1,197 @@
+\section{Introduction}
+Mathematical optimization is one of the pillars of modern machine learning (ML), equipping us with the numerical tools needed to compute parameters for large-scale decision systems. In this work, we focus on \emph{variational inequality problems (VIPs)}—a unifying framework that extends beyond classical loss minimization to encompass min–max optimization, complementarity problems \cite{CottleDantzig1968}, equilibrium computation in games, and general fixed-point formulations. In recent years, VIPs have gained significant traction in ML and data science, especially due to their broad potential applicability in domains where minimizing a single empirical loss is insufficient, with notable examples including generative adversarial networks \cite{goodfellow2014}, multi-agent and robust reinforcement learning \cite{pmlr-v97-zhang19k,rajput2020}, and auction theory \cite{roughgarden2016}.
+
+In practice, many of these tasks reduce to finite-sum formulations, where the objective depends on a large collection of data samples or agents. In such settings, \emph{stochastic gradient methods} have become the workhorse of large-scale learning \cite{Bottou2012,JohnsonZhang2013}. By exploiting the finite-sum structure, stochastic gradient descent (SGD) and its variants replace expensive full-gradient computations with inexpensive updates on a few components, enabling scalability to massive datasets. 
+
+While the theoretical underpinnings of SGD have been extensively studied \cite{Rakhlin2012,ShamirZhang2013,Reddi2018}, much of its practical success can be traced to a handful of seemingly “low-level” heuristics: step-size schedules (constant vs.\ decaying), data ordering (with vs.\ without resampling), and iterate selection (average vs.\ last iterate). To facilitate analysis, the community has typically adopted a \emph{ceteris paribus} perspective—isolating one design choice at a time while holding the rest fixed—an approach that clarifies individual effects but obscures their interaction.
+
+A particularly important example is the use of a \emph{constant step size}. This choice is extremely popular in practice: it makes the algorithm easy to tune, quickly diminishes dependence on initialization, and yields substantial early progress \cite{polyak1992}. Yet it comes with a fundamental limitation: convergence halts at a non-vanishing bias. Even in the simple case of strongly convex problems with a unique solution $x^*$, one typically has
+\(
+\|x_k - x_*\|^2 = e^{-\rho k}\|x_0 - x_*\|^2 + \text{bias}(\gamma),
+\)
+where the first term decays exponentially while the residual satisfies $\text{bias}(\gamma) = O(\gamma)$. Thus, in the long run, the iterates stabilize at a point whose distance from the optimum remains on the order of the step size.
+
+To address this issue, practitioners often turn to debiasing heuristics. One such technique, widely adopted in stochastic optimization, is \emph{random reshuffling} (\RRresh), or \emph{without-replacement} sampling, where each data point is used exactly once per epoch. Unlike classical \emph{with-replacement} SGD, which may revisit or skip samples, \RRresh enforces a random full pass that mirrors practical large-scale training \cite{Bottou2012}. Despite the dependence it induces across samples, recent work has established faster convergence guarantees for \RRresh in both minimization and VIPs \cite{Ahn2020,Gurbuzbalaban2021,Mishchenko2020a,Cai2023}, and even bias reduction from $O(\gamma)$ to $O(\gamma^2)$ under suitable conditions.
+
+Orthogonal to reshuffling, another classical idea from numerical analysis has recently re-emerged in stochastic optimization: \emph{Richardson–Romberg} (\RRrom) \emph{extrapolation}. Its principle is simple yet powerful: run the algorithm at two different step sizes and combine their outputs so that the leading bias term cancels. Concretely, whenever the bias admits an expansion of the form $\text{bias}(\gamma) = \Delta \gamma + O(\gamma^{\kappa})$ with $\kappa>1$, running the stochastic approximation at two step sizes gives:
+\vspace{-0.5em}\[\text{$x_{\infty}^{\gamma} - x^* = \Delta \gamma + O(\gamma^{\kappa})$ and $x_{\infty}^{2\gamma} - x^* = 2\Delta \gamma + O(\gamma^{\kappa})$.}\vspace{-0.5em}\] 
+Extrapolating these iterates then yields \vspace{-0.5em} 
+\[
+x_{\text{extr}}
+= 2x_{\infty}^{\gamma} - x_{\infty}^{2\gamma} - x^*
+= \cancel{2\Delta \gamma} - \cancel{2\Delta \gamma} + O(\gamma^{\kappa})
+= O(\gamma^{\kappa}). \vspace{-0.5em}
+\]
+Originally introduced for accelerating discretization schemes in stochastic differential equations \cite{Hildebrand1987,TalayTubaro1990,BallyTalay1996}, \RRrom\ has since been applied to optimization, improving constant-step methods from SGD \cite{Durmus2016,Dieuleveut2020} to Q-learning and two-timescale stochastic approximation \cite{AllmeierGast2024,ZhangXie2024,Huo2024a,Kwon2024}. Despite its conceptual simplicity and empirical success, its theoretical foundations for stochastic VIPs remain nascent \cite{vlatakis2024stochastic}. This raises a fundamental question: 
+\begin{equation}
+\parbox{35em}{\centering
+\textit{What new phenomena arise when these heuristics\\—
+\emph{constant step sizes, random reshuffling, and Richardson extrapolation }—\\
+interact simultaneously? }
+}
+\tag{$\bigstar$}
+\label{central-question}
+\end{equation}
+Addressing this question is non-trivial: \RRresh\ produces a biased stochastic oracle whose discrete noise structure lies outside the scope of existing analyses for mainly unbiased \RRrom\ methods \cite{Bach1,Bach2,Mouilines, Vlatakis}. 
+\subsection{Our contributions.}
+Motivated by this gap, we undertake in this work what is, to the best of our knowledge, the first systematic study demonstrating that these heuristics can be synthesized into a principled algorithmic framework, yielding a composite bias reduction unattainable by any of them in isolation.
+
+\begin{maininformal}
+For quasi-strongly monotone smooth VIPs, our combined method (\RRrom$\oplus$\RRresh, Algorithm~X) cancels all lower-order terms in the bias expansion, yielding an asymptotic bias of order $O(\gamma^3)$.
+\end{maininformal}
+
+\begin{figure}[ht]
+    \centering
+    % Left image
+    \begin{minipage}{0.48\linewidth}
+        \centering
+        \includegraphics[width=0.8\linewidth]{iclr2026/placeholder.pdf}
+        %\caption*{(a) Bias trajectories for a toy VIP example.}
+    \end{minipage}
+    \hfill
+    % Right image
+    \begin{minipage}{0.48\linewidth}
+        \centering
+        \scalebox{0.45}{\input{iclr2026/gamma-neighbors}}
+        %\caption*{(b) Asymptotic neighborhood of $x_k$.}
+    \end{minipage}
+    \caption{Illustration of bias behavior. 
+    \textbf{(a)} Example on a quadratic VIP with $F(x)=\tfrac{1}{N}\sum x^\top A x$ for $N=1000$. 
+    Already after the second epoch, the methods clearly separate: 
+    \textcolor{blue}{SGD}, \textcolor{green}{\RRresh}, \textcolor{orange}{\RRrom}, 
+    and \textcolor{red}{\RRresh$\oplus$\RRrom}. 
+    \textbf{(b)} Decomposition of the iterates as 
+    $x_k = x_* + C e^{-k} + \text{bias}_{\text{method}}(\gamma)$, 
+    illustrating how the asymptotic neighborhood depends on the bias term.}
+\end{figure}
+
+\newpage
+
+\begin{figure}[ht]
+    \centering
+    \scalebox{0.65}{\input{iclr2026/model}}
+    \caption{Algorithmic Model of \RRresh$\oplus$\RRrom}
+\end{figure}
+
+%To the best of our knowledge, this work is the first to demonstrate that these heuristics can be synthesized into a principled algorithmic framework, yielding a composite bias reduction unattainable by any of them in isolation.
+
+
+
+% Concretely, whenever the bias expands as $\text{bias}_{}(\gamma) = \Delta \gamma + O(\gamma^{\kappa})$ for some $\kappa>1$,
+% then if 
+%         $x_{\infty}^{\gamma} - x^* = \Delta\dot\gamma + O(\gamma^{\kappa}), \quad x_{\infty}^{2\gamma} - x^* = \Delta\dot 2\gamma + O(\gamma^{\kappa})$ then extrapolating yields
+% $        2x_{\infty}^{\gamma}- x_{\infty}^{2\gamma} - x^* = \cancel{2\Delta \gamma} - \cancel{2\Delta \gamma} + \mathcal{O}\left(\gamma^{\kappa}\right) = \mathcal{O}\left(\gamma^{\kappa}\right) \nonumber
+% $
+
+% \begin{eqnarray}
+%         x_{\infty}^{\gamma} - x^* = \Delta\dot\gamma + O(\gamma^{\kappa}), \quad x_{\infty}^{2\gamma} - x^* = \Delta\dot 2\gamma + O(\gamma^{\kappa})\\
+%         2x_{\infty}^{\gamma}- x_{\infty}^{2\gamma} - x^* = \cancel{2\Delta \gamma} - \cancel{2\Delta \gamma} + \mathcal{O}\left(\gamma^{\kappa}\right) = \mathcal{O}\left(\gamma^{\kappa}\right) \nonumber
+% \end{eqnarray}
+
+% \newpage
+
+% Orthogonal to the above, another classical debiasing technique has recently gained traction in stochastic optimization: Richardson–Romberg (RR) extrapolation. Originally developed in numerical analysis to improve the accuracy of discretization schemes [Hildebrand, 1987], RR operates by combining approximations with different step sizes so as to cancel the leading term in the error expansion. The one-step version was introduced to reduce discretization error in Euler schemes for stochastic differential equations [Talay & Tubaro, 1990], later extended to non-smooth settings [Bally & Talay, 1996] and multistep discretizations [Pages, 2007].
+
+% The same idea can be applied to constant-step stochastic gradient methods: if the stationary bias admits an expansion of the form
+% x_{\infty}^{\gamma} - x^* = \Delta \gamma + O(\gamma^{\kappa}),
+% \quad
+% x_{\infty}^{2\gamma} - x^* = 2\Delta \gamma + O(\gamma^{\kappa}),
+% then extrapolating yields
+% 2x_{\infty}^{\gamma} - x_{\infty}^{2\gamma} - x^*
+% = \cancel{2\Delta \gamma} - \cancel{2\Delta \gamma} + O(\gamma^{\kappa})
+% = O(\gamma^{\kappa}),
+% thereby eliminating the dominant bias term. This simple yet powerful idea has motivated a growing line of work applying RR to stochastic approximation methods, including SGD [Durmus et al., 2016; Dieuleveut et al., 2020; Merad & Gaïffas, 2023; Huo et al., 2024a], Q-learning, and other single- and two-timescale algorithms [Allmeier & Gast, 2024; Zhang & Xie, 2024; Huo et al., 2024a; Kwon et al., 2024].
+
+% Despite this progress, the theoretical understanding of RR in the context of stochastic VIs remains nascent. Prior work has either assumed unbiased stochastic oracles [Bach], or leveraged specific structural properties of the noise [Vlatakis et al.]. Thus, while RR has proven effective in practice and across related stochastic approximation problems, its guarantees for general variational inequalities are still incomplete.
+
+% \newpage
+
+
+% Orthogonal to the above, there is another folkore from numerical analysis debiasing technique that has become popular in the field of stochastic VIs, the Richardson - Romberg extrapolation. Richardson requires a more refined analysis of the bias of the method, decomposing into a dominant term and some higher order ones, resulting in $\text{bias}_{}(\gamma) = \Delta \gamma + O(\gamma^{\kappa})$
+% \begin{eqnarray}
+%         x_{\infty}^{\gamma} - x^* = \Delta\dot\gamma + O(\gamma^{\kappa}), \quad x_{\infty}^{2\gamma} - x^* = \Delta\dot 2\gamma + O(\gamma^{\kappa})\\
+%         2x_{\infty}^{\gamma}- x_{\infty}^{2\gamma} - x^* = \cancel{2\Delta \gamma} - \cancel{2\Delta \gamma} + \mathcal{O}\left(\gamma^{\kappa}\right) = \mathcal{O}\left(\gamma^{\kappa}\right) \nonumber
+% \end{eqnarray}
+% Despite the simplicity of the method, the theoretical understanding is nascent. Papers for Richardson explaining the method in minimization (cite Bach) and in VI (Vlatakis). The first analyzed the method with unbiased stochastic oracles, while the second were utilizing specific structure of the noise. 
+
+% Richardson-Romberg (RR) extrapolation is a technique used to improve the accuracy of numerical approximations (Hildebrand, 1987), such as those from numerical differentiation or integration. It involves using approximations with different step sizes and then extrapolating to reduce the error, typically by removing the leading term in the error expansion. The one-step RR extrapolation was introduced to reduce the discretization error induced by an Euler scheme to simulate stochastic differential equation in Talay & Tubaro (1990), and later generalized for non-smooth functions in Bally & Talay (1996). This technique was extended using multistep discretizations in Page`s (2007). RR extrapolation have been applied to Stochastic Gradient Descent (SGD) methods in Durmus et al. (2016), Dieuleveut et al. (2020), Merad & Ga ̈ıffas (2023) and Huo et al. (2024a), to improve convergence and reduce error in optimization problems, particularly when dealing with noisy or high-variance gradient estimates. Recent papers (Allmeier & Gast, 2024; Zhang & Xie, 2024; Huo et al., 2024a; Kwon et al., 2024) consider applications of RR to different stochastic approximation problems with constant step-size, including Q-learning, and single- and two-timescale stochastic approximation.
+
+
+% To address this issue, practitioners often turn to debiasing heuristics. One such technique, widely adopted in stochastic optimization, is \emph{random reshuffling} (RR), or \emph{without-replacement} sampling, where each data point is used exactly once per epoch. Unlike the classical \emph{with-replacement} variant of SGD—where samples are drawn independently and some may be revisited while others are skipped. RR eliminates this redundancy by enforcing a full pass over the dataset in a random order, closely matching how large-scale training is implemented in practice.
+% Despite the dependence it induces across samples within an epoch, recent work has established faster convergence guarantees for RR in both minimization and VIPs \cite{Ahn et al., 2020; Gürbüzbalaban et al., 2021; Mishchenko et al., 2020a; Cai et al., 2023}. Beyond these rate improvements, RR has also been shown to reduce the stationary bias of constant-step methods from $O(\gamma)$ to $O(\gamma^2)$ under suitable conditions.
+
+%To address this issue, practitioners often turn to debiasing heuristics. One such technique, widely adopted in stochastic optimization, is \emph{random reshuffling} (RR)\textendash also known as \emph{without-replacement}, which samples each data point exactly once per epoch. In contrast, the classical \emph{with-replacement} variant of SGD draws each sample independently at every step, so the same data point may be visited multiple times while others are skipped. RR eliminates this redundancy by enforcing a full pass over the dataset in a random order, a procedure that aligns closely with how practitioners typically implement large-scale training, owing to its ease of use and superior empirical performance \cite{Bottou, 2012}. Despite the additional technical challenges introduced by the dependence across samples within an epoch, a series of recent works has established faster convergence guarantees for RR across minimization and variational inequality problems \cite{Ahn et al., 2020; Gürbüzbalaban et al., 2021; Mishchenko et al., 2020a; Cai et al., 2023}. Strikingly, beyond rate improvements, reshuffling has also been shown to mitigate the stationary bias of constant-step stochastic methods, sharpening it from $O(\gamma)$ down to $O(\gamma^2)$ under suitable conditions.
+
+% For example, a particularly important design choice is the use of a \emph{constant step size}. In practice, this setting is extremely popular: it makes the algorithm easy to tune, quickly erases dependence on initialization, and yields rapid early progress \cite{?,?}. Yet it comes with a fundamental limitation: convergence stalls at a non-vanishing bias. Even in the simple case of strongly convex problems with a unique solution $x^$, one typically has
+% $\|x_k - x_*\|^2 \;=\; e^{-\rho k}\|x_0 - x_*\|^2 \;+\; \text{bias}(\gamma),$
+% with $\text{bias}(\gamma) = O(\gamma)$. Thus, in the long run, the iterates stabilize at a point whose distance from the optimum is of order $\gamma$.
+% To facilitate analysis, the leitmotif of the community
+% isolates one of these design choices while holding the rest fixed — a ceteris paribus approach that yields valuable but fragmented insights into their impact.
+% examines these choices in isolation—adopting a ceteris paribus perspective that clarifies their individual impact but obscures their interaction.
+
+
+
+% In practice, many of these tasks reduce to finite-sum formulations, where the objective depends on a large collection of data samples or agents. The success of modern large-scale learning hinges on stochastic methods, which overcome the prohibitive cost of computing full gradients by sampling and updating with only a few components at each iteration.
+
+
+% Variational inequalities (VIs) form a unifying framework for a wide range of machine learning problems, including adversarial robustness, reinforcement learning, and min–max optimization.
+
+\newpage
+
+
+
+% What is the problem?
+% Why the problem is important?
+% Why the problem is unsolved/history 
+% How we resolve it
+% Why it was not trivial?
+
+
+% VI's are important + applications
+
+% Finite-sum: success of Stochastic gradient methods to tame the lack of full-gradient. 
+% In the last decades, there is a great effort from the theory community to explain the heuristics that tune the performance of the method in practice.
+
+% The community has explored the effects of an algorithmic heuristic isolated and not the synergy with other common ones. 
+
+% Constant step size: in practice it is used but this leads to bias remaining
+% \begin{eqnarray}
+%     \|x_k - x_*\|^2 &=& \exp{-\rho k} \|x_0 - x_*\|^2 + \text{bias}(\gamma) \nonumber
+% \end{eqnarray}
+% The bias in SGD is $\text{bias}(\gamma) = O(\gamma)$. The limit of the iterates could be off the optimal value by a magnitude of order $\text{bias}(\gamma)$. 
+
+% In practice, RR is used because it is beneficial (cite papers). Recently found they provide debiasing $\text{bias}_{\text{RR}}(\gamma) = O(\gamma^2)$.
+
+% Orthogonal to the above, there is another folkore from numerical analysis debiasing technique that has become popular in the field of stochastic VIs, the Richardson - Romberg extrapolation. Richardson requires a more refined analysis of the bias of the method, decomposing into a dominant term and some higher order ones, resulting in $\text{bias}_{}(\gamma) = \Delta \gamma + O(\gamma^{\kappa})$
+% \begin{eqnarray}
+%         x_{\infty}^{\gamma} - x^* = \Delta\dot\gamma + O(\gamma^{\kappa}), \quad x_{\infty}^{2\gamma} - x^* = \Delta\dot 2\gamma + O(\gamma^{\kappa})\\
+%         2x_{\infty}^{\gamma}- x_{\infty}^{2\gamma} - x^* = 2 \Delta\dot\gamma - 2\Delta\dot\gamma + \mathcal{O}\left(\gamma^{\kappa}\right) = \mathcal{O}\left(\gamma^{\kappa}\right) \nonumber
+% \end{eqnarray}
+
+% Despite the simplicity of the method, the theoretical understanding is nascent. Papers for Richardson explaining the method in minimization (cite Bach) and in VI (Vlatakis). The first analyzed the method with unbiased stochastic oracles, while the second were utilizing specific structure of the noise. 
+
+% In this work, we ask the question: 
+% What is the mutual impact of all the aforementioned heuristics when they are applied simultaneously?
+
+% This questions makes sense and it is non-trivial, as the RR heuristic provides a biased stochastic oracle. Even if Emmanouilidis et al. provide bounds in the second moment, the noise from the stochastic algorithm is discrete and thus direct application of the previous results (Bach, Vlatakis) do not hold. In this work, it is the first time to the best of our knowledge that we present an algorithmic way to combine the heuristics in an effective way for reducing the bias in a composite way. 
+
+% Figure with both plots (left: bias vs step-size, right: 2D plot showing neighbourhoods)
+
+% Algorithm: legend provide details about smoothing noise
+
+% Our contributions:
+% - Convergence guarantees for a structured class of non-quasi-monotone problems, establishing exponential convergence up to the bias term
+% - Sufficient statistics proving that the average iterate of the algorithm follows a law of large numbers and a corresponding central limit theorem
+% - Building upon the aforementioned contributions, we establish an accelerated convergence of the proposed algorithm given the refined bias shown:
+% Informal Result
+
+% The first two are preliminaries for establishing the last one, which is the main. 
+
+% From technical perspective, we show Constant step size per epoch the MC is a continuous space homogeneous, Markov Chain. The randomness space is $(U_k, \omega)$, however they are independent between each other and the space is decomposed, where the space of permutations is a redundant MC 
+
+\textit{Paragraph on the Algorithm} We analyze stochastic gradient algorithms that use random reshuffling as the sampling technique for selecting the data and estimating the stochastic oracles of the gradients/operators at them. Specifically, at the start of each epoch $k >0$ a permutation $\omega_k$ of $[n]$ is drawn uniformly at random, specifying an ordering of the data in the dataset for evaluating the stochastic gradients inside the epoch. The algorithm consequently performs the classical update rule of SGD(A) 
+\begin{equation}\tag{SGDA-RR}
+    x_k^{i+1} = x_k^i - \gamma g(x^i_k; \omega_k^i) \label{SGDA-RR}
+\end{equation}
+where $g(x_i^k; \omega_k^i)$ is the stochastic oracle evaluated at $x^i_k$ and defined by the corresponding $\omega_k^i$ data point of the dataset. In this work, we allow the stochastic oracle to be either the typical stochastic gradient $g(x_i^k; \omega_k^i) = F_{\omega_k^i}(x_k^i)$ or a smooth version of it [motivated by applications and cite papers here]. 
+As a last step, the last iterate of the epoch is set as a starting point for the next epoch and the algorithm reiterates. 

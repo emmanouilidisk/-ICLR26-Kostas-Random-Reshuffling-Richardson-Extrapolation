@@ -1,0 +1,540 @@
+% !TEX root = ./iclr2026_conference.tex
+\section{Proof of Bias for \RRresh\ and \RRresh$\oplus$\RRrom\ Methods\\(Lemma~\ref{lem: rr_1}) and (Theorem~\ref{thm: rr_1_rr_2})}
+\label{app: rich-romberg-proofs}
+\subsection{Jacobian bound for one-pass map}
+% {\Huge ASTEIO...oute to chatgpt den xerei ti einai ti !!!}
+\begin{lemma}[Jacobian bound for one-pass map]%\label{lemma:eigenvalues_operator}
+Assume each component $F_i:\R^d\to\R^d$ is $C^1$ near $x^*$ with $\|\nabla F_i(x^*)\|_{\mathrm{op}}\le L_i$ and let $L_{\max}=\max_i L_i$. 
+For a permutation $\omega\in\mathfrak{S}_n$, define the inner one-step map
+\[
+\Phi_{\omega,i}(x)\;:=\;x-\gamma F_{\omega_i}(x),\qquad i=0,\dots,n-1,
+\]
+its composition over one reshuffled pass
+\[
+\Phi^{(n)}_{\omega}(x)\;:=\;\Phi_{\omega,n-1}\circ\cdots\circ \Phi_{\omega,0}(x),
+\]
+and the epoch map
+\[
+H(x,\omega)\;:=\;x-\gamma\sum_{i=0}^{n-1}F_{\omega_{i}}\big(x^{[i]}(x,\omega)\big),
+\quad 
+x^{[0]}(x,\omega)=x,\;\;x^{[i+1]}(x,\omega)=\Phi_{\omega,i}\big(x^{[i]}(x,\omega)\big).
+\]
+Then, at $x^*$ it holds that
+\[
+\|\nabla_x G(x^*, \omega)\|_{\text{op}}\;\le\;1+\sum_{i=1}^{n}(\gamma L_{\max})^{i}.
+\]
+Consequently, the spectral radius of $\nabla_x G(x^*, \omega)$ is at most $1+\sum_{i=1}^{n}(\gamma L_{\max})^{i}$.
+\end{lemma}
+%
+%\begin{proof}
+%By the chain rule, the Jacobian of the $n$-step composition satisfies
+%\[
+%\nabla \Phi^{(n)}_{\pi}(x)
+%=\prod_{i=0}^{n-1}\Big(I-\gamma \nabla F_{\pi[n-1-i]}\big(x^{[n-1-i]}(x,\pi)\big)\Big).
+%\]
+%At $x=x^*$, the fixed-point relation of the inner iterates yields $x^{[i]}(x^*,\pi)=x^*$ for all $i$, so
+%\[
+%\nabla \Phi^{(n)}_{\pi}(x^*)
+%=\prod_{i=0}^{n-1}\Big(I-\gamma \nabla F_{\pi[i]}(x^*)\Big).
+%\]
+%A first-order expansion of the epoch map around $x^*$ gives
+%\[
+%\nabla_x H(\pi,x^*)
+%=I-\nabla \Phi^{(n)}_{\pi}(x^*).
+%\]
+%Using submultiplicativity and $\|\nabla F_{\pi[i]}(x^*)\|_{\text{op}}\le L_{\max}$,
+%\[
+%\big\|\nabla \Phi^{(n)}_{\pi}(x^*)\big\|_{\text{op}}
+%\le \prod_{i=0}^{n-1}\big\|I-\gamma \nabla F_{\pi[i]}(x^*)\big\|_{\text{op}}
+%\le \prod_{i=0}^{n-1} \big(1+\gamma L_{\max}\big).
+%\]
+%This crude product bound is valid but loose. A tighter (standard) expansion of the product shows
+%\[
+%\nabla \Phi^{(n)}_{\pi}(x^*)
+%= I + \sum_{i=1}^{n}(-\gamma)^i
+%\!\!\sum_{0\le j_1<\cdots<j_i\le n-1}
+%\!\!\!\!\nabla F_{\pi[j_i]}(x^*)\cdots \nabla F_{\pi[j_1]}(x^*),
+%\]
+%so by triangle inequality and submultiplicativity,
+%\[
+%\big\|\nabla \Phi^{(n)}_{\pi}(x^*)\big\|_{\text{op}}
+%\le 1+\sum_{i=1}^{n} (\gamma L_{\max})^{i}.
+%\]
+%Hence
+%\[
+%\|\nabla_x H(\pi,x^*)\|_{\text{op}}
+%=\|I-\nabla \Phi^{(n)}_{\pi}(x^*)\|_{\text{op}}
+%\le 1+\sum_{i=1}^{n} (\gamma L_{\max})^{i}.
+%\]
+%The spectral radius is bounded by the operator norm, completing the proof.
+%\end{proof}
+
+Our first lemma aims to bound the maximum eigenvalue of the matrix $\nabla_{x} H(\omega,x^*)$ with respect to the known Lipschitz constants of the operators $F_i, \forall i \in [n]$.
+
+
+
+
+\begin{lemma}\label{lemma: eigenvalues_operator}
+    The maximum eigenvalue of the operator $\nabla_{x} G(x^*, \omega)$ is $L_{max}^G = 1 + \sum\limits_{i=1}^{n} (\gamma L_{max})^i$.
+\end{lemma}
+\begin{proof}
+    Let $\phi_{\omega_i}(x, z) = x - \gamma F_{\omega_i}(z)$. Define, also, the $k-$step operator $\phi^{(k)}_{\omega}(x, z) = \phi_{\omega_k}\left(x, \phi_{\omega_{k-1}}\left(x,  ... \phi_{\omega_1}\left(x, z\right)...\right)\right)$ with $\phi^{(0)}_{\omega}(x, z) = z$ and obtain that
+    \begin{eqnarray}
+       x_{k+1}^0 &=& H(x_k^0, \omega) \nonumber \\
+       \nabla_{x} G(x_k^0, \omega) &=& I - \nabla \phi^{(n)}_{\omega}(x_k^0, x_k^0) \nonumber
+    \end{eqnarray}
+    since $G(x_k^0, \omega) := \sum_{i=0}^{n-1} F_{\omega_k^i}\big(x^{i}_k\big)$. 
+    
+    The gradient of $G(\cdot,\omega)$ is computed by deriving first the partial derivatives of $\phi^{(n)}_{\omega}(x, z)$ with respect to $x$ and $z$. We prove by induction that
+    \begin{itemize}
+        \item  $\nabla_z \phi^{(n)}_{\omega}(x,z) = (-\gamma)^{n} \nabla F_{\omega_{n}}\left(\phi^{(n-1)}_{\omega}(x, z)\right) \cdot \nabla F_{\omega_{n-1}}\left(\phi^{(n-2)}_{\omega}(x, z)\right) \cdot ... \cdot \nabla F_{\omega_{1}}\left(\phi^{(0)}_{\omega}(x, z)\right)$
+        \item $\nabla_x \phi^{(n)}_{\omega}(x, z) = \sum\limits_{j=0}^{n-1} (-\gamma)^{j} \nabla F_{\omega_{n-1}}(\phi^{(n)}_{\omega}(x, z)) \nabla F_{\omega_{n-1}}\left(\phi^{(n-2)}_{\omega}(x, z)\right) \cdot ... \cdot \nabla F_{\omega_{n-j+1}}\left(\phi^{(n-j)}_{\omega}(x, z)\right)$
+    \end{itemize}
+    For $k = 1$, we have that $\phi^{(1)}_{\omega}(x, z) = \phi_{\omega_1}(x, z) = x - \gamma F_{\omega_1}(z)$ and it holds that
+    \begin{eqnarray}
+        \nabla_z\phi^{(1)}_{\omega}(x, z) &=& -\gamma \nabla F_{\omega_{0}}(z) \nonumber \\
+        \nabla_x \phi^{(1)}_{\omega}(x, z) &=& I \nonumber
+    \end{eqnarray}
+    thus the inductive hypothesis holds for $k=1$. 
+    Assuming that it holds for $n-1,$ we, next, prove that it holds for $n$. We have that 
+    \begin{eqnarray}
+        \nabla_z \phi^{(n)}_{\omega}(x,z) &=& \nabla_z \phi_{\omega}\left(x, \phi^{(n-1)}_{\omega}(x, z)\right) \nabla_z \phi^{(n-1)}_{\omega}(x, z) \nonumber \\
+        &=& (-\gamma) \nabla F_{\omega_{n}}\left(\phi^{(n-1)}_{\omega}(x, z)\right) \cdot (-\gamma)^{n-1} \nabla F_{\omega_{n-1}}\left(\phi^{(n-2)}_{\omega}(x, z)\right) \cdot ... \cdot \nabla F_{\omega_{1}}\left(\phi^{(0)}_{\omega}(x, z)\right) \nonumber \\
+        &=& (-\gamma)^{n} \nabla F_{\omega_{n}}\left(\phi^{(n-1)}_{\omega}(x, z)\right) \cdot \nabla F_{\omega_{n-1}}\left(\phi^{(n-2)}_{\omega}(x, z)\right) \cdot ... \cdot \nabla F_{\omega_{1}}\left(\phi^{(0)}_{\omega}(x, z)\right) \nonumber
+    \end{eqnarray}
+    
+    We, next, compute the gradient with respect to $x$ and get 
+    \begin{eqnarray}
+        \nabla_x \phi^{n}_{\omega}(x, z) &=& \nabla_x \phi_{\omega}(x, \phi^{(n-1)}_{\omega}(x, z)) + \nabla_z \phi_{\omega}\left(x, \phi^{(n-1)}_{\omega}(x, z)\right) \nabla_x \phi^{(n-1)}_{\omega}(x, z)
+    \end{eqnarray}
+    
+    Using the fact that $\nabla_x \phi_{\omega}(x, \phi^{(n-1)}_{\omega}(x, z)) = I, \nabla_z \phi_{\omega}\left(x, \phi^{(n-1)}_{\omega}(x, z)\right) = \nabla F_{\omega_{n}}(\phi^{(n-1)}_{\omega}(x, z))$ and the inductive hypothesis for $\nabla_x \phi^{(n-1)}_{\omega}(x, z), $ we obtain
+    \begin{eqnarray*}
+        \nabla_z \phi^{(n)}_{\omega}(x,z) &=& I - \gamma \nabla F_{\omega_{n}}(\phi^{(n-1)}_{\omega}(x, z)) \sum\limits_{j=0}^{n-2} (-\gamma)^j \nabla F_{\omega_{n-1}}\left(\phi^{(n-2)}_{\omega}(x, z)\right) \cdot ... \cdot \nabla F_{\omega_{n-j}}\left(\phi^{(n-1-j)}_{\omega}(x, z)\right) \\
+        &=& I + \sum\limits_{j=0}^{n-2} (-\gamma)^{j+1} \nabla F_{\omega_{n-1}}(\phi^{(n)}_{\omega}(x, z)) \nabla F_{\omega_{n-1}}\left(\phi^{(n-2)}_{\omega}(x, z)\right) \cdot ... \cdot \nabla F_{\omega_{n-j}}\left(\phi^{(n-1-j)}_{\omega}(x, z)\right) \\
+        &=& I + \sum\limits_{j=1}^{n-1} (-\gamma)^{j} \nabla F_{\omega_{n-1}}(\phi^{(n)}_{\omega}(x, z)) \nabla F_{\omega_{n-1}}\left(\phi^{(n-2)}_{\omega}(x, z)\right) \cdot ... \cdot \nabla F_{\omega_{n-j+1}}\left(\phi^{(n-j)}_{\omega}(x, z)\right) \\
+        &=& \sum\limits_{j=0}^{n-1} (-\gamma)^{j} \nabla F_{\omega_{n-1}}(\phi^{(n)}_{\omega}(x, z)) \nabla F_{\omega_{n-1}}\left(\phi^{(n-2)}_{\omega}(x, z)\right) \cdot ... \cdot \nabla F_{\omega_{n-j+1}}\left(\phi^{(n-j)}_{\omega}(x, z)\right)
+    \end{eqnarray*}
+    Thus, in order to compute 
+    $\nabla_{x} G(\omega,x^*)
+    = I-
+    \nabla \phi^{(n)}_{\omega}
+    (x^*, x^*)$, we first compute 
+    $\nabla \phi^{(n)}_{\omega}(x^*, x^*)$. Since $x^*$ is a 
+    stationary point, it is a fixed point of the operator 
+    $\phi^{(j)}_{\omega}(x^*, x^*) = x^*, \forall j \geq 0$. 
+    From chain rule, we have that
+    \begin{eqnarray}
+        \nabla \phi^{(n)}_{\omega}(x^*,x^*) &=& \nabla_z \phi^{(n)}_{\omega}(x^*, x^*) + \nabla_x \phi^{(n)}_{\omega}(x^*, x^*) \\
+        &=& (-\gamma)^{n} \prod_{j=1}^{n} \nabla F_{\omega_{j}}\left(x^*\right) + \sum\limits_{i=1}^{n-1} \prod\limits_{j=1}^{i} (-\gamma \nabla F_{\omega_{n-j}}(x^*)) \\
+        &=& \sum\limits_{i=1}^{n} \prod\limits_{j=1}^{i} (-\gamma \nabla F_{\omega_{n-j}}(x^*)) 
+    \end{eqnarray}
+    In order to find the maximum eigenvalue of the operator $\nabla \phi^{(n)}_{\omega}(x^*, x^*)$, we apply the sub-multiplicative property of the operator norm to get
+    \begin{eqnarray}
+        \left\|\sum\limits_{i=1}^{n} \prod\limits_{j=1}^{i} (-\gamma \nabla F_{\omega_{n-j}}(x^*))\right\|_{\text{op}} &\leq& \sum\limits_{i=1}^{n}\left\|\prod\limits_{j=1}^{i} (-\gamma \nabla F_{\omega_{n-j}}(x^*))\right\|_{\text{op}} \nonumber \\
+        &\leq& \sum\limits_{i=1}^{n}\prod\limits_{j=1}^{i} \|-\gamma \nabla F_{\omega_{n-j}}(x^*)\|_{\text{op}} \nonumber \\
+        &\leq& \sum\limits_{i=1}^{n}\gamma^i \prod\limits_{j=1}^{i}  L_{n-j} \\
+        &\leq& \sum\limits_{i=1}^{n} (\gamma L_{max})^i
+    \end{eqnarray}
+    where $L_i$ is the maximum eigenvalue of $\nabla F_i(x^*)$ and $L_{max}$ is the maximum over all eigenvalues of $\nabla F_i(x^*), \forall i\in[n]$. 
+    Since $\nabla G({\omega},x^*) = I - \nabla \phi^{(n)}_{\omega}(x_k^0, x^*),$ using the submultiplicative property of the operator norm we have that 
+    $\|\nabla G(\omega,x^*)\|_{\text{op}} 
+    \leq 1 + 
+    \|\nabla \phi^{(n)}_{\omega}(x_k^0, x^*)\|_{\text{op}}$ and thus the maximum eigenvalue of 
+    $\nabla G(\omega,x^*)$ is $L_{max}^{G} = 1 + \sum\limits_{i=1}^{n} (\gamma L_{max})^i$.
+\end{proof}
+
+We, next, provide the theorem establishing that the combination of the two heuristics lead to a refined bias of the order $\mathcal{O}\left(\gamma^3\right)$. 
+%{\Huge OTAN ftiaxeis ta panw ftiaxe kai ayto}
+%\begin{lemma}[Restatement of Lemma~\ref{lem: rr_1}]
+%Let $\lambda=0$ and Assumptions~\ref{assumt: sol_set_non_empty}--\ref{assumpt: 4th-moment bounded} hold.  
+%If $\gamma\le\gamma_{\max}$ (cf.\ Theorem~\ref{thm: convergence_rate}), then
+%\[
+%\mathrm{bias}(\texttt{Perturbed SGD-\RRresh})
+%=\limsup_{k\to\infty}\|\ex[x_k]-x^*\|
+%= C(x^*)\gamma+\mathcal{O}(\gamma^3).
+%\]
+%\end{lemma}
+\subsection{Higher-Order Terms of \RRresh\ bias\\(Lemma~\ref{lem: rr_1})}
+\begin{lemma}[Extended version of Lemma~\ref{lem: rr_1}]\label{lemma: convergence_of_x}
+Let $\lambda=0$ and Assumptions~\ref{assumt: sol_set_non_empty}--\ref{assumpt: 4th-moment bounded} hold.  
+If \texttt{Perturbed SGD-\RRresh} is run with $\gamma < \gamma_{max},$ it holds that
+\[       \mathrm{bias}(\texttt{Perturbed SGD-\RRresh})
+=\limsup_{k\to\infty}\|\ex[x_k]-x^*\|
+= C(x^*)\gamma+\mathcal{O}(\gamma^3).\]\[\Updownarrow\] \[\Expepgamma{x} = x_* + \gamma A + \mathcal{O}\left(\gamma^3\right)\]
+  
+    where $A = - \frac{1}{2} \nabla_{x} H(\omega,x^*)^{-1}\nabla^2 H(\omega,x^*)M \int_{\mathbb{R}^d} C(x) \pi_\gamma(dx), C = \Expe{\mathbb{U}_{\omega_{1^k}}^{\otimes 2}}$, $L_{max}^G = 1 + \sum\limits_{i=1}^{n} L_{max}^i$, $M = \nabla_{x} H(\omega,x^*)\otimes I + I \otimes \nabla_{x} H(\omega,x^*)-\gamma \nabla_{x} H(\omega,x^*)\otimes \nabla_{x} H(\omega,x^*)$ and the maximum step size is $\gamma_{max} = \gammaubbothrr$.
+\end{lemma}
+\begin{proof}
+    From a third order Taylor expansion of $G$ around $x_*,$ we have that
+    \begin{eqnarray}
+        H(\omega,x) = \nabla_{x} H(\omega,x^*) (x - x^*) + \frac{1}{2} \nabla^2 H(\omega,x^*) (x - x^*)^{\otimes2} + R_1(x), \forall x \in \mathbb{R}^d 
+    \end{eqnarray}
+    where the reminder $R_1(x)$ satisfies $\sup_{x\in\mathbb{R}^d}\left\{\frac{R_1(x)\|}{\|x - x^*\|^3}\right\} < +\infty$.
+    Taking expectation with respect to the invariant distribution $\pi_\gamma$ and using the fact that $\ex_{\pi_{\gamma}}\left[H(\omega,x)\right] = 0,$ we get 
+    \begin{eqnarray}
+        0 = \ex_{\pi_{\gamma}}\left[\nabla_{x} H(\omega,x^*) (x - x^*) + \frac{1}{2} \nabla^2 H(\omega,x^*) (x - x^*)^{\otimes2} + R_1(x)\right] 
+    \end{eqnarray}
+    From Lemma~\ref{lemma strongly monotone 4th-moment} and using Holder inequality and the fact that $\sup_{x\in\mathbb{R}^d}\left\{\frac{R_1(x)\|}{\|x - x^*\|^3}\right\} < +\infty$, we obtain
+    \begin{eqnarray}
+        \nabla_{x} H(\omega,x^*)\Expepgamma{x - x^*} + \frac{1}{2} \nabla^2 H(\omega,x^*)\int_{\mathbb{R}^d} (x - x^*)^{\otimes2}\pi_\gamma(dx) = \mathcal{O}\left(\gamma^3\right) \label{eq1_lemma}
+    \end{eqnarray}
+    Taking the second order Taylor of $G$ around $x^*$, we have that 
+    \begin{eqnarray}
+        x^1_0 - x^* = x_0^0 - x^* - \gamma \nabla_{x} H(\omega,x^*)(x_0^0 - x^*) + \gamma \mathbb{U}_1^k(x_0^0)+\gamma R_2(x^0_0) \label{eq2_lemma}
+    \end{eqnarray}
+    with $\mathcal{R}_2$ the second order reminder satisfying $\sup_{x\in\mathbb{R}^d}\left\{\frac{R_2(x)\|}{\|x - x^*\|^2}\right\} < +\infty$. 
+    From the second order moment of equation \eqref{eq2_lemma}, the unbiasedness of the noise $\mathbb{U}_k, \forall i, k \in \mathbb{N},$ and Theorem~\ref{lemma strongly monotone 4th-moment}, we have that
+    \begin{eqnarray}
+        \int_{\mathbb{R}^d} (x - x^*)^{\otimes2} \pi_\gamma(dx) &=& \left[I - \gamma \nabla_{x} H(\omega,x^*)\right] \int_{\mathbb{R}^d}(x - x^*)^{\otimes 2}\pi_\gamma(dx) \left[I - \gamma \nabla_{x} H(\omega,x^*)\right] \nonumber \\
+        && + \gamma^2 \int_{\mathbb{R}^d} C(x) \pi_\gamma(dx) + \mathcal{O}\left(\gamma^5\right)\nonumber
+    \end{eqnarray}
+    Rearranging the terms, we get
+    \begin{eqnarray}
+        M \int_{\mathbb{R}^d} (x - x^*)^{\otimes2} \pi_\gamma(dx) &=& \gamma \int_{\mathbb{R}^d} C(x) \pi_\gamma(dx) + \mathcal{O}\left(\gamma^3\right) \label{eq3_lemma}
+    \end{eqnarray}
+    where $M = \nabla_{x} H(\omega,x^*)\otimes I + I \otimes \nabla_{x} H(\omega,x^*)-\gamma \nabla_{x} H(\omega,x^*)\otimes \nabla_{x} H(\omega,x^*)$.
+    
+    We, next, show that the operator $M$ is invertible for the selected step size by proving that it is symmetric and positive definite. Let $\lambda_i, \forall i \in [d],$ be the eigenvalues of $\nabla_{x} H(\omega,x^*)$ with $\{u_i\}_{i\in[d]}$ the corresponding eigenvectors. Note that $I - \frac{\gamma}{2} \nabla_{x} H(\omega,x^*)$ has eigenvalues $(1-\frac{\gamma}{2} \lambda_i) > 0$ and thus for $\gamma < \frac{2}{\lambda_{max}(\nabla_{x} H(\omega,x_*))}$ it is symmetric positive definite on the same basis $\{u_i\}_{i\in[d]}$. Hence we can factor the operator $M$ as 
+    \begin{eqnarray}
+        M &=& \nabla_{x} H(\omega,x^*)\otimes I + I \otimes \nabla_{x} H(\omega,x^*)-\gamma \nabla_{x} H(\omega,x^*)\otimes \nabla_{x} H(\omega,x^*) \nonumber \\
+        &=& \nabla_{x} H(\omega,x^*)\otimes(I-\frac{\gamma}{2}\nabla_{x} H(\omega,x^*)) + (I - \frac{\gamma}{2} \nabla_{x} H(\omega,x^*)) \otimes \nabla_{x} H(\omega,x^*) \nonumber
+    \end{eqnarray}
+    Thus, the vectors $u_i \otimes u_j, \forall i, j\in[d]$ diagonalize $M$ with eigenvalues $\mu_{i, j} =\lambda_i (1-\gamma \lambda_j)+\lambda_j(1 - \gamma\lambda_i), \forall i, j\in[d]$. From Lemma~\ref{lemma: eigenvalues_operator}, we have that the maximum eigenvalue of $\nabla_{x} H(\omega,x^*)$ is $L_{max}^G = 1 + \sum\limits_{i=1}^{n} (\gamma L_{max})^i$ and hence for $\gamma < 1$ we have that $\gamma L_{max} \leq 1$ and hence $L_{max}^G < \Tilde{L}_{max}^G =: 1 + n$. Selecting the stepsize such that $\gamma < \frac{2}{n+1},$ it holds that $\mu_{i, j} > 0, \forall i, j\in[d],$ and thus $M$ is positive definite and invertible. 
+    Thus, multiplying \eqref{eq3_lemma} with $M^{-1}$ from the left, we get
+    \begin{eqnarray}
+        \int_{\mathbb{R}^d} (x - x^*)^{\otimes2} \pi_\gamma(dx) &=& \gamma M^{-1} \int_{\mathbb{R}^d} C(x) \pi_\gamma(dx) + \mathcal{O}\left(\gamma^3\right) \label{eq4_lemma}
+    \end{eqnarray}
+    Substituting \eqref{eq4_lemma} into \eqref{eq1_lemma} and rearranging the terms, we obtain
+    \begin{eqnarray}
+        \nabla_{x} H(\omega,x^*)\Expepgamma{x - x^*} = - \frac{\gamma}{2} \nabla^2 H(\omega,x^*)M \int_{\mathbb{R}^d} C(x) \pi_\gamma(dx) + \mathcal{O}\left(\gamma^3\right) \nonumber \\
+        \Rightarrow \Expepgamma{x - x^*} = - \frac{\gamma}{2} \nabla_{x} H(\omega,x^*)^{-1}\nabla^2 H(\omega,x^*)M \int_{\mathbb{R}^d} C(x) \pi_\gamma(dx) + \mathcal{O}\left(\gamma^3\right)
+    \end{eqnarray}
+    
+    Letting $A = - \frac{1}{2} \nabla_{x} H(\omega,x^*)^{-1}\nabla^2 H(\omega,x^*)M \int_{\mathbb{R}^d} C(x) \pi_\gamma(dx),$ we obtain 
+    \begin{eqnarray}
+        \Expepgamma{x} = x_* + \gamma A + \mathcal{O}\left(\gamma^3\right) 
+    \end{eqnarray}
+\end{proof}
+
+\subsection{Proof of Bias Refinements of \RRresh$\oplus$\RRrom\\ (Theorem~\ref{thm: rr_1_rr_2})}
+\begin{theorem}[Restatement of Theorem~\ref{thm: rr_1_rr_2}]
+Under the assumptions of Lemma~\ref{lem: rr_1}, Algorithm~\ref{alg:rrrom-rrresh} output satisfies
+\[\begin{aligned}
+&\text{Last-iterate version (line 9):} 
+&& \|\ex[x_k]-x^*\|\;\le\;c(1-\rho)^k+\mathcal{O}(\gamma^3), \\[0.5em]
+&\text{Averaged-iterate version (line 10):} 
+&& \Biggl\|\ex\!\left[\tfrac{1}{k}\sum_{m=1}^k x_m\right]-x^*\Biggr\|\;\le\;\tfrac{c/\rho}{k}+\mathcal{O}(\gamma^3).
+\end{aligned}\]
+where $\rho\in(0,1),\;c<\infty \text{ (cf.\ Theorem~\ref{thm: efficient_stats}).}$
+\end{theorem}
+
+\begin{proof}
+    From Lemma~\ref{lemma: convergence_of_x}, we have that the iterates $x_{\gamma, k}$ of Perturbed SGD--\RRresh with step size $\gamma$ satisfy
+    \begin{eqnarray}
+        \mathbb{E}_{x_{\gamma} \sim \pi_{\gamma}} [x] = x_* + \gamma A + \mathcal{O}\left(\gamma^3\right) \label{eq_1_thm1}
+    \end{eqnarray}
+    Similarly the iterates $(x_{2\gamma,k})_{k}$ of SGD-RR with step size $2\gamma$ satisfy
+    \begin{eqnarray}
+        \mathbb{E}_{x_{2\gamma} \sim \pi_{2\gamma}} [x_{2\gamma}] = x_* + 2\gamma A + \mathcal{O}\left(\gamma^3\right) \label{eq_2_thm1}
+    \end{eqnarray}
+    Thus, from \eqref{eq_1_thm1}, \eqref{eq_2_thm1} we can compute the Richardson Romberg iterates as
+    \begin{eqnarray}
+        \left(\mathbb{E}_{x_{\gamma} \sim \pi_{\gamma}} [2x]-\mathbb{E}_{x_{2\gamma} \sim \pi_{2\gamma}} [x_{2\gamma}]\right) = \mathcal{O}\left(\gamma^3\right) \label{eq: romberg_reshuffling_dist}
+    \end{eqnarray}
+    Consider the test function $\ell(x) = x$. The function satisfies the assumptions in both Theorem~\ref{thm: efficient_stats_app},~\ref{thm: LLN_CLT_res}. Combining \eqref{eq: romberg_reshuffling_dist} with the rate that the iterates of the method tend to the limiting invariant distribution and the corresponding Central Limit Theorem from Theorems~\ref{thm: efficient_stats_app},~\ref{thm: LLN_CLT_res}, we obtain
+    \begin{eqnarray}
+        && \|\ex[x_k]-x^*\|\;\le\;c(1-\rho)^k+\mathcal{O}(\gamma^3), \\
+        && \Biggl\|\ex\!\left[\tfrac{1}{k}\sum_{m=1}^k x_m\right]-x^*\Biggr\|\;\le\;\tfrac{c/\rho}{k}+\mathcal{O}(\gamma^3).
+    \end{eqnarray}
+    where $\rho \in (0, 1), c\in(0, +\infty)$. 
+\end{proof}
+
+% {\color{red}
+% \section*{Appendix X: Why Gaussian Smoothing Is a Theoretical Artifact (and Not Algorithmically Essential)}
+
+% In this appendix we clarify the mathematical role of the Gaussian preprocessing step used in our analysis of the $\RRresh$ and $\RRrom$ heuristics. The purpose of this step is purely technical: it enables the use of Harris–Lyapunov theory in order to establish geometric ergodicity and global CLTs for the epoch-level Markov kernel. Crucially, the smoothing does not affect the debiasing mechanism nor the practical behavior of the algorithm.
+
+% \subsection*{X.1\; Why smoothing is introduced in the analysis}
+
+% The reshuffled (unsmoothed) SGD update induces a discrete transition kernel
+% \[
+% P_0(x,A)
+% =
+% \frac{1}{n!}\sum_{\pi\in S_n} \mathbf 1\{\Phi(x,\pi)\in A\},
+% \]
+% where $\Phi(x,\pi)$ denotes the $n$-step composition of the component updates under permutation $\pi$.
+
+% The kernel $P_0$ is Feller, since $x\mapsto \Phi(x,\pi)$ is continuous for each $\pi$.  
+% However, $P_0$ is not irreducible: for each $x$, the support of $P_0(x,\cdot)$ consists of at most $n!$ atoms.  
+% As is standard in Markov-chain theory, this lack of absolute continuity prevents any minorization condition of the form
+% \[
+% P_0(x,A)\;\ge\;\delta\,\nu(A) \qquad\text{for } x\in C,
+% \]
+% where $C$ is a small set and $\nu$ a nontrivial reference measure.  
+% Without such a condition, the Harris–Lyapunov theorem cannot be applied, and geometric ergodicity as well as global CLTs are out of reach.
+
+% To bypass only this technical obstruction, we consider the smoothed kernel
+% \[
+% P_\sigma(x,dy)
+% =
+% \int \varphi_\sigma\bigl(y- \Phi(x,\pi)\bigr)\, d\pi,
+% \]
+% where $\varphi_\sigma$ is the density of a nondegenerate Gaussian.  
+% This kernel has a strictly positive density on $\mathbb{R}^d\times\mathbb{R}^d$, which directly implies minorization, geometric ergodicity, and the existence of LLN/CLT limits for scalar observables.
+
+% \subsection*{X.2\; Smoothing is asymptotically negligible}
+
+% The smoothing parameter can be chosen as $\sigma_{\mathrm{PreProcess}}^2 = O(\gamma^p)$ for any $p\ge 2$.  
+% Thus its contribution is of strictly lower asymptotic order than the bias terms present in the $\RRresh$ expansion.  
+% In particular, the stationary second and fourth moments of the $\RRresh$ chain satisfy
+% \[
+% M_2 = \Theta(\gamma^2),
+% \qquad
+% M_4 = \Theta(\gamma^2),
+% \]
+% and these scalings are unchanged when convolved with a Gaussian of variance $O(\gamma^p)$, $p\ge 2$.  
+% Since the $\RRrom$ extrapolation relies exactly on these moments in the epoch-level Taylor expansion, the smoothing has no effect on the cancellation leading to the $O(\gamma^3)$ bias.
+
+% \subsection*{X.3\; The unsmoothed chain still possesses invariant measures}
+
+% Removing the smoothing leaves the kernel $P_0$ Feller.  
+% Moreover, the drift inequality
+% \[
+% \mathbb{E}[V(X_{k+1})\mid X_k=x]
+% \;\le\;
+% \lambda\, V(x) + b
+% \quad\text{for some } \lambda<1
+% \]
+% continues to hold for $V(x)=1+\|x\|^2$.  
+% Hence the empirical measures
+% \[
+% \mu_T
+% =
+% \frac{1}{T}\sum_{k=0}^{T-1} \delta_{X_k}
+% \]
+% form a tight sequence for any initialization, and the Krylov–Bogolyubov theorem guarantees the existence of at least one invariant probability measure of $P_0$.
+
+% However, $P_0$ fails minorization because for almost all $z\in\mathbb{R}^d$,
+% \[
+% P_0(x,\{z\}) = 0,
+% \]
+% so no uniform lower bound against a nontrivial reference measure can be obtained.  
+% Consequently, uniqueness of the invariant measure and exponential mixing cannot be established with the classical Harris theorem.  
+% The chain may possess multiple invariant measures, and no global CLT or spectral-gap bound can be asserted in the unsmoothed setting.
+
+% \subsection*{X.4\; Bias cancellation persists without smoothing}
+
+% Despite the lack of a global ergodic theorem, the debiasing mechanism of $\RRresh\oplus \RRrom$ is unaffected.  
+% The key point is that the bias expansion depends solely on the deterministic epoch-level map
+% \[
+% T_\gamma(x) := \mathbb{E}_{\pi}[\Phi(x,\pi)],
+% \]
+% and on its second- and third-order Taylor coefficients at the solution $x^\ast$.  
+% These quantities are independent of the smoothing, and the cancellation of the linear term continues to hold for the unsmoothed dynamics.
+
+% More precisely, the Krylov–Bogolyubov theorem ensures that every trajectory has at least one limit point in the set of invariant measures.  
+% If $\pi_\gamma^{(j)}$ is any such invariant measure, then the stationary bias expansion for $\RRresh$ and the cancellation induced by $\RRrom$ both apply to $\pi_\gamma^{(j)}$, because they depend only on the local Taylor expansion of $T_\gamma$.  
+% Thus each invariant “cluster’’ exhibits the same $O(\gamma^3)$ bias.
+
+% \subsection*{X.5\; Why smoothing cannot be removed in the total-variation theory}
+
+% We record a simple lemma illustrating the obstruction to letting $\sigma \downarrow 0$ in total variation.
+
+% \begin{lemma}
+% Let $\mu$ be a probability measure on $\mathbb{R}^d$ with an atom at $x_0$, i.e., $\mu(\{x_0\})=p>0$.  
+% For $\sigma>0$, define $\mu_\sigma := \mu * \varphi_\sigma$ where $\varphi_\sigma$ is the density of a nondegenerate Gaussian.  
+% Then for every $\sigma>0$,
+% \[
+% \|\mu_\sigma - \mu\|_{\mathrm{TV}} \ge p,
+% \]
+% and therefore $\|\mu_\sigma - \mu\|_{\mathrm{TV}} \not\to 0$ as $\sigma\downarrow 0$.
+% \end{lemma}
+
+% \begin{proof}
+% Since $\mu_\sigma$ is absolutely continuous with respect to Lebesgue measure, $\mu_\sigma(\{x_0\}) = 0$, while $\mu(\{x_0\})=p>0$.  
+% Evaluating the definition of total variation distance on the set $\{x_0\}$ gives the claim.
+% \end{proof}
+
+% Since the reshuffling kernel $P_0(x,\cdot)$ always contains finitely many atoms, this lemma shows that convolution cannot approach $P_0$ in total variation.  
+% Therefore, the minorization constant of $P_\sigma$ must vanish as $\sigma\downarrow 0$, and Harris ergodicity cannot be recovered in the limit.
+
+% \subsection*{X.6\; Practical implications}
+
+% Modern implementations of SGD already incorporate continuous perturbations due to floating-point rounding, GPU nondeterminism, stochastic data pipelines, and, in some settings, explicit Gaussian noise (e.g., DP-SGD).  
+% Thus the smoothed model $P_\sigma$ more closely reflects actual hardware behavior than the idealized discrete kernel $P_0$, and explains why removing the smoothing has no observable effect in experiments.
+
+% \bigskip
+% In summary, Gaussian smoothing is purely a mathematical device to enable global ergodicity results; it has negligible asymptotic effect, is naturally present in practice, and does not influence the $\RRresh\oplus\RRrom$ bias cancellation responsible for the $O(\gamma^3)$ improvement.
+
+
+% \section*{What If Gaussian Smoothing Is Avoided ?}
+% We thank the reviewer for prompting a deeper explanation.  
+% This appendix provides a mathematically precise discussion of (i) why Gaussian smoothing is introduced in the analysis, (ii) why it has no algorithmic impact, and (iii) what changes mathematically if one removes it.  
+% We also include a self-contained lemma and proposition demonstrating why minorization cannot survive the limit \(\sigma \!\downarrow\! 0\), thereby explaining why smoothing is essential for Harris-ergodicity but not for the debiasing mechanism via \(RR_1\) and \(RR_2\).
+
+% \bigskip
+
+% \noindent
+% \textbf{1. Why smoothing is needed only for Harris–Lyapunov analysis}
+
+% The Random Reshuffling (\(RR_1\)) update induces a \emph{discrete} transition kernel
+% \[
+% P_0(x,A) \;=\; \frac{1}{n!}\sum_{\pi\in S_n} \mathbf{1}\{\Phi(x,\pi)\in A\},
+% \]
+% which is Feller but not irreducible: for each \(x\), \(P_0(x,\cdot)\) is supported on at most \(n!\) atoms.  Therefore:
+
+% \begin{itemize}
+% \item The kernel \(P_0\) fails minorization.
+% \item As a result, the standard Harris–Lyapunov theorem cannot be applied to obtain geometric ergodicity or a global CLT.
+% \end{itemize}
+
+% To circumvent this purely technical obstacle, we consider a \emph{smoothed} kernel:
+% \[
+% P_\sigma(x, dy) \;=\; \int \varphi_\sigma\bigl(y - \Phi(x,\pi)\bigr)\, d\pi,
+% \]
+% where \(\varphi_\sigma\) is the density of a non-degenerate Gaussian \(\mathcal{N}(0,\sigma^2 I_d)\).  This kernel is everywhere strictly positive, which ensures:
+
+% \begin{enumerate}
+% \item a valid minorization condition,
+% \item geometric Harris ergodicity in total variation distance,
+% \item and global LLN/CLT results.
+% \end{enumerate}
+
+% Importantly, the smoothing is introduced only for the purpose of analysis: the actual algorithm remains identical to unsmoothed \(RR_1\).
+
+% \bigskip
+
+% \noindent
+% \textbf{2. Why the smoothing is asymptotically negligible}
+
+% We may choose the smoothing variance to satisfy
+% \[
+% \sigma_{\mathrm{PreProcess}}^2 = O(\gamma^p), \quad p \ge 2.
+% \]
+
+% Thus the smoothing noise can be arbitrarily smaller than all bias terms in the RR analysis. In particular:
+
+% \begin{itemize}
+% \item The \(RR_1\) dynamics alone already yields stationary moments  
+% \[
+% M_2 = \Theta(\gamma^2), \qquad M_4 = \Theta(\gamma^2),
+% \]
+% and these stay unchanged under smoothing with \(\sigma^2 = O(\gamma^p)\).
+% \item The \(RR_2\) extrapolation relies only on these moments to cancel the linear term in the bias expansion.
+% \end{itemize}
+
+% Hence:
+
+% \[
+% \text{Smoothing does not affect the cubic-order debiasing.}
+% \]
+
+% The bias cancellation arises from the deterministic epoch-map Taylor expansion — not from the added noise.
+
+% Empirically, across realistic datasets, the added perturbation has negligible effect; formal understanding of its size-dependence remains an interesting future direction.
+
+% \bigskip
+
+% \noindent
+% \textbf{3. What changes mathematically if smoothing is removed}
+
+% Without smoothing:
+
+% \begin{itemize}
+% \item \(P_0\) remains Feller.
+% \item A Lyapunov drift condition still holds:
+% \[
+% \mathbb{E}[V(X_{k+1}) \mid X_k = x] \le \lambda V(x) + b.
+% \]
+% \item By the Krylov–Bogolyubov theorem, at least one invariant measure exists.
+% \item Time averages obey an LLN, ensuring that empirical averages converge (subsequentially) to some invariant distribution.
+% \end{itemize}
+
+% What we lose is:
+
+% \begin{itemize}
+% \item Minorization (since \(P_0(x,\cdot)\) is atomic);
+% \item hence geometric ergodicity, spectral-gap bounds, and CLTs are no longer guaranteed.
+% \end{itemize}
+
+% Thus the chain may remain stable, but uniqueness of the invariant measure and exponential mixing cannot be established without smoothing.
+
+% \bigskip
+
+% \noindent
+% \textbf{4. The bias cancellation from \(RR_1 \oplus RR_2\) remains valid even without smoothing}
+
+% The cubic-order improvement from \(RR_2\) emerges from the deterministic second- and third-order expansion of the epoch map
+% \[
+% T_\gamma(x) = \mathbb{E}_\pi[\Phi(x,\pi)],
+% \]
+% not from any stochastic noise. Since smoothing does not change \(T_\gamma\), the cancellation mechanism is unaffected.
+
+% More formally:
+
+% \begin{itemize}
+% \item By Krylov–Bogolyubov, for any initial condition the Cesàro averages of the chain converge (weakly) to some invariant distribution \(\pi_\gamma^{(j)}\).
+% \item For each such invariant measure, the Taylor expansion yields the usual bias expansion with a linear and cubic term.
+% \item Applying \(RR_2\) cancels the linear term, leaving only the cubic bias — independently of smoothing or of uniqueness of the invariant measure.
+% \end{itemize}
+
+% \bigskip
+
+% \noindent
+% **5. Proof that minorization cannot survive as \(\sigma \to 0\)**
+
+% \begin{lemma}
+% Let \(\mu\) be a probability measure on \(\mathbb{R}^d\) that has an atom, i.e.\ there exists \(x_0\) with \(\mu(\{x_0\}) = p > 0\).  
+% Define the Gaussian-smoothed measure \(\mu_\sigma = \mu * \varphi_\sigma\). Then for every \(\sigma>0\),
+% \[
+% \|\mu_\sigma - \mu\|_{\mathrm{TV}} \ge p,
+% \]
+% and hence
+% \[
+% \|\mu_\sigma - \mu\|_{\mathrm{TV}} \not\to 0 \quad \text{as } \sigma\downarrow 0.
+% \]
+% \end{lemma}
+
+% \begin{proof}
+% By definition of total variation,
+% \[
+% \|\mu - \nu\|_{\mathrm{TV}} = \sup_{A} |\mu(A) - \nu(A)|.
+% \]
+% Pick \(A = \{x_0\}\). Then \(\mu(A)=p\), while \(\mu_\sigma(A)=0\). Therefore
+% \[
+% \|\mu_\sigma - \mu\|_{\mathrm{TV}} \ge |0 - p| = p.
+% \]
+% \end{proof}
+
+% \begin{proposition}
+% Assume the smoothed transition kernel \(P_\sigma\) satisfies a minorization condition
+% \[
+% P_\sigma(x,A) \ge \varepsilon(\sigma)\, \nu_\sigma(A)
+% \]
+% on some set \(C\) with \(\nu_\sigma(C)>0\). Then necessarily
+% \[
+% \varepsilon(\sigma) \longrightarrow 0
+% \quad \text{as } \sigma\downarrow 0.
+% \]
+% Thus no uniform minorization can hold in the limit \(\sigma\to 0\).
+% \end{proposition}
+
+% \begin{proof}[Sketch]
+% Fix \(x_0\in C\) and consider a permutation \(\pi_0\). Let
+% \(A = \{\Phi(x_0,\pi_0)\}\). Under unsmoothed RR,
+% \(P_0(x_0, A) = 1/n! > 0\), but for any \(\sigma>0\),
+% \(P_\sigma(x_0, A)=0\) (Gaussian mixture is continuous).  
+% Next, consider shrinking balls \(A_r := B_r(\Phi(x_0,\pi_0))\). As \(r \downarrow 0\),  
+% \(P_0(x_0,A_r)\to 1/n!\), but \(P_\sigma(x_0,A_r)=O(r^d/\sigma^d)\). Hence the minorization coefficient \(\varepsilon(\sigma)\) must tend to zero as \(\sigma\to 0\).
+% \end{proof}
+
+% \bigskip
+
+% \noindent
+% \textbf{Summary.}  
+% Gaussian smoothing is used purely as a tool to establish global ergodicity and CLTs.  
+% It is not algorithmically necessary and does not influence the structural bias cancellation achieved by \(RR_1 \oplus RR_2\).  
+% Without smoothing the chain remains stable and admits invariant measures; with smoothing we additionally obtain uniqueness and mixing.  
+% Thus, smoothing is a theoretical convenience with negligible practical effect.
+% }

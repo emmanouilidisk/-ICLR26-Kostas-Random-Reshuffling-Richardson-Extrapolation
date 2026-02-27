@@ -1,0 +1,162 @@
+% !TEX root = ./iclr2026_conference.tex
+\newpage
+\section{Proof of Convergence Rate (MSE) of Perturbed SGD–\RRresh\\  (Theorem~\ref{thm: convergence_rate})}
+\label{app: convergence_rate}
+ Our first result concerns the \emph{Perturbed SGD–\RRresh} variant for $\lambda$-weak $\mu$-quasi strongly monotone VIPs.
+\begin{theorem}[Restatement of Theorem~\ref{thm: convergence_rate}]
+    Let Assumptions~\ref{assumt: sol_set_non_empty}-\ref{assumpt: lipschitz} hold. %If $\gamma \leq \gamma_{max}$, 
+    Then the iterates of {Perturbed SGD–\RRresh} satisfy for $\gamma \leq \gamma_{max}$,\vspace{-0.5em}
+    \begin{eqnarray}
+        \ex\left[\|x_{k+1}^0 - x_*\|^2\right] &\leq& \left(1 - \frac{\gamma  n\mu}{2}\right)^{k+1} \|x^0_0 - x^*\|^2 + \frac{8 n \gamma^2 L_{max}^2}{\mu^2} \sigma_*^2 + \frac{8\lambda}{\mu} \nonumber
+    \end{eqnarray}\vspace{-0.5em}
+   {\small where  $\sigma_*^2 = \frac{1}{n} \sum_{i=0}^{n-1} \|F_i(x^*)\|^2$ and $\gamma_{max} = \min\left\{\frac{1}{3nL_{max}}, \frac{\sqrt{1+6 \mu^2 L_{max}^2} -1}{12nL_{max}^2}\right\}$. }
+\end{theorem}
+
+We first provide some notation that will be necessary for establishing the proof of Theorem~\ref{thm: convergence_rate}. 
+Consider the epoch-wise update rule of {Perturbed SGD–\RRresh}
+\begin{eqnarray}
+    x_{k+1}^0 = x^n_{k} &=& x_k^{0} - \gamma \sum\limits_{i=0}^{n-1} F_{\omega_{k}^i}(x_k^i) - \gamma \noise_k \nonumber \\
+    &=& x_k^{0} - \gamma G_{\omega_k}(x_k^0) - \gamma \noise_k \label{epoch_wise_update}
+\end{eqnarray}
+where $G_{\omega_k}(x_k^0) := \sum\limits_{i=0}^{n-1} F_{\omega_{k}^i}(x_k^i)$ denotes the epoch-wise operator used to update the epoch-level iterates $(x_k)_{k\geq 0}$. 
+
+
+\subsection{Preparatory Lemmas \& Propositions}
+With this notation at hand, we proceed in proving two Lemmas that are necessary for deriving the rate of convergence of the Theorem~\ref{thm: convergence_rate}. 
+In the first lemma, following the high-level intuition that one epoch of random reshuffling with step size $\gamma$ progresses the underlying dynamics approximately equal to one step of the deterministic GD with step size $\gamma' = n \gamma$, in the first lemma we bound the ``progress" that the deterministic algorithm makes in one step. 
+
+\begin{lemma}
+\label{lem: bound_on_deter}
+    Let Assumptions~\ref{assumt: sol_set_non_empty}-\ref{assumpt: lipschitz} hold. For any $x^*\in \mathcal{X}^*$, the iterates of {Perturbed SGD–\RRresh} satisfy that
+    \begin{eqnarray}
+        \exof{\left\|x_{k+1} - x^* - \gamma n F(x_k)\right\|^2\given\filter_k} &\leq& \left[(1 - \gamma n\mu)^2 + \gamma^2 n^2 L_{max}^2\right] \|x_k - x^*\|^2 + 2 \gamma n \lambda \nonumber
+    \end{eqnarray}
+\end{lemma}
+\begin{proof}
+    For any fixed $x^*\in \mathcal{X}^*$, it holds that 
+    \begin{eqnarray}
+        \left\|x_{k+1} - x^* - \gamma n F(x_k)\right\|^2 &=& \|x_k - x^*\|^2 - 2 \gamma n\langle x_k - x^*, F(x_k)\rangle + \gamma^2 n^2 \|F(x_k)\|^2 \nonumber\\
+        &\leq& \|x_k - x^*\|^2  - 2 \gamma n\mu \|x_k - x^*\|^2  + 2 \gamma n \lambda + \gamma^2 n^2\| F(x_k)\|^2 \nonumber \\
+        &\leq& (1 - 2 \gamma n\mu) \|x^{0}_k - x^*\|^2 + 2 \gamma n \lambda + \gamma^2 n^2\| F(x_k)\|^2\nonumber \\
+        &\stackrel{\text{Assumption } \ref{assumpt: lipschitz}}{\leq}& (1 - 2 \gamma n\mu +\gamma^2 n^2 L_{max}^2) \|x_k - x^*\|^2 + 2 \gamma n \lambda \label{eq: bound_deterministic} 
+    \end{eqnarray}
+    Taking expectation condition on the filtration $\filter_k$, gives
+    \begin{eqnarray}
+       \exof{\left\|x_{k+1} - x^* - \gamma n F(x_k)\right\|^2\given\filter_k} &\leq& (1 - 2 \gamma n\mu +\gamma^2 n^2 L_{max}^2) \|x_k - x^*\|^2 + 2 \gamma n \lambda \nonumber \\
+       &\leq& \left[(1 - \gamma n\mu)^2 + \gamma^2 n^2 L_{max}^2\right] \|x_k - x^*\|^2 + 2 \gamma n \lambda \nonumber
+    \end{eqnarray}
+\end{proof}
+
+Having an expression for the progress made by the deterministic counterpart of {Perturbed SGD–\RRresh}, we next aim to bound how large the deviation of the two algorithms becomes inside an epoch. To do so, we bound the sum of the distances of the iterates obtain by {Perturbed SGD–\RRresh} from the start of the epoch, which corresponds to the fictitious iterate of our comparator deterministic counterpart. The following lemma provides an upper bound dependent on the distance of the current epoch-level iterate from the solution and the variance at the optimum. 
+\begin{lemma}
+\label{lem: bound_on_stochastic_part}
+    Let Assumptions~\ref{assumt: sol_set_non_empty},~\ref{assumpt: lipschitz} hold. If {Perturbed SGD–\RRresh} is run with step size $\gamma \leq \frac{1}{\sqrt{3n(n-1)}L_{max}}$, then it holds that
+    \begin{eqnarray}
+        \exof{\sum_{i=1}^{n-1}\left\|x_k^i - x_k^0\right\|^2\given\filter_k} &\leq& 6 n^3 \gamma^2L_{max}^2 \norm{x_k^0 - x^*}^2 + 2 n^2 \gamma^2 \sigma_*^2 \nonumber
+    \end{eqnarray}
+\end{lemma}
+\begin{proof}
+From the epoch-level update \eqref{epoch_wise_update}, it holds 
+    \begin{eqnarray}
+        \|x^i_k - x_k^0\|^2 &=& \gamma^2 i^2 \left\|\frac{1}{i} \sum\limits_{j=0}^{i-1} F_{\omega_k^j}(x^j_k)\right\|^2 \nonumber\\
+    &\stackrel{\eqref{ineq1}}{\leq}& 3\gamma^2 i \sum\limits_{j=0}^{i-1} \norm{F_{\omega_k^j}  (x_k^j)-F_{\omega_k^j} (x_k^0)}^2  + 3\gamma^2 i^2 \norm{\frac{1}{i}\sum\limits_{j=0}^{i-1} F_{\omega_k^j} (x_k^0)-F (x_k^0)}^2 \nonumber \\
+    && + 3\gamma^2 i^2 \norm{F(x_k^0)}^2\nonumber\\
+    &\stackrel{\text{Assumption } \ref{assumpt: lipschitz}}{\leq}& 3\gamma^2 L_{max}^2 i\sum\limits_{j=0}^{i-1} \norm{x_k^j-x_k^0}^2 + 3\gamma^2 i^2 \norm{\frac{1}{i}\sum\limits_{j=0}^{i-1} F_{\omega_k^j} (x_k^0)-F (x_k^0)}^2 \nonumber \\
+    && + 3\gamma^2 i^2 \norm{F(x_k^0)}^2 \nonumber
+    \end{eqnarray}
+    where at the last step we have used the Lipschitz property of the operators $F_i, \forall i \in [n]$. 
+    Taking expectation condition on the filtration $\mathcal{F}_k$, we get
+    \begin{eqnarray}
+        \Expep{\norm{x_k^i - x_k^0}^2} &\leq& 3\gamma^2 L_{max}^2 i\Expep{\sum\limits_{j=0}^{i-1} \norm{x_k^j-x_k^0}^2} \nonumber \\ 
+        && + 3\gamma^2 i^2 \Expep{\norm{\frac{1}{i}\sum\limits_{j=0}^{i-1} F_{\omega_k^j} (x_k^0)-F (x_k^0)}^2} + 3\gamma^2 i^2 \norm{F(x_k^0)}^2 \label{eq: lemma_for_conv_rate_eq1}
+    \end{eqnarray}
+    From Lemma A.3 in \citep{emmanouilidis2024stochastic}, it holds for $A = \frac{2}{n} \sum_{i=0}^{n-1} L_i^2$, $\sigma_*^2 = \frac{1}{n} \sum_{i=0}^{n-1} \|F_i(x^*)\|^2$ and $\forall i \in [n]$ that
+    \begin{eqnarray}
+        i^2 \Expep{\norm{\frac{1}{i}\sum\limits_{j=0}^{i-1} F_{\omega_k^j} (x_k^0)-F (x_k^0)}^2} &\leq& \frac{i(n-i)}{n-1} \left(A \|x_k^0 - x^*\|^2 +2 \sigma_*^2\right) \label{eq: lemma_for_conv_rate_eq2}   
+    \end{eqnarray} 
+    From inequality \eqref{eq: lemma_for_conv_rate_eq2} and \eqref{eq: lemma_for_conv_rate_eq1}, thus, we obtain
+    \begin{eqnarray}
+            \Expep{\norm{x_k^i - x_k^0}^2} &\leq& 3\gamma^2 L_{max}^2 i \Expep{\sum\limits_{j=0}^{i-1} \norm{x_k^i-x_k^0}^2} + 3 \gamma^2 \frac{i(n-i)}{n-1} A\norm{x_k^0 - x^*}^2 \nonumber \\
+            && + 6\gamma^2 \frac{i(n-i)}{n-1} \sigma_*^2 + 3\gamma^2 i^2 \norm{F(x_k^0)}^2 \label{eq: lemma_for_conv_rate_eq4} 
+    \end{eqnarray}
+    By summing over $0\leq i \leq n-1$ we have that 
+    \begin{eqnarray}
+        \sum_{i=0}^{n-1} \Expep{\norm{x_k^i - x_k^0}^2} &\leq& 3\gamma^2 L_{max}^2\frac{n(n-1)}{2} \sum_{i=0}^{n-1} \Expep{\norm{x_k^i - x_k^0}^2} + \gamma^2 A \frac{n(n+1)}{2} \norm{x_k^0 - x^*}^2 \nonumber \\
+        && + \gamma^2 n(n+1)\sigma_*^2 + \frac{\gamma^2n(n-1)(2n-1)}{2} \norm{F(x_k^0)}^2, \label{eq: lemma_for_conv_rate_eq5}
+    \end{eqnarray}
+    where we used the facts 
+        \begin{eqnarray}
+    \sum_{i=0}^{n-1} i = \frac{n(n-1)}{2}, \quad \sum_{i=0}^{n-1} i^2  = \frac{n(n-1)(2n-1)}{6}, \quad \sum_{i=0}^{n-1} \frac{i(n-i)}{n-1} = \frac{n(n+1)}{6} \nonumber.
+    \end{eqnarray}
+    For $\gamma \leq \frac{1}{\sqrt{3n(n-1)}L_{max}}$, rearranging the terms in \eqref{eq: lemma_for_conv_rate_eq5} we obtain
+    \begin{eqnarray}
+        \sum_{i=0}^{n-1} \Expep{\norm{x_k^i - x_k^0}^2} &\leq& \gamma^2 n(n+1) A \norm{x_k^0 - x^*}^2 + 2 n(n+1) \gamma^2\sigma_*^2 \nonumber \\
+       && +n(n-1)(2n-1) \gamma^2\norm{F(x_k^0)}^2\nonumber \\ 
+       &\stackrel{\text{Assumption }\ref{assumpt: lipschitz}}{\leq}& 2\gamma^2 n^2 (A+nL^2) \norm{x_k^0 - x^*}^2  + 2 n^2 \gamma^2\sigma_*^2 \nonumber \\
+       &\stackrel{A \leq 2 L_{max}^2}{\leq}& 6n^3 \gamma^2 L_{max}^2 \norm{x_k^0 - x^*}^2  + 2 n^2 \gamma^2\sigma_*^2 \nonumber
+    \end{eqnarray}
+\end{proof}
+
+In the preceding subsection, we established a series of preparatory lemmas. We now combine these ingredients into a unified elementwise argument to prove Theorem~\ref{thm: convergence_rate}.
+\subsection{Assembling the Lemmas: Proof of Theorem \ref{thm: convergence_rate}}
+\label{app: thm: convergence_rate}
+In this section, we provide the proof of Theorem~\ref{thm: convergence_rate}, establishing linear convergence of {Perturbed SGD–\RRresh} to a neighbourhood of the solution. The proof technique leverages the interpretation that one epoch of {Perturbed SGD–\RRresh} with sufficiently small step size $\gamma > 0$ is equivalent to one step of the gradient descent with step size $\gamma' = n \gamma$, as the iterates of {Perturbed SGD–\RRresh} inside the epoch do not change drastically. To account for the deviation of the iterates from the initial state $x_k^0$ inside the epoch, we have upper bounded the sum of the corresponding distances in Lemma~\ref{lem: bound_on_stochastic_part}. Thus, using the combining the bound on the progress made by gradient descent from Lemma~\ref{lem: bound_on_deter} with the potential ``deviation" between the two algorithms we establish the rate of convergence of the method. 
+\begin{proof}
+Using the update rule of {Perturbed SGD–\RRresh}, we have that:
+\begin{eqnarray}
+		x_{k+1}^{0} &=& x^{n-1}_k - \gamma F_{\omega^k_{n-1}}(x^{n-1}_k) - \gamma \mathbb{U}_k \nonumber\\
+		&\stackrel{}{=}\;& x_k^0 -\gamma \sum_{i=0}^{n-1} F_{\omega_k^i}(x_k^i) - \gamma \mathbb{U}_k \nonumber \\
+		&=& x^{0}_k -\gamma  n F(x_k^0) - \gamma \sum_{i=0}^{n-1} \left(F_{\omega_k^i}(x_k^i) - F_{\omega_k^i}(x_k)\right) - \gamma \mathbb{U}_k \label{p1_1}
+\end{eqnarray}
+where the last step we used the fact that $\gamma n F(x_k^0) = \gamma \sum \limits_{i=0}^{n-1} F_{\omega^k_{i-1}}(x_k^0)$ and the finite-sum structure of the operator $F$.
+It holds, thus, that 
+\begin{eqnarray}
+    \|x_{k+1}^{0} - x^*\|^2 &=& \left\|x_k^0 - x^* - \gamma  n F(x_k^0) - \gamma \sum_{i=0}^{n-1} (F_{\omega_k^i}(x_k^{i}) - F_{\omega_k^i}^k(x_k^0)) - \gamma \mathbb{U}_k\right\|^2 \label{eq: conv_rate_eq2}
+\end{eqnarray}
+From Young's inequality, the right-hand side (RHS) of \eqref{eq: conv_rate_eq2} can be bounded as follows
+\begin{eqnarray}
+    \|x_{k+1}^{0} - x^*\|^2 &\leq& \frac{\left\|x_k^0 - x^* - \gamma n F(x_k^0) \right\|^2}{1 - \gamma n\mu} +\frac{\gamma}{n\mu} \left\|\sum_{i=0}^{n-1}(F_{\omega_k^i}(x_k^i) - F_{\omega_k^i}^k(x_k^0)) + \mathbb{U}_k\right\|^2\nonumber \\
+    &\stackrel{\eqref{ineq1}}{\leq}& \frac{\left\|x_k^0 - x^* - \gamma n F(x_k^0) \right\|^2}{1 - \gamma  n\mu} +\frac{2\gamma}{n\mu} \left\|\sum_{i=0}^{n-1} F_{\omega_k^i}(x_k^i) - F_{\omega_k^i}(x_k^0) \right\|^2 + \frac{2 \gamma}{n \mu} \|\mathbb{U}_k\|^2 \nonumber\\
+    &\stackrel{\eqref{ineq1}}{\leq}& \frac{\left\|x_k^0 - x^* - \gamma  n F(x_k^0) \right\|^2}{1 - \gamma  n\mu} + \frac{2\gamma}{\mu} \sum_{i=0}^{n-1}\left\|F_{\omega_k^i}(x_k^i) - F_{\omega_k^i}(x_k^0)\right\|^2 + \frac{2\gamma}{n\mu} \left\|\mathbb{U}_k\right\|^2 \nonumber
+\end{eqnarray}
+
+Applying the Lipschitz property of the operators, we obtain
+\begin{eqnarray}
+    \|x_{k+1}^{0} - x^*\|^2 &\leq& \frac{\left\|x_k^0 - x^* - \gamma  n F(x_k^0) \right\|^2}{1 - \gamma  n\mu} + \frac{2\gamma L_{max}^2}{\mu} \sum_{i=1}^{n-1}\left\|x_k^i - x_k^0\right\|^2 +\frac{2\gamma}{n\mu} \left\|\mathbb{U}_k\right\|^2 \label{eq: conv_rate_eq3}
+\end{eqnarray}
+
+Taking expectation condition on the filtration $\filter_k$ (history of $x_k^0$) and using the fact that the noise $\mathbb{U}_k \sim \mathcal{N}\left(0, \gamma^2n^2 \sigma_*^2\mathbb{I}\right)$, we get 
+ \begin{eqnarray}
+    \exof{\|x_{k+1}^{0} - x^*\|^2 \given \filter_k} &\leq& \frac{\exof{\left\|x_k^0 - x^* - \gamma  n F(x_k^0) \right\|^2\given \filter_k}}{1 - \gamma  n\mu}  + \frac{2\gamma L_{max}^2}{\mu} \exof{\sum_{i=1}^{n-1}\left\|x_k^i - x_k^0\right\|^2\given\filter_k} \nonumber \\
+    && + \frac{2n\gamma^3\sigma_*^2}{\mu}\label{eq: conv_rate_eq4}
+ \end{eqnarray}
+
+To complete the proof, it suffices to bound each term on the right-hand side of \eqref{eq: conv_rate_eq4}. From Lemmas~\ref{lem: bound_on_deter}, ~\ref{lem: bound_on_stochastic_part}, it holds for $\gamma \leq \frac{1}{\sqrt{3n(n-1)}L_{max}}$ that
+\begin{eqnarray}
+    \exof{\left\|x_k^0 - x^* - \gamma  n F(x_k^0) \right\|^2\given \filter_k} &\leq& \left[(1 - \gamma n\mu)^2 + \gamma^2 n^2 L_{max}^2\right] \|x_k - x^*\|^2 + 2 \gamma n \lambda \label{bound_on_T1}\\
+    \exof{\sum_{i=1}^{n-1}\left\|x_k^i - x_k^0\right\|^2\given\filter_k} &\leq& 4\gamma^2 n^3 L^2 \norm{x_k^0 - x^*}^2 \label{bound_on_T2}
+\end{eqnarray}
+
+Substituting \eqref{bound_on_T1} and \eqref{bound_on_T2} into \eqref{eq: conv_rate_eq4}, we obtain
+\begin{eqnarray}
+    \Expep{\|x_{k+1}^{0} - x^*\|^2} &\leq& \left(1 - \gamma n \mu + \frac{\gamma^2 n^2 L_{max}^2}{1 - \gamma n \mu} + \frac{8 n^3\gamma^3 L^2L_{max}^2}{\mu}\right) \|x_k^0 - x^*\|^2 \nonumber \\
+    && + \frac{4 n^2 \gamma^3 L_{max}^2}{\mu} \sigma_*^2 + \frac{2 n \gamma \lambda}{1 - \gamma n \mu} \quad \quad \label{p1_4}
+\end{eqnarray}
+
+Selecting the stepsize $\gamma \leq \min\left\{\frac{1}{2n\mu}, \frac{\sqrt{1+6L_{max}^2 \mu^2} -1}{12nL_{max}^2}\right\}$, we have that
+\begin{eqnarray}
+    \frac{1}{1 - \gamma n \mu} &\leq& 2 \nonumber \\
+    \text{ and } \left(1 - \gamma n \mu + \frac{\gamma^2 n^2 L_{max}^2}{1 - \gamma n \mu} + \frac{12 n^3\gamma^3 L_{max}^4}{\mu}\right) &\leq& \left(1 - \frac{\gamma n \mu}{2}\right) \nonumber
+\end{eqnarray}
+and thus substituting in \eqref{p1_4} we get
+\begin{eqnarray}
+    \Expep{\|x_{k+1}^{0} - x^*\|^2} &\leq& \left(1 - \frac{\gamma n \mu}{2}\right) \|x_k^0 - x^*\|^2 + \frac{4 n^2 \gamma^3 L_{max}^2}{\mu} \sigma_*^2 + 4 n \gamma \lambda \label{ineq_cond_res}
+\end{eqnarray}
+
+Taking expectation on both sides and using the tower property of expectations, we have that:
+\begin{eqnarray}
+        \Expe{\|x_{k+1}^{0} - x^*\|^2} &\leq& \left(1 - \frac{\gamma  n\mu}{2} \right) \|x_k^0 - x^*\|^2 + \frac{4 n^2 \gamma^3 L_{max}^2}{\mu} \sigma_*^2 + 8 n \gamma \lambda \nonumber\\
+     &\leq&\left(1 - \frac{\gamma  n\mu}{2}\right)^{k+1}\|x_k^0 - x^*\|^2 + \sum_{i=1}^k \left(1 - \gamma  n\mu\right)^i  \left(\frac{4 n^2 \gamma^3 L_{max}^2}{\mu} \sigma_*^2 + 8 n \gamma \lambda\right) \nonumber\\ 
+   &\leq& \left(1 - \frac{\gamma  n\mu}{2}\right)^{k+1} \|x^0_0 - x^*\|^2 + \frac{8 n \gamma^2 L_{max}^2}{\mu^2} \sigma_*^2 + \frac{8\lambda}{\mu} \nonumber
+\end{eqnarray}
+\end{proof}

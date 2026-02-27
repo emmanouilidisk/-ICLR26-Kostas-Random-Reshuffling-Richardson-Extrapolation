@@ -1,0 +1,472 @@
+% !TEX root = ./iclr2026_conference.tex
+\newpage
+
+\section{Proof of Ergodic Properties and Limit Theorems\\
+(Theorem~\ref{thm: efficient_stats}) \& (Theorem~\ref{thm: LLN_CLT_res})
+}
+%\section{Proof of Theorem~\ref{thm: efficient_stats}}
+\label{app: efficient_stats}
+We start by proving a series of properties that the induced Markov Chain satisfies, that will be necessary for proving the Theorem~\ref{thm: efficient_stats}. 
+%%%%%%%%%%%%%\subsection{Small \& Petite Sets}
+\begin{proposition} [Proposition 5.5.3 \citep{meyn2012markov}]\label{prop: petite_set}
+    If a set $C \in \mathcal{B}(\R^d)$ is $\nu_m$-small, then it is $\nu_{\delta_m}$-petite for some $\delta_m > 0$.
+\end{proposition}
+\noindent\textit{Intuition.}  
+The notions of \emph{small} and \emph{petite} sets are technical tools in Markov chain theory that help verify stability properties.  
+A set $C$ is called \emph{small} if, starting from $C$, the chain has a uniform positive chance of reaching any region of the state space within a fixed number of steps.  
+A \emph{petite} set is a weaker concept: instead of requiring such uniformity in a single time step, it allows the chance of hitting any region to be distributed over a random number of steps (via a probability distribution over times).  
+Thus, every small set is automatically petite, but the reverse is not true.  
+Intuitively, small sets guarantee “uniform mixing after a fixed horizon,” while petite sets guarantee the same effect “on average over time.”  
+
+% \begin{lemma}
+% \label{prop: bound prr epoch deviations}
+% Let Assumption~\ref{assumpt: lipschitz} hold. For any fixed $d \in [n]$ and $x \in \R^{d}$, the following inequality holds: 
+% \begin{eqnarray}
+% \mathbb{E}_{\pi \in \mathcal{S}} \left[\norm{\frac{1}{d} \sum_{j=0}^{d-1} F_{\omega_j}(x)- F(x)}^4 \right] &\le& 
+% \frac{1}{k^4}\left[
+% \frac{k}{n}\,S_4
+% +\frac{9k(k-1)}{n(n-1)}\Big(n^2(\operatorname{tr}\hat\Sigma)^2 - S_4\Big)
+% \right].
+% \end{eqnarray} 
+% \vspace{-.2cm}
+%  where $\mathcal{S}$ is the set of all permutations of the set $[n]$ of length $d$, 
+%  $A =\frac{2}{n} \sum_{i=1}^{n} L_i^2$ and $\sigma_*^2 = \frac{1}{n} \sum\limits_{i=1}^{n} \|F_i(z^*)\|^2$.
+% \end{lemma}
+% \begin{proof}
+% First, we substitute in Proposition \ref{prop:random_reshuffling} $X_i \leftarrow F_i(z_0^k), i\in[n]$ and fix an integer $d\in [n]$. Next, we draw a permutation with $d$ elements uniformly at random from the set of all permutations of $[n]$ with $d$ elements, i.e. $\pi \sim \mathcal{U}(\mathcal{S})$. In other words, let $X_{\pi_0}, \dotsc X_{\pi_{d-1}}$ be sampled uniformly without replacement from $\{X_1,\dotsc, X_{n}\}$. Then, we have that the quantities $\Bar{X}, \mu$ from Proposition \ref{prop:random_reshuffling} are equal to: 
+% \begin{eqnarray}
+%   \Bar{X} = \frac{1}{d}\sum_{j=0}^{d-1} F_{\pi_j}(z), \quad \mu = \frac{1}{n} \sum\limits_{j=1}^{n}F_j(z) =F(z) 
+% \end{eqnarray}
+% From Proposition \ref{prop:random_reshuffling}, thus, we get that:
+% \begin{eqnarray}
+% \mathbb{E}_{\pi \in \mathcal{S}} \left[\norm{\Bar{X} - \mu}^2\right] = \mathbb{E}_{\pi \in \mathcal{S}} \left[\norm{\frac{1}{d}\sum_{j=0}^{d-1} F_{\pi_j}(z) - F(z)}^2 \right]= \frac{n-d}{d(n-1)}\frac{1}{n} \sum_{j=1}^{n}\left\|F_j(z)-F(z)\right\|^2 \label{in_to_substitute_var}
+% \end{eqnarray}
+% Using Proposition \ref{app: bound for const assumpt}, we next bound the sum on the right hand-sight (RHS) as follows:
+% \begin{eqnarray}
+% d^2 \mathbb{E}_{\pi \in \mathcal{S}} \left[\norm{\frac{1}{d}\sum_{j=0}^{d-1} F_{\pi_j}(z) - F(z)}^2\right] &\leq& \frac{d(n-d)}{n-1} \left(A \|z - z^*\|^2 + 2\sigma_*^2 \right) \nonumber
+% \end{eqnarray}
+%  \end{proof}
+%%%%%%%%%%%%%
+\subsection{Proof of Continuous State Time Homogenious Markov Chain\\(Lemma~\ref{lem:epoch-homog})}
+\begin{lemma}[Epoch-level homogeneity and kernel]
+Fix $\gamma>0$ and $n\in\mathbb{N}$. Then Perturbed-SGD can be described at each epoch $k$ as:
+\emph{Draw $\omega_k$ uniformly from $\mathfrak{S}_n$ and set}
+\[\vspace{-0.25em}
+x_{k+1}
+\;=\;
+H(x_k,\omega_k)\;+\;U_k, 
+\quad U_k\sim \mathcal N(0,\Sigma),
+\vspace{-0.25em}\]
+where $H(x,\omega)$ denotes the endpoint of one reshuffled pass started at $x$ with permutation $\omega$ (i.e., the map induced by $n$ inner updates with step size $\gamma$). Then $(x_k)_{k\ge 0}$ is a time-homogeneous Markov chain on $\R^d$ with transition kernel
+\[
+P(x,A)
+\;=\;
+\frac{1}{n!}\sum_{\omega\in\mathfrak{S}_n}
+\int_A \phi\!\big(y;\,H(x,\omega),\,\Sigma \big)\,dy,
+\qquad A\in\mathcal{B}(\R^d),
+\]
+where $\phi(\cdot;m,\Sigma )$ is the $d$-variate Gaussian density with mean $m$ and covariance $\Sigma$.
+\end{lemma}
+\begin{proof}
+Fix $\gamma>0$ and $n\in\mathbb{N}$. For any $x\in\R^d$ and $\omega\in\mathfrak{S}_n$, define the inner-epoch recursion
+\[
+x^{[0]}(x,\omega)=x,\qquad
+x^{[j+1]}(x,\omega)=x^{[j]}(x,\omega)-\gamma\,F_{\omega[j]}\big(x^{[j]}(x,\omega)\big),\;\; j=0,\ldots,n-1,
+\]
+and the (measurable) epoch map
+\[
+H(x,\omega):=x-\gamma\sum_{j=0}^{n-1}F_{\omega[j]}\big(x^{[j]}(x,\omega)\big).
+\]
+By construction, at epoch $k$ the algorithm updates as
+\[
+x_{k+1}=H(x_k,\omega_k)+U_k,
+\]
+where $(\omega_k)_{k\ge0}$ are i.i.d.\ uniform on $\mathfrak{S}_n$ and $(U_k)_{k\ge0}$ are i.i.d.\ with law $\mathcal N(0,\Sigma I_d)$, independent of $(\omega_k)_{k\ge0}$ and of $x_k$ given the present state.
+
+\smallskip
+\noindent\emph{Markov property.} Let $A\in\mathcal{B}(\R^d)$. Using the tower property and the independence of $\omega_k,U_k$ from the past given $x_k$,
+\[
+\Pr(x_{k+1}\in A\mid x_0,\ldots,x_k)
+=\E\!\left[\Pr\!\left(H(x_k,\omega_k)+U_k\in A\;\middle|\;x_k,\omega_k\right)\Bigm|x_k\right]
+=\E\!\left[\Pr\!\left(H(x_k,\omega)+U\in A\right)\right],
+\]
+where the outer expectation is over $\omega\sim\mathrm{Unif}(\mathfrak{S}_n)$ and $U\sim\mathcal N(0,\Sigma I_d)$, independent. Thus
+\[
+\Pr(x_{k+1}\in A\mid x_0,\ldots,x_k)=\Pr(x_{k+1}\in A\mid x_k)=:P(x_k,A),
+\]
+so $(x_k)_{k\ge0}$ is a Markov chain.
+
+\smallskip
+\noindent\emph{Time-homogeneity and kernel.} Since the joint law of $(\omega_k,U_k)$ does not depend on $k$, the transition kernel $P$ is time-invariant. By conditioning on $\omega$ and integrating over the Gaussian $U$,
+\[
+P(x,A)=\frac{1}{n!}\sum_{\omega\in\mathfrak{S}_n}\Pr\!\left(H(x,\omega)+U\in A\right)
+=\frac{1}{n!}\sum_{\omega\in\mathfrak{S}_n}\int_A \phi\!\left(y;\,H(x,\omega),\,\Sigma I_d\right)\,dy,
+\]
+where $\phi(\cdot;m,\Sigma I_d)$ denotes the $d$-variate Gaussian density with mean $m$ and covariance $\Sigma I_d$. This yields the stated expression for $P$ and establishes time-homogeneity on $\R^d$.
+
+\smallskip
+\noindent\emph{Augmented formulation (for reference).} On the product space $\R^d\times\mathfrak{S}_n$, define the next permutation $\omega' \sim \mathrm{Unif}(\mathfrak{S}_n)$ independently of $(x,\omega)$ and $U$. Then the augmented chain $((x_k,\omega_k))_{k\ge0}$ satisfies
+\[
+(x',\omega')=\big(H(x,\omega)+U,\;\omega'\big),
+\]
+and the associated kernel is
+\[
+K\big((x,\omega),A\times B\big)=\int_A \phi\!\left(y;\,H(x,\omega),\,\Sigma I_d\right)dy\cdot \frac{|B|}{n!},
+\]
+which is manifestly time-homogeneous. \end{proof}
+
+We, next, show that there exists an energy function that describes the iterates of the Markov chain. 
+%%%%%%%%%%%%%
+\subsection{Proof of Foster-Lyuapunov inequality }\label{app: foster}
+A central tool for proving stability and ergodicity of Markov chains is the \emph{Foster–Lyapunov inequality}.  
+The idea is to construct an ``energy'' or ``Lyapunov'' function $\mathcal{E}(x,x^*)$ that tracks the distance of the chain’s state from equilibrium.  
+If this function decreases on average outside a bounded region, it ensures that the process cannot drift to infinity and will instead return frequently to a compact set.  
+This property, when combined with the minorization condition, implies positive Harris recurrence and geometric ergodicity \citep{meyn2012markov}.  
+
+In our case, a natural candidate for such an energy is the squared distance to a solution $x^*$, up to an additive constant.  
+The following corollary verifies that this choice indeed satisfies a Foster–Lyapunov inequality for Perturbed SGD–\RRresh,  
+showing that the expected energy after one epoch contracts linearly up to a fixed additive term.
+\begin{corollary}\label{corol: energy_decrease}
+    Let Assumptions~\ref{assumt: sol_set_non_empty}-\ref{assumpt: lipschitz} hold. The function $\mathcal{E}(x_0^{k}, x^*) = \|x_0^{k} - x^*\|_2^2 + 1$ satisfies for any $x^*\in \mathcal{X}^*$ the inequality
+    \begin{eqnarray}
+        \exof{\mathcal{E}(x^{k+1}_0, x^*)\given \filter_k} &\leq& c_1 \mathcal{E}(x^k_0, x^*) + c_2, \nonumber
+    \end{eqnarray}
+    where $c_1 = 1 - \frac{\gamma n \mu}{2}$ and $c_2 = \frac{\gamma n \mu}{2} + \frac{8 n \gamma^2 L_{max}^2}{\mu^2} \sigma_*^2 + \frac{8\lambda}{\mu}$.
+\end{corollary}
+\begin{proof}
+    From inequality \eqref{ineq_cond_res} of Theorem~\ref{thm: convergence_rate}, we have that
+    \begin{eqnarray}
+        \exof{\|x_{k+1}^{0} - x^*\|^2\given \filter_k} &\leq& \left(1 - \frac{\gamma  n\mu}{2}\right)^{k+1} \|x^0_0 - x^*\|^2 + \frac{8 n \gamma^2 L_{max}^2}{\mu^2} \sigma_*^2 + \frac{8\lambda}{\mu} \nonumber\nonumber
+    \end{eqnarray}
+    Adding in both sides one and using the definition of $\mathcal{E}(x^k_0, x^*),$ we obtain
+    \begin{eqnarray}
+      \exof{\|x_{k+1}^{0} - x^*\|^2 + 1\given \filter_k} &\leq& \left(1 - \frac{\gamma n \mu}{2}\right) \left(\|x_k - x^*\|^2+1\right) + \frac{\gamma n \mu}{2} + \frac{8 n \gamma^2 L_{max}^2}{\mu^2} \sigma_*^2 + \frac{8\lambda}{\mu} \nonumber  \\
+      \iff \exof{\mathcal{E}(x^{k+1}_0, x^*)\given \filter_k} &\leq& c_1 \mathcal{E}(x^k_0, x^*) + c_2
+    \end{eqnarray}
+    where at the last step we have let $c_1 = 1 - \frac{\gamma n \mu}{2}$ and $c_2 = \frac{\gamma n \mu}{2} + \frac{8 n \gamma^2 L_{max}^2}{\mu^2} \sigma_*^2 + \frac{8\lambda}{\mu}$.
+\end{proof}
+
+%\kostas{In Lemma~\ref{lemma: geometric_drift_property} the $x^*$ is any arbitrary $x^* \in\mathcal{X}^*$?}
+\begin{lemma}\label{lemma: geometric_drift_property}
+   Let Assumptions~\ref{assumt: sol_set_non_empty}-\ref{assumpt: lipschitz} hold. If $\gamma \leq \gamma_{max}$, then for any fixed $x^*\in \mathcal{X}^*$ the functions $\mathcal{E}_1(x, x^*) = \mathcal{E}(x, x^*), \mathcal{E}_2(x, x^*) = \sqrt{\mathcal{E}(x, x^*)}$ satisfy the geometric drift property for the iterates of {Perturbed SGD–\RRresh}, \ie $\forall i \in\{1, 2\}$ there exist measurable set $C_i$, constants $\alpha_i > 0, \tilde{\alpha}_i < \infty$ such that $\forall x\in\R^d$ 
+   \begin{equation}
+       \Delta \mathcal{E}_i(x, x^*) = - \alpha \mathcal{E}_i(x, x^*) + \one_C \tilde{\alpha}, \label{eq: geometric_drift_property}
+   \end{equation}
+   where $\Delta \mathcal{E}_i(x, x^*) = \int_{x'\in \R^d} P(z,dx')\energy_i(x') - \energy_i(x)$ and the constant $\gamma_{max} = \gammaub$. 
+\end{lemma}
+\begin{proof}
+In order to prove that the geometric drift property is satisfied, we need to show that there exist function $\energy_i: \R^d\rightarrow [1, +\infty]$, measurable set $C_i$ and constants $\alpha_i>0, \tilde{\alpha_i}<\infty$ such that \eqref{eq: geometric_drift_property} holds. From Corollary~\ref{corol: energy_decrease}, we have that the function $\energy_1: \R^d \rightarrow [1, +\infty]$ with $\energy_1(x, x^*) = \|x - x^*\|^2 + 1$ satisfies along the iterates of {Perturbed SGD–\RRresh} that
+\begin{eqnarray}
+    \exof{\energy_1(x_{k+1}, x^*) \given \filter_k:\ourbraces{\state_k = x}}&\leq& c_1 \mathcal{E}_1(x, x^*) + c_2 \label{eq: energy_inequality_for_geometric_drift},
+\end{eqnarray}
+where $c_1 = 1 - \frac{\gamma n \mu}{2}$ and $c_2 = \frac{\gamma n \mu}{2} + \frac{8 n \gamma^2 L_{max}^2}{\mu^2} \sigma_*^2 + \frac{8\lambda}{\mu}$. Additionally, for the epoch-level iterates $x_k$ of~{Perturbed SGD–\RRresh} the definition of $\Delta \energy$ is
+\begin{eqnarray}
+    \Delta \energy_1(x, x^*) &=& \int_{x' \in \R^d} P(x,\dd x') \energy_1(x', x^*) - \energy_1(x, x^*) \nonumber \\
+    &=& \exof{\energy_1(x_{k+1}, x^*) - \energy_1(x_k, x^*) \given \filter_k:\ourbraces{\state_k = x}} \label{eq: Delta_Energy}.
+\end{eqnarray}
+From \eqref{eq: energy_inequality_for_geometric_drift} and \eqref{eq: Delta_Energy}, we have that
+\begin{eqnarray}
+    && \exof{\energy_1(x_{k+1}, x^*) \given \filter_k:\ourbraces{\state_k = x}} \leq c_1 \energy_1(x) + c_2 \nonumber\\
+    &\Rightarrow& \exof{\energy_1(x_{k+1}, x^*) - \energy_1(x_k, x^*)\given \filter_k:\ourbraces{\state_k = x}}\leq -(1-c_1) \energy_1(x, x^*) + c_2 \nonumber\\
+    &\Rightarrow& \Delta \energy_1(x, x^*) \leq -(1-c_1) \energy_1(x, x^*) + c_2 
+\end{eqnarray}
+Let $C_1 = \left\{x\in\R^d: \energy_1(x, x^*) \leq \frac{2c_2}{(1-c_1)}\right\}$. We have that
+\begin{eqnarray}
+    \Delta \energy_1(x, x^*) &\leq& -(1-c_1) \energy_1(x, x^*) + \one_C(x) c_2 + \one_{C^{c}}(x) \frac{1-c_1}{2} \energy_1(x, x^*)\nonumber\\
+    &\leq& -\frac{1-c_1}{2} \energy_1(x, x^*) + \one_{C_1(x)} c_2 \label{eq: final_delta}
+\end{eqnarray}
+where at the last step we used the fact that $\one_{C_1^{c}}(x) < 1$ and \textcolor{red}{$c_1 \in (0, 1)$}. 
+From \eqref{eq: final_delta} we conclude that $\energy_1(x, x^*)$ satisfies the geometric drift property for the set $C_1 = \left\{x\in\R^d: \energy_1(x) \leq \frac{2c_2}{(1-c_1)}\right\}$ and with constants $\alpha = \frac{1-c_1}{2}, a = c_2$. 
+
+For the $\mathcal{E}_2(x, x^*) = \sqrt{\mathcal{E}(x, x^*)}$, by Jensen's inequality it holds that
+\begin{eqnarray}
+    \exof{\sqrt{\energy(x_{k+1}, x^*)} \given \filter_k:\ourbraces{\state_k = x}} &\leq& \sqrt{\exof{\energy(x_{k+1}, x^*) \given \filter_k:\ourbraces{\state_k = x}}} \nonumber \\
+    &\leq& \sqrt{c_1 \mathcal{E}(x, x^*) + c_2} \nonumber \\
+    &\leq& \sqrt{c_1} \sqrt{\energy(x, x^*)} + \sqrt{c_2} \nonumber
+\end{eqnarray}
+Thus, there exist constants $d_1 = \sqrt{c_1}, d_2 = \sqrt{c_2}$ such that it holds
+\begin{eqnarray}
+    \exof{\energy_2(x_{k+1}, x^*) \given \filter_k:\ourbraces{\state_k = x}}&\leq& d_1 \mathcal{E}_2(x, x^*) + d_2,
+\end{eqnarray}
+Since it holds that
+\begin{equation}
+    \Delta \energy_2(x, x^*) = \int_{x' \in \R^d} P(x,\dd x') \energy_2(x', x^*) - \energy_2(x, x^*)= \exof{\energy_2(x_{k+1}, x^*) - \energy_2(x_k, x^*) \given \filter_k:\ourbraces{\state_k = x}},
+\end{equation}
+we have that
+\begin{eqnarray}
+    && \exof{\energy_2(x_{k+1}, x^*) - \energy_2(x_k, x^*)\given \filter_k:\ourbraces{\state_k = x}}\leq -(1-d_1) \energy_2(x, x^*) + d_2 \nonumber\\
+    &\Rightarrow& \Delta \energy_2(x, x^*) \leq -(1-d_1) \energy_2(x, x^*) + d_2 
+\end{eqnarray}
+Let $C_2 = \left\{x\in\R^d: \energy_2(x, x^*) \leq \frac{2d_2}{(1-d_1)}\right\}$. We have that
+\begin{eqnarray}
+    \Delta \energy_2(x, x^*) &\leq& -(1-d_1) \energy_2(x, x^*) + \one_{C_2(x)} d_2 + \one_{C_2^{c}}(x) \frac{1-d_1}{2} \energy_2(x, x^*)\nonumber\\
+    &\leq& -\frac{1-d_1}{2} \energy_2(x, x^*) + \one_{C_2(x)} d_2 \nonumber
+\end{eqnarray}
+where at the last step we used the fact that $\one_{C_2^{c}}(x) < 1$ and \textcolor{red}{$d_1 \in (0, 1)$}. 
+Hence, we conclude that $\energy_2(x, x^*)$ satisfies the geometric drift property for the set $C_2 = \left\{x\in\R^d: \energy_2(x) \leq \frac{2d_2}{(1-d_1)}\right\}$ and with constants $\alpha_2 = \frac{1-d_1}{2}, \tilde{\alpha} = d_2$. 
+\end{proof}
+%%%%%%%%%%%%%
+\subsection{Proof of Minorization Property }\label{app: minorization}
+The next step in establishing ergodicity is to verify a \emph{minorization condition}.  
+Intuitively, this property guarantees that whenever the chain is in a certain “small set” $C$,  
+its one-step transition kernel dominates a fixed nontrivial distribution $\nu$, uniformly with probability $\delta>0$.  
+In other words, starting from any $x\in C$, the algorithm has a baseline chance of moving into any region of the state space according to $\nu$.  
+This is the key ingredient that, together with a Lyapunov–Foster drift condition, yields geometric ergodicity of the Markov chain.  
+The following lemma formalizes this property for the iterates of Perturbed SGD–\RRresh.  
+\begin{lemma}[Minorization property]\label{lemma: minorization}
+Let Assumptions~\ref{assumt: sol_set_non_empty}--\ref{assumpt: lipschitz} hold.  
+If $\gamma \leq \gamma_{\max}$, then the iterates of \texttt{Perturbed SGD--\RRresh} satisfy the minorization condition:  
+there exist a constant $\delta>0$, a probability measure $\nu$ on $(\R^d,\mathcal{B}(\R^d))$, and a set $C\subseteq\R^d$ such that $\nu(C)=1$, $\nu(C^\complement)=0$, and
+\begin{equation}\label{eq: minorization_cond}
+    P(x,A) \;\ge\; \delta\,\one_C(x)\,\nu(A), 
+    \qquad \forall x\in\R^d,\; A\in\mathcal{B}(\R^d),
+\end{equation}
+where $P(x,A)=\Pr(x_{k+1}\in A\mid x_k=x)$ and $\gamma_{\max}=\gammaub$.
+\end{lemma}
+
+\begin{proof}
+Consider the Lyapunov candidate $\mathcal{E}(x)=\|x-x^*\|^2+1$ for some $x^*\in\mathcal{X}^*$.  
+Its sublevel sets 
+\[
+C(r):=\{x\in\R^d : \mathcal{E}(x)\le r\} = \ball(x^*,\sqrt{r-1}),\qquad r>1,
+\]
+are bounded, hence suitable for applying small/petite set arguments.  
+
+At each epoch, the update of Perturbed SGD-{\RRresh} can be described by
+\[
+x_{k+1}=H(x_k,\omega_k)+U_k,
+\]
+where $\omega_k$ is uniform on $\mathfrak{S}_n$ and $U_k\sim\mathcal N(0,\Sigma I_d)$, independent of $\omega_k$ and $x_k$.  
+Thus, for any $A\in\mathcal{B}(\R^d)$,
+\[
+P(x,A)=\frac{1}{n!}\sum_{\omega\in\mathfrak{S}_n}
+\int_A \phi\!\big(y;\,H(x,\omega),\,\Sigma \big)\,dy,
+%\frac{1}{n!}\sum_{\omega\in\mathfrak{S}_n}\int_A \phi\!\left((x-y)/\gamma ; H(x,\omega) \,\Sigma I_d\right)\,dy,
+\]
+Since $\phi(y;m,\Sigma I_d)>0$ for all $y\in\R^d$, the kernel has strictly positive support everywhere.  
+
+Now fix $r_0>1$ and restrict to $C(r_0)$.  
+Define the reference measures for any   $A\in\mathcal{B}(\R^d)$
+
+
+\[\nu(A):=\frac{\operatorname{Leb}(A\cap C(r_0))}{\operatorname{Leb}(C(r_0))}\text{ and }\operatorname{Leb}(A)= 
+\int_A   \inf\limits_{x \in C(r_0)} \frac{1}{n!}\sum_{\omega\in\mathfrak{S}_n} \phi\!\big(y;\,H(x,\omega),\,\Sigma \big)\,dy.
+\]
+i.e., the uniform probability distribution over $C(r_0)$.  
+Clearly $\nu(C(r_0))=1$ and $\nu(C(r_0)^\complement)=0$.  
+
+Finally, by continuity of $\phi$ and compactness of $C(r_0)$, there exists $\delta\geq \operatorname{Leb}(C(r_0)) >0$ such that
+\[
+P(x,A)\;\ge\;\delta\,\nu(A), \qquad \forall x\in C(r_0),\; A\subseteq C(r_0).
+\]
+If $x\notin C(r_0)$ or $A\not\subseteq C(r_0)$, the right-hand side of \eqref{eq: minorization_cond} is zero and the inequality is trivially satisfied.  
+Hence the minorization condition \eqref{eq: minorization_cond} holds.
+\end{proof}
+
+%%%%%%%%%%%%%
+\subsection{Proof of Irreducibility, Aperiodicity and Harris and Positive Recurrence}
+\begin{lemma}\label{lemma: properties-mc}
+    The Markov chain $(x_k)_{k \geq 0}$ of {Perturbed SGD–\RRresh} is
+    \begin{enumerate}[noitemsep,nolistsep,leftmargin=*]
+       \item $\irr-$irreducible for some non-zero $\sigma$-finite measure $\irr$ on $\R^d$ over the Borel $\sigma$-algebra of $\R^d$. 
+        \item strongly aperiodic. 
+        \item Harris and positive recurrent with an invariant measure.
+    \end{enumerate}
+\end{lemma}
+ \begin{proof}
+We prove each of the three properties in turn.  
+
+\paragraph{Irreducibility.}  
+From Lemma~\ref{lemma: minorization}, the Markov kernel of \texttt{Perturbed SGD--\RRresh} is
+\[
+P(x,A)=\frac{1}{n!}\sum_{\omega\in\mathfrak{S}_n}\int_A \phi\!\left(y;\,H(x,\omega),\,\Sigma I_d\right)\,dy,
+\qquad A\in\mathcal{B}(\R^d),
+\]
+where $\phi(\cdot;m,\Sigma I_d)$ is a Gaussian density with strictly positive support.  
+Hence, for any measurable set $A$ of positive Lebesgue measure, $P(x,A)>0$.  
+Taking $\psi$ to be the Lebesgue measure, we conclude that the chain is $\psi$-irreducible.  
+
+\paragraph{Strong Aperiodicity.}  
+By Lemma~\ref{lemma: minorization}, there exist $\delta>0$, a probability measure $\nu$, and a set $C\subseteq\R^d$ such that
+\[
+P(x,A)\;\ge\;\delta\,\one_C(x)\nu(A), \qquad \forall x\in\R^d,\; A\in\mathcal{B}(\R^d).
+\]
+Since $C$ has positive Lebesgue measure and $\nu(C) = 1$, $\nu(C^\circ) = 0$ and given that the sets $C(r)$ in the proof of the Lemma \ref{lemma: minorization} are small and of positive measure, we get that the Markov chain is strongly aperiodic.
+%
+%, this minorization implies strong aperiodicity.  
+\paragraph{Harris and Positive Recurrence.}  
+By Proposition~\ref{prop: petite_set}, the small set $C$ of Lemma~\ref{lemma: minorization} is also petite.  
+Combined with the Foster–Lyapunov drift condition of Lemma~\ref{lemma: geometric_drift_property}, the Geometric Ergodic Theorem (Theorem 15.0.1 in \citep{meyn2012markov}) guarantees that the chain is positive recurrent and admits an invariant probability measure.  
+
+Finally, from Theorem 9.1.8 of \citep{meyn2012markov}, the existence of a Lyapunov function unbounded off petite sets, satisfying $\Delta \mathcal{E} \leq 0$ together with $\psi$-irreducibility, implies Harris recurrence.  
+\end{proof}
+%%%
+%%%\begin{proof}
+%%%    We prove each of the three properties: irreducibility, aperiodicity and Harris and positive recurrence, below separately. 
+%%%    \begin{itemize}
+%%%        \item \textbf{Irreducible.} From the proof of \cref{lemma: minorization} for {Perturbed SGD–\RRresh} we have from \eqref{eq: prob_x_A} that
+%%%        \begin{equation*}
+%%%            \prob\parens{\state_{\time+1}\in A|\state_\time = x} = \int_{x'\in A} f\left(\dfrac{x-x'}{\gamma}-G_{\omega_k}(x)\right)\dd x',
+%%%        \end{equation*}
+%%%        where $f$ is the pdf of the normal distribution $\mathcal{N}(0, n^2\gamma^2\sigma_*^2 I)$. 
+%%%        
+%%%        Let $\irr$ be a non-zero $\sigma$-finite measure in the Borel $\sigma$-algebra of $\R^d$. 
+%%%        For any $A\subseteq\borel(\R^d)$ with $\irr(A)>0$, we have that $\ourbraces{x}\subseteq \ball(x,1)$ and there exists $\varepsilon>0$ such that $\ball(a_0,\varepsilon)\subseteq A$, for some $a_0\in A$. Thus, it holds that
+%%%        \begin{align*}
+%%%            P(x,A) &\geq \int_{\hat{a} \in\ball(a_0,\varepsilon)} f\left(\dfrac{x-\hat{a}}{\step}-G_{\omega_k}(x)\right)\dd \hat{a} \\
+%%%            &\geq \int_{\hat{a}\in\ball(a_0,\varepsilon)} \inf_{\hat{x} \in\ball(x,1)} f\left(\dfrac{\hat{x} -\hat{a}}{\step}-G_{\omega_k}(\hat{x})\right)\dd \hat{a} > 0,
+%%%        \end{align*}
+%%%        where the non-negativity stems from the positive support of the pdf function everywhere in $\R^d$. 
+%%%        Thus, we conclude the Markov Chain is $\irr$-irreducible.
+%%%        \kostas{After the first inequality, the pdf in Manolis' work was $pdf_{U(\hat{x})}$ where $U(\hat{x})$ is the noise in the stochastic oracle. In our case (finite-sum min problem), how this should be written?}
+%%%        
+%%%        \item \textbf{Strongly Aperiodic.} 
+%%%        From Lemma \ref{lemma: minorization}, we have that there exists constant $\delta > 0$, probability measure $\nu$ and set $C \subseteq \mathbb{R}^d$ such that $\nu(C) = 1$, $\nu(C^\circ) = 0$ and $\forall x \in \mathbb{R}^d$ and any $A \in \mathcal{B}(\mathbb{R}^d)$ it holds 
+%%%        \begin{equation*}
+%%%            \text{Pr}\left[x_{k+1} \in A | x_k = x\right] \geq \delta \one_{C}(x) \nu(A)
+%%%        \end{equation*}
+%%%        Given that the sets $C(r)$ in the proof of the Lemma \ref{lemma: minorization} are small and of positive measure, we get that the Markov chain is strongly aperiodic.
+%%%
+%%%        \item \textbf{Harris \& Positive Recurrent.} By Proposition \ref{prop: petite_set}, the geometric drift property of \ref{lemma: geometric_drift_property} holds for a petite set. According to the Geometric Ergodic Theorem (Theorem 15.0.1) in \citep{meyn2012markov}, since the underlying Markov chain is $\psi$-irreducible and aperiodic we have that it is positive recurrent and has an invariant probability measure. 
+%%%
+%%%        We, next, show that the chain is Harris recurrent. From the proof of Lemma \ref{lemma: geometric_drift_property} we have that there is a function $\mathcal{E}(x)$ that is unbounded off petite sets satisfying $\Delta \mathcal{E} \leq 0$ and given that the chain is $\psi$-irreducible, we have from Theorem 9.1.8 in \citep{meyn2012markov} that the Markov chain is Harris recurrent. 
+%%%\end{itemize}
+%%%\end{proof}
+%%%
+
+
+%%%%%%%%%%%%%
+\subsection{Proof of Existence of Unique Invariant Distribution at Epoch-level \\(Theorem~\ref{thm: efficient_stats})}
+By verifying irreducibility, aperiodicity, and \emph{positive Harris recurrence} \citep{meyn2012markov}, we establish a unique invariant distribution $\pi_\gamma$, geometric convergence in total variation to it, and concentration of scalar observables (admissible test functions) around $x^*$.
+\begin{theorem}[Restatement of Theorem~\ref{thm: efficient_stats}] \label{thm: efficient_stats_app}
+Under Assumptions~\ref{assumt: sol_set_non_empty}--\ref{assumpt: lipschitz}, run \emph{Perturbed SGD-\RRresh} with $\gamma\le\gamma_{\max}$. Then $(x_k)_{k\ge0}$ admits a unique stationary distribution $\pi_\gamma\in\mathcal P_2(\R^d)$, and additionally:
+\begin{align*}
+&\text{(i)}~~ |\ex[\ell(x_k)]-\ex_{x\sim\pi_\gamma}[\ell(x)]|\;\le\;c(1-\rho)^k 
+&& \forall \ell:|\ell(x)|\le L_\ell(1+\|x\|), \\
+&\text{(ii)}~~ |\ex_{x\sim\pi_\gamma}[\ell(x)]-\ell(x^*)|\;\le\;L_\ell\sqrt{C} 
+&& \forall \ell:  L_\ell-\text{Lipschitz functions},
+\end{align*}
+for some $c<\infty$, $\rho\in(0,1)$, $C=\Theta(\mathrm{MSE}(\texttt{SGD}-{\RRresh}))$ and $\gamma_{\max}$ defined in Theorem~\ref{thm: convergence_rate}%$\gamma_{\max}=\gammaub$
+\end{theorem}
+%%%%%
+%%%%%\begin{theorem}[Restatement of Theorem~\ref{thm: efficient_stats}] \label{thm: efficient_stats_app}
+%%%%%    Let Assumptions~\ref{assumt: sol_set_non_empty}-\ref{assumpt: lipschitz} hold. If {Perturbed SGD–\RRresh} is run with step size $\gamma < \gammaub$, then the following hold
+%%%%%    \begin{enumerate}
+%%%%%        \item The epoch-level iterates $(x_k)_{k \geq 0}$ have a unique stationary distribution $\pi_\gamma \in \mathcal{P}_2(\R^d),$ where $P_2(\R^d)$ is the set of distributions supported in $\R^d$ with bounded second moment.
+%%%%%        \item For any initialization $x_0 \in \R^d$ and any test function $\ell: \R^d \rightarrow \R$ satisfying 
+%%%%%        $\|\ell(x)\| \leq L_{\ell} (1 + \|x\|), \quad \forall x \in \R^d_{\geq 0}$ with $L_{\ell} > 0$, the iterates of {Perturbed SGD–\RRresh} converge geometrically in total variation distance to $\pi_\gamma$, i.e. there exist constants $\rho \in (0, 1)$ and $c \in (0, +\infty)$ such that
+%%%%%        \begin{eqnarray}
+%%%%%            \left|\ex_{x_k}\left[\ell(x_k)\right] - \ex_{x \sim \pi_\gamma}\left[\ell(x)\right]\right| &\leq& c (1 - \rho)^k
+%%%%%        \end{eqnarray}
+%%%%%        \item For any $L_{\ell}-$Lipschitz test function $\ell: \R^d \rightarrow \R$, there exists a constant $C \propto \max\{\lambda, \gamma\}/\mu$ such that
+%%%%%        \begin{eqnarray}
+%%%%%            \left|\ex_{x\sim\pi_\gamma}\left[\ell(x)\right] - \ell(x^*)\right| &\leq& L_{\ell} \sqrt{C}.
+%%%%%        \end{eqnarray}
+%%%%%    \end{enumerate}
+%%%%%\end{theorem}
+\begin{proof}
+    From Lemma~\ref{lemma: properties-mc}, we have that the underlying Markov Chain has an invariant probability measure. Since from Lemma~\ref{lemma: geometric_drift_property} the induced Markov Chain satisfies the geometric drift property, according to the Strong Ergodic Theorem \citep{meyn2012markov} we conclude that the measure is finite and unique. 
+    From the invariant property of $\pi_{\gamma}$, we have that for $x_0 \sim \pi_{\gamma}$ the iterates satisfy also that $(x_k)_{k>0}\sim\pi_{\gamma}$. From Corollary~\ref{corol: energy_decrease}, we have that for an arbitrary fixed $x^*$ the iterates of {Perturbed SGD–\RRresh} with step size $\gamma \leq $ satisfy for $c_1 \in (0, 1), c_2 >0$ that
+    \begin{eqnarray}
+        \exof{\|x_{k+1} - x^*\|_2^2 + 1 \given \filter_k} &\leq& c_1 \left(\|x_{k} - x^*\|_2^2 + 1\right) + c_2. \nonumber
+    \end{eqnarray}
+    Taking expectation with respect to the invariant measure $\pi_\gamma$ and using the tower law of expectation, we get
+    \begin{eqnarray}
+        \ex_{x\sim\pi_{\gamma}}\left[\|x - x^*\|_2^2\right] \leq \frac{c_1 +c_2 -1}{1-c_1} = \mathcal{O}\left(\frac{\max(\gamma, \lambda)}{\mu}\right) < +\infty. \label{eq: big_O_with_max_term}
+    \end{eqnarray}
+    Combining the above inequality with the fact that $\|x_*\| \leq R$ by Assumption~\ref{assumt: sol_set_non_empty}, we conclude that the invariant measure $\pi_{\gamma}\in \mathcal{P}_2(\R^d),$ where $\mathcal{P}_2(\R^d)$ is the set of distributions supported in $\R^d$ with finite second moment.  
+
+    We, next, proceed with proving the second statement of the Theorem. By assumption, we have that the test function satisfies $\forall x \in \R^d_{\geq 0}$ that 
+    \begin{eqnarray}
+        |\ell(x)| &\leq& L_{\ell} (1 + \|x\|) \nonumber \\
+        &\leq& L_{\ell} (1 + \|x^*\| + \|x - x^*\|) \nonumber \\
+        &\leq& L_{\ell} (1 + R + \|x - x^*\|) \nonumber \\
+        &\leq& (1 + R)  L_{\ell} (1 + \|x - x^*\|)
+    \end{eqnarray}
+    where we have used the triangle inequality and the fact that $\|x^*\| \leq R$. Applying Cauchy-Schwarz inequality, we can further upper bound $\|\ell(x)\|$
+    \begin{eqnarray}
+       |\ell(x)| &\leq& \sqrt{2} (1 + R)  L_{\ell} \sqrt{1 + \|x - x^*\|} \nonumber \\
+       &\leq& \max\left(1, \sqrt{2} (1 + R) L_{\ell}\right) \sqrt{\mathcal{E}(x, x^*)} \label{eq: upper_ell_bound}
+    \end{eqnarray}
+    Letting $c = \max\left(1, \sqrt{2} (1 + R) L_{\ell}\right)$ and $\tilde{\mathcal{E}}(x, x^*) = c \sqrt{\mathcal{E}(x, x^*)}$, we have that
+    \begin{eqnarray}
+        |\ell(x)| &\leq& \tilde{\mathcal{E}}(x, x^*) \nonumber
+    \end{eqnarray}
+    From Lemma~\ref{lemma: geometric_drift_property} we have that $\energy_1(x, x^*), \energy_2(x, x^*)$ satisfy the geometric drift property and since $c \geq1$ we have that $\tilde{\energy}(x, x^*) = c \energy_2(x, x^*)$ satisfies also the geometric drift property. According to Theorem 16.0.1 in \citep{meyn2012markov} {Perturbed SGD–\RRresh} is $\tilde{\mathcal{E}}$-uniformly ergodic and there exists $\rho \in (0, 1)$ and $R \in (0, +\infty)$ such that
+    \begin{eqnarray}
+        \left|P^k \ell(x_0) - \ex_{x\sim\pi_{\gamma}}\left[\ell(x)\right] \right| &\leq& R (1 - \rho)^k \left|\tilde{\mathcal{E}}(x_0, x^*)\right| \label{eq: P_to_be_taken_sup}
+    \end{eqnarray}
+    Letting $c = R\left|\tilde{\mathcal{E}}(x_0, x^*)\right|$, we have proven the inequality in the statement of the theorem. In order to show that the epoch-level iterates converge under the total variation distance it suffices to consider only functions $\ell: \R^d \rightarrow \R$ that are bounded by 1. In this case, there are constants $\tilde{\rho} \in (0, 1)$ and $\tilde{R} \in (0, +\infty)$ independent of $\ell$ such that it holds 
+    \begin{eqnarray}
+        \sup_{|\ell| \leq1} \Big|P^k \ell(x_0) - \ex_{x\sim\pi_{\gamma}}\left[\ell(x)\right] \Big| &\leq& \tilde{R} (1 - \tilde{\rho})^k \Big|\tilde{\mathcal{E}}(x_0, x^*)\Big| \nonumber
+    \end{eqnarray}
+    implying according to the dual representation of Radon metric for bounded initial conditions \citep{wiki} the geometric convergence under the total variation distance. 
+
+    In order to prove the third statement of the theorem, we apply linearity of expectation and the Lipschitz property of the test function $\ell$ and obtain
+    \begin{eqnarray}
+       \left|\ex_{x\sim\pi_\gamma}\left[\ell(x)\right] - \ell(x^*)\right| &\leq& \ex_{x\sim\pi_\gamma}\left[\left|\ell(x) - \ell(x^*)\right|\right] \nonumber \\
+       &\leq& \ex_{x\sim\pi_\gamma}\left[L_{\ell} \left\|x -x^*\right\|\right] \nonumber
+    \end{eqnarray}
+    Applying Cauchy-Schwarz inequality and using inequality \eqref{eq: big_O_with_max_term}, we obtain that
+    \begin{eqnarray}
+        \left|\ex_{x\sim\pi_\gamma}\left[\ell(x)\right] - \ell(x^*)\right| \leq L_{\ell} \sqrt{\ex_{x\sim\pi_\gamma}\left[ \left\|x -x^*\right\|\right]} \leq L_{\ell}\sqrt{D} \nonumber
+    \end{eqnarray}
+    where $D \propto \frac{\max(\gamma, \lambda)}{\mu}$ according to \eqref{eq: big_O_with_max_term}.
+\end{proof}
+\newpage
+We conclude with the establishment of a Law of Large Numbers (LLN) and the corresponding Centra limit Theorem (CLT) that describe the epoch-level iterates of {Perturbed SGD–\RRresh}. 
+%%%%%%%%%%%%%
+\subsection{Proof of Limit theorems of Epoch-level iterates\\(Theorem~\ref{thm: efficient_stats})}
+\begin{theorem}[Restatement of Theorem~\ref{thm: LLN_CLT_res}]
+Suppose Assumptions~\ref{assumt: sol_set_non_empty}--\ref{assumpt: lipschitz} hold and run Perturbed SGD--\RRresh with $\gamma \le \gamma_{\max}$, (cf.\ Theorem~\ref{thm: convergence_rate}). \\ 
+\\Let $\ell:\R^d\to\R$ be any test function such that $|\ell(x)|\le L_\ell(1+\|x\|^2)$ and $\ex_{x\sim\pi_\gamma}[\ell(x)]<\infty$.\\
+Then for the epoch-level iterates, it holds that:
+\[
+\underbrace{\frac{1}{T}\sum_{t=0}^{T-1}\ell(x_t) 
+  \;\xrightarrow{\text{a.s.}}\; \ex_{x\sim\pi_\gamma}[\ell(x)]}_{\text{(LLN)}}
+\qquad
+\underbrace{T^{-1/2}\sum_{t=0}^{T-1}\!\Big(\ell(x_t)-\ex_{x\sim\pi_\gamma}[\ell(x)]\Big) 
+  \;\xrightarrow{d}\; \mathcal N(0,\sigma^2_{\pi_\gamma}(\ell))}_{\text{(CLT)}},
+  \]
+where $\sigma^2_{\pi_\gamma}(\ell)=\lim_{T\to\infty}\tfrac{1}{T}\ex_{\pi_\gamma}[S_T^2]$ and $S_T^2=\sum_{t=0}^{T-1}\big(\ell(x_t)-\ex_{x\sim\pi_\gamma}[\ell(x)]\big)^2$.
+\vspace{-0.25em}
+\end{theorem}
+%
+%\begin{theorem}[Restatement of Theorem~\ref{thm: LLN_CLT_res}]
+%    Let Assumptions~\ref{assumt: sol_set_non_empty}-\ref{assumpt: lipschitz} hold. If {Perturbed SGD–\RRresh} is run with step size $\gamma < \gamma_{max}$, then for any function $\ell: \R^d \rightarrow \R$ satisfying $\ex_{x\sim\pi_\gamma}\left[\ell(x)\right] < \infty$ and $|\ell(x)| \leq L_{\ell} (1 + \|x\|^2)$ with $L_{\ell} > 0$ the following hold
+%    \begin{enumerate}
+%        \item A Law of Large Numbers for the epoch-level iterates of {Perturbed SGD–\RRresh}:
+%            \begin{eqnarray*}
+%                \lim_{T\rightarrow+\infty} \frac{1}{T}\sum_{t=0}^{T-1} \ell(x_t) = \ex_{x\sim\pi_\gamma}\left[\ell(x)\right] \quad \as
+%            \end{eqnarray*}
+%        \item A Central Limit Theorem for the epoch-level iterates of {Perturbed SGD–\RRresh}:
+%            \begin{eqnarray*}
+%                T^{-1/2} \sum_{t=0}^{T-1} \left[\ell(x_t) - \ex_{x\sim\pi_\gamma}\left[\ell(x)\right]\right] \xrightarrow{d} \mathcal{N}(0, \sigma_{\pi_{\gamma}}^2),
+%            \end{eqnarray*}
+%            where $\sigma_{\pi_{\gamma}}^2(\ell) = \lim\limits_{T\rightarrow+\infty} \frac{1}{T}\ex_{\pi_{\gamma}} \left[S_T^2\right]$ and $S_T^2 = \sum_{t=0}^{T-1} \left[\ell(x_t) - \ex_{x\sim\pi_\gamma}\left[\ell(x)\right]\right]^2$.
+%     \end{enumerate}
+%     where $\gamma_{max} = \gammaub$. 
+%\end{theorem}
+\begin{proof}
+We show that the Markov Chain induced by the epoch-level iterates of {Perturbed SGD–\RRresh} is Harris positive recurrent, it has an invariant measure and satisfies $\energy$-uniform ergodicity, and hence by Theorem 17.0.1 in \citep{meyn2012markov} the stated Law of Large Numbers and Central Limit Theorem hold. 
+
+From Lemma~\ref{lemma: properties-mc}, we have that the Markov Chain is Harris positive recurrent with an invariant measure. It suffices, thus, to show that the chain is $\energy$-uniform ergodic by proving that there exists a potential function $\energy(\cdot)$ such that the chain satisfies the geometric drift property of \citet{meyn2012markov} and $\|\ell(x)\|^2 \leq \energy(x)$. 
+Let $\energy(x, x^*) = \exof{\mathcal{E}(x^{k+1}_0, x^*)\given \filter_k}$ for any fixed $x^*\in\mathcal{X}^*$. According to Lemma~\ref{lemma: geometric_drift_property}, $\energy(x, x^*)$ satisfies the geometric drift property. Additionally, since $\ell$ has a linear growth it holds that
+\begin{eqnarray}
+    |\ell(x)|^2 &\leq& L_{\ell}^2 (1+\|x\|^2)^2 \nonumber \\
+    &\leq& L_{\ell}^2 (1 + \|x^*\| + \|x - x^*\|)^2 \nonumber \\
+    &\leq& L_{\ell}^2 (1 + R + \|x - x^*\|)^2 \nonumber \\
+    &\leq& L_{\ell}^2 (1 + R)^2  (1 + \|x - x^*\|)^2 \label{eq: upper_bound_ell^2}
+\end{eqnarray}
+From Cauchy-Schwarz inequality, it holds that
+\begin{eqnarray}
+    1 + \|x - x^*\| &\leq& \sqrt{2} \sqrt{1+\|x - x^*\|^2} \nonumber \\
+    \Rightarrow (1 + \|x - x^*\|)^2 &\leq& 2 (1+\|x - x^*\|^2) \nonumber \\
+    \Rightarrow (1 + \|x - x^*\|)^2 &\leq& 2 \energy(x, x^*) \label{eq: up_1}
+\end{eqnarray} 
+Thus, combining \eqref{eq: up_1} and \eqref{eq: upper_bound_ell^2}, we obtain
+\begin{eqnarray}
+    |\ell(x)|^2 &\leq& 2 L_{\ell}^2 (1 + R)^2 \energy(x, x^*)
+\end{eqnarray}
+Thus, $\energy(x, x^*)$ satisfies the geometric drift property and it holds that $|\ell(x)|^2 \leq \energy(x, x^*)$ and hence the chain is $\energy$-uniform ergodic, completing the proof.
+\end{proof}

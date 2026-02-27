@@ -1,0 +1,394 @@
+% !TEX root = ./iclr2026_conference.tex
+
+\newpage
+\section{Bounding 4th-order Moments of Error Distance}
+\label{app: moments}
+\subsection{ Higher order version of Proposition A.2 \citep{emmanouilidis2024stochastic} - Bound of Kyrtosis for Lipschtiz Operators}
+\begin{proposition}\label{prop: 4th_norm_avg_bound}
+Let Assumption~\ref{assumpt: lipschitz} hold. For any $x\in\mathbb{R}^d$ and any reference point $x^*\in\mathbb{R}^d$, it holds that
+\[
+\frac{1}{n}\sum_{i=1}^n \norm{F_i(x)-F(x)}^{4}
+\;\le\;
+128\Bigg(\frac{1}{n}\sum_{i=1}^n L_i^{4}\Bigg)\norm{x-x^*}^{4}
+\;+\;128\,\sigma_*^{4},
+\]
+where $\displaystyle \sigma_*^{4}:=\frac{1}{n}\sum_{i=1}^n \norm{F_i(x^*)}^{4}$.
+\end{proposition}
+\begin{proof}
+Define
+\[
+\Delta_i := F_i(x)-F_i(x^*), \quad 
+\Delta := \frac{1}{n}\sum_{j=1}^n \Delta_j = F(x)-F(x^*), \quad
+\xi_i := F_i(x^*)-F(x^*).
+\]
+Then $F_i(x)-F(x)=(\Delta_i-\Delta)+\xi_i$. Using $(a+b)^4\le 8(a^4+b^4)$, we have that
+\[
+\norm{F_i(x)-F(x)}^4 \le 8\norm{\Delta_i-\Delta}^4 + 8\norm{\xi_i}^4.
+\]
+Applying the same inequality once more to $\Delta_i-\Delta$, we obtain
+\[
+\norm{\Delta_i-\Delta}^4 \le 8\big(\norm{\Delta_i}^4+\norm{\Delta}^4\big).
+\]
+Averaging over $i$ and using Jensen’s inequality for the convex map $u\mapsto \norm{u}^4$,
+\[
+\frac{1}{n}\sum_{i=1}^n \norm{F_i(x)-F(x)}^4
+\le 128\Big(\tfrac{1}{n}\sum_{i=1}^n \norm{\Delta_i}^4\Big)
++ 8\Big(\tfrac{1}{n}\sum_{i=1}^n \norm{\xi_i}^4\Big).
+\]
+Moreover, $\norm{\xi_i}=\norm{F_i(x^*)-F(x^*)}\le \norm{F_i(x^*)}+\norm{F(x^*)}$, hence by $(a+b)^4\le 8(a^4+b^4)$ and Jensen,
+\[
+\frac{1}{n}\sum_{i=1}^n \norm{\xi_i}^4
+\le 16\Big(\tfrac{1}{n}\sum_{i=1}^n \norm{F_i(x^*)}^4\Big)=16\,\sigma_*^4.
+\]
+By Lipschitz continuity, we have
+\[
+\norm{\Delta_i}=\norm{F_i(x)-F_i(x^*)}\le L_i\norm{x-x^*}
+\quad\Rightarrow\quad
+\frac{1}{n}\sum_{i=1}^n \norm{\Delta_i}^4
+\le \Big(\tfrac{1}{n}\sum_{i=1}^n L_i^4\Big)\norm{x-x^*}^4.
+\]
+Combine the last two inequalities to obtain
+\[
+\frac{1}{n}\sum_{i=1}^n \norm{F_i(x)-F(x)}^4
+\le 128\Big(\tfrac{1}{n}\sum_{i=1}^n L_i^4\Big)\norm{x-x^*}^4
++128\,\sigma_*^4
+\]
+\end{proof}
+\newpage
+\subsection{A Combinatorial Tool for Higher-Order Moments In Sampling without Replacement}\label{app: combinatorial}
+As part of our analysis, we require bounds on the fourth moment of empirical averages when the underlying data are sampled \emph{without replacement}.  
+While this result is of independent combinatorial interest—appearing naturally in the study of randomization effects and variance reduction—it also plays a technical role in controlling higher-order error terms in our proofs.  
+The following lemma provides a clean upper bound in terms of simple population statistics such as $\hat\Sigma$ and $S_4$.
+
+\begin{lemma}[Fourth moment of a sample mean; upper bound] \label{lemma: 4th-order-property}
+Let $X_1,\dots,X_n\in\mathbb{R}^d$ be fixed vectors, let
+\[
+\bar X:=\frac1n\sum_{i=1}^n X_i,\qquad r_i:=X_i-\bar X,\qquad
+\hat\Sigma:=\frac1n\sum_{i=1}^n r_i r_i^\top,
+\]
+and define the population sums
+\[
+S_4:=\sum_{i=1}^n \|r_i\|^4,\qquad
+U_2:=\sum_{i\ne j}\|r_i\|^2\|r_j\|^2,\qquad
+T_2:=\sum_{i\ne j}(r_i^\top r_j)^2 .
+\]
+Draw a size-$k$ simple random sample without replacement, with
+indices $(\omega_1,\dots,\omega_n)$ uniformly chosen among all $k$-subsets,
+and set $\bar X_\omega=\frac1k\sum_{t=1}^k X_{\omega_t}$.
+Then
+\begin{equation}
+\label{eq:target-upper}
+\mathbb{E}\,\|\bar X_\omega-\bar X\|^4
+\;\le\;
+\frac{1}{k^4}\left[
+\frac{k}{n}\,S_4
++\frac{9k(k-1)}{n(n-1)}\Big(n^2(\operatorname{tr}\hat\Sigma)^2 - S_4\Big)
+\right].
+\end{equation}
+\end{lemma}
+\begin{proof}
+Write $S:=\sum_{t=1}^k r_{\omega_t}$ so that $\bar X_\omega-\bar X=\frac1k S$ and
+$\|\bar X_\omega-\bar X\|^4=\frac1{k^4}\|S\|^4$.
+Using the Frobenius inner product $\langle A,B\rangle_F=\operatorname{tr}(A^\top B)$,
+\[
+\|S\|^2=\left\|\sum_{t=1}^k r_{\omega_t}\right\|^2
+=\sum_{t,u=1}^k r_{\omega_t}^\top r_{\omega_u}
+=\Big\langle \sum_{t=1}^k r_{\omega_t}r_{\omega_t}^\top,\; \sum_{u=1}^k r_{\omega_u}r_{\omega_u}^\top\Big\rangle_F,
+\]
+and hence
+\[
+\|S\|^4
+=\Big(\sum_{t,u=1}^k r_{\omega_t}^\top r_{\omega_u}\Big)^2
+=\sum_{t,u,s,v=1}^k (r_{\omega_t}^\top r_{\omega_u}) (r_{\omega_s}^\top r_{\omega_v}).
+\]
+Taking expectation and using the inclusion probabilities for simple random
+sampling without replacement,
+\[
+\mathbb{P}(\omega_a=i)=\frac{1}{n},\qquad
+\mathbb{P}(\omega_a=i,\ \omega_b=j)=\frac{1}{n(n-1)}\quad (i\ne j),
+\]
+we may group terms by the equality pattern among the \emph{positions}
+$(t,u,s,v)$ (Hoeffding/U-statistics enumeration). Only three patterns survive:
+
+\medskip
+\noindent
+\textbf{(P1) Diagonal--diagonal:} $(t=u)$ and $(s=v)$.
+This contributes
+\[
+\frac{k}{n}\,S_4
+\quad+\quad
+\frac{k(k-1)}{n(n-1)}\,U_2 .
+\]
+
+\noindent
+\textbf{(P2) Diagonal--off-diagonal (or vice versa):}
+exactly one of the pairs $(t,u)$ or $(s,v)$ is diagonal and the other is off-diagonal.
+Counting gives a coefficient $4\binom{k}{1}\binom{k-1}{2}$,
+leading to the contribution
+\[
+\frac{4\binom{k}{1}\binom{k-1}{2}}{\binom{n}{1}\binom{n-1}{2}}\; T_2
+=\frac{6k(k-1)}{n(n-1)}\,T_2 .
+\]
+
+\noindent
+\textbf{(P3) Off-diagonal--off-diagonal:}
+both pairs are off-diagonal but correspond to the same unordered pair of distinct sampled units.
+This yields
+\[
+\frac{2\binom{k}{2}}{\binom{n}{2}}\; U_2
+=\frac{2\cdot \frac{k(k-1)}{2}}{\frac{n(n-1)}{2}}\,U_2
+=\frac{2k(k-1)}{n(n-1)}\,U_2 .
+\]
+
+\medskip
+Summing the three contributions we obtain the exact identity
+\begin{equation}
+\label{eq:exact}
+\mathbb{E}\,\|\bar X_\omega-\bar X\|^4
+=\frac{1}{k^4}\left[
+\frac{k}{n}S_4
++\frac{3k(k-1)}{n(n-1)}\,U_2
++\frac{6k(k-1)}{n(n-1)}\,T_2
+\right].
+\end{equation}
+
+Next, by Cauchy--Schwarz,
+\[
+(r_i^\top r_j)^2 \le \|r_i\|^2\,\|r_j\|^2\quad\text{for all }i\ne j,
+\]
+hence $T_2\le U_2$. Plugging this into \eqref{eq:exact} gives
+\[
+\mathbb{E}\,\|\bar X_\omega-\bar X\|^4
+\le \frac{1}{k^4}\left[
+\frac{k}{n}S_4
++\frac{(3+6)k(k-1)}{n(n-1)}\,U_2
+\right]
+= \frac{1}{k^4}\left[
+\frac{k}{n}S_4
++\frac{9k(k-1)}{n(n-1)}\,U_2
+\right].
+\]
+Finally, observe the exact identity
+\[
+U_2
+=\sum_{i\ne j}\|r_i\|^2\|r_j\|^2
+=\Big(\sum_{i=1}^n\|r_i\|^2\Big)^2 - \sum_{i=1}^n\|r_i\|^4
+= n^2\big(\operatorname{tr}\hat\Sigma\big)^2 - S_4,
+\]
+because $\sum_i\|r_i\|^2 = n\,\operatorname{tr}\hat\Sigma$.
+Substituting this into the previous display yields the claimed bound \eqref{eq:target-upper}.
+\end{proof}
+
+\begin{lemma}
+\label{lem: bound_on_stochastic_part_2}
+    Let Assumptions~\ref{assumt: sol_set_non_empty},~\ref{assumpt: lipschitz} hold. If {Perturbed SGD–\RRresh} is run with step size $\gamma \leq \frac{1}{3nL_{max}}$, then it holds that
+    \begin{eqnarray}
+        \exof{\sum_{i=1}^{n-1}\left\|x_k^i - x_k^0\right\|^4\given\filter_k} &\leq& 54\gamma^4 C \norm{x_k-x^*}^{4} + 3456 \gamma^4 (n-1) \sigma_*^{4} + 972 \gamma^4 \frac{n(n+1)}{n-1} (\sigma_*^2)^2 \nonumber
+    \end{eqnarray}
+    where $C = 64n L_{max}^2 + 3n^2(n+1) L_{max}^2 + \frac{n^2(n+1)^2(2n+1)L^4}{10}$. 
+\end{lemma}
+\begin{proof}
+From the epoch-level update \eqref{epoch_wise_update}, it holds 
+    \begin{eqnarray}
+        \|x^i_k - x_k^0\|^4 &=& \gamma^4 i^4 \left\|\frac{1}{i} \sum\limits_{j=0}^{i-1} F_{\omega_k^j}(x^j_k)\right\|^4 \nonumber\\
+    &\stackrel{\eqref{ineqforthefourth}}{\leq}& 27\gamma^4 i^3 \sum\limits_{j=0}^{i-1} \norm{F_{\omega_k^j}  (x_k^j)-F_{\omega_k^j} (x_k^0)}^4 + 27\gamma^4 i^4 \norm{\frac{1}{i}\sum\limits_{j=0}^{i-1} F_{\omega_k^j} (x_k^0)-F (x_k^0)}^4 \nonumber \\
+    && + 27\gamma^4 i^4 \norm{F(x_k^0)}^4\nonumber\\
+    &\stackrel{\text{Assumption } \ref{assumpt: lipschitz}}{\leq}& 27\gamma^4 i^3 L_{max}^4\sum\limits_{j=0}^{i-1} \norm{x_k^j-x_k^0}^2 + 27\gamma^4 i^4\norm{\frac{1}{i}\sum\limits_{j=0}^{i-1} F_{\omega_k^j} (x_k^0)-F (x_k^0)}^4\nonumber \\
+    && + 27\gamma^4 i^4 \norm{F(x_k^0)}^4 \nonumber
+    \end{eqnarray}
+    where at the last step we have used the Lipschitz property of the operators $F_i, \forall i \in [n]$. 
+    Taking expectation condition on the filtration $\mathcal{F}_k$, we get
+    \begin{eqnarray}
+        \Expep{\norm{x_k^i - x_k^0}^4} &\leq& 27\gamma^4 i^3 L_{max}^4 \Expep{\sum\limits_{j=0}^{i-1} \norm{x_k^j-x_k^0}^4} \nonumber \\ 
+        && + 27\gamma^4 i^4 \Expep{\norm{\frac{1}{i}\sum\limits_{j=0}^{i-1} F_{\omega_k^j} (x_k^0)-F (x_k^0)}^4} + 27\gamma^4 i^4\norm{F(x_k^0)}^4 \quad \quad \label{eq: lemma_for_conv_rate_4th_eq1}
+    \end{eqnarray}
+    
+    Substituting in Lemma \ref{lemma: 4th-order-property} $X_{\omega_t} := F_{\omega_k^j} (x_k^0)$ and $k = n$, we get that
+    \begin{eqnarray}
+        \Expep{\norm{\frac{1}{i}\sum\limits_{j=0}^{i-1} F_{\omega_k^j} (x_k^0)-F (x_k^0)}^4} &\leq& \frac{1}{i^4}\left[
+        \frac{i}{n}\,S_4
+        +\frac{9i(i-1)}{n(n-1)}\Big(n^2(\operatorname{tr}\hat\Sigma)^2 - S_4\Big)
+        \right] \nonumber \\
+        &\leq& \frac{1}{i^4}\left[\frac{i}{n}\,S_4 +\frac{9in(i-1)}{n-1} (\operatorname{tr}\hat\Sigma)^2 \right] \label{eq: lemma_for_conv_rate_4th_ordereq2}   
+    \end{eqnarray} 
+    where $S_4 = \sum_{j=0}^{i-1} \|F_{\omega_k^j} (x_k^0)-F (x_k^0)\|^4 \geq 0$ and $\operatorname{tr}\hat\Sigma = \frac{1}{n} \sum_{i=0}^{n-1} \|F_{i} (x_k^0) -F (x_k^0)\|^2$. We, next, upper bound the terms $S_4$ and $\operatorname{tr}\hat{\Sigma}$. From Lemma~\ref{lemma: 4th-order-property}, we have that
+    \begin{eqnarray}
+        S_4 &\leq& 128\Bigg(\frac{1}{n}\sum_{i=1}^n L_i^{4}\Bigg)\norm{x_k-x^*}^{4}
+\;+\;128\,\sigma_*^{4}. \label{eq: bound_on_stochastic_part_2_eq_1}
+    \end{eqnarray}
+    Using Proposition A.2 \citep{emmanouilidis2024stochastic}, we have that
+    \begin{eqnarray}
+        \operatorname{tr}\hat\Sigma = \frac{1}{n} \sum_{i=0}^{n-1} \|F_{i} (x_k^0) -F (x_k^0)\|^2 \stackrel{}{\leq} A\|x_k-x^*\|^2 + 2\sigma_*^2,\label{eq: bound_on_stochastic_part_2_eq_2}
+    \end{eqnarray}
+    since each $F_i$ is Lipschitz. Substituting \eqref{eq: bound_on_stochastic_part_2_eq_1}, \eqref{eq: bound_on_stochastic_part_2_eq_2} into \eqref{eq: lemma_for_conv_rate_4th_eq1}, we obtain that
+    \begin{eqnarray}
+        i^4 \Expep{\norm{\frac{1}{i}\sum\limits_{j=0}^{i-1} F_{\omega_k^j} (x_k^0)-F (x_k^0)}^4} &\leq& \frac{128i}{n^2}\sum_{i=1}^n L_i^{4}\norm{x_k-x^*}^{4} + 
+        \frac{128i}{n}\sigma_*^{4} \nonumber \\
+        && + \frac{9i(i-1)}{n-1}(A\|x_k-x^*\|^2 + 2\sigma_*^2)^2 \nonumber \\
+        &\stackrel{\eqref{ineq1}}{\leq}&  \frac{128i}{n^2}A_{4}\norm{x_k-x^*}^{4} + \frac{128i}{n}\sigma_*^{4} \nonumber \\
+        && + \frac{18i(i-1)}{n-1} A\|x_k-x^*\|^4 + \frac{36i(i-1)}{n-1} (\sigma_*^2)^2 \quad \label{eq: lemma_for_conv_rate_eq4th_2}
+    \end{eqnarray}
+    where we have let $A_4:= \sum_{i=1}^n L_i^4$ for brevity.
+    From inequality \eqref{eq: lemma_for_conv_rate_eq4th_2} and \eqref{eq: lemma_for_conv_rate_4th_eq1}, thus, we obtain
+    \begin{eqnarray}
+            \Expep{\norm{x_k^i - x_k^0}^4} &\leq& 27\gamma^4 i^3 L_{max}^4 \Expep{\sum\limits_{j=0}^{i-1} \norm{x_k^i-x_k^0}^4} \nonumber \\
+            && + 27\gamma^4 \Big[\frac{128i}{n^2}A_{4}\norm{x_k-x^*}^{4} + \frac{128i}{n}\sigma_*^{4} + \frac{18i(i-1)}{n-1} A\|x_k-x^*\|^4 + \frac{36i(i-1)}{n-1} (\sigma_*^2)^2\Big] \nonumber \\
+            && + 27\gamma^4 i^4\norm{F(x_k^0)}^4 \nonumber \\
+            &\leq& 27\gamma^4 i^3 L_{max}^4 \Expep{\sum\limits_{j=0}^{i-1} \norm{x_k^i-x_k^0}^4} \nonumber \\
+            && + 27\gamma^4 \Big[\left(\frac{128i}{n^2}A_{4} + \frac{18i(i-1)}{n-1} A\right) \norm{x_k-x^*}^{4} + \frac{128i}{n}\sigma_*^{4} + \frac{36i(i-1)}{n-1} (\sigma_*^2)^2\Big] \nonumber \\
+            && + 27\gamma^4 i^4\norm{F(x_k^0)}^4 \label{eq: lemma_for_conv_rate_eq4th_3} 
+    \end{eqnarray}
+
+    By summing over $0\leq i \leq n-1$, we have that 
+    \begin{eqnarray}
+        \sum_{i=0}^{n-1} \Expep{\norm{x_k^i - x_k^0}^2} &\leq& 27\gamma^4 L_{max}^4 \frac{n^2(n-1)^2}{4} \sum_{i=0}^{n-1} \Expep{\norm{x_k^i - x_k^0}^2} \nonumber \\
+            && + 27\gamma^4 \left(\frac{64(n-1)}{n}A_{4} + 18n(n+1) A\right) \norm{x_k-x^*}^{4} + 1728 \gamma^4 (n-1) \sigma_*^{4} \nonumber \\
+            && + \gamma^4 \frac{972 n(n+1)}{n-1} (\sigma_*^2)^2 + 27\gamma^4 \frac{n(n+1)(2n+1)(3n^2+3n-1)}{30} \norm{F(x_k^0)}^4, \quad \quad \label{eq: lemma_for_conv_rate_eq5_4th}
+    \end{eqnarray}
+    where we used the facts 
+        \begin{eqnarray}
+        && \sum_{i=0}^{n-1} i = \frac{n(n-1)}{2}, \quad \sum_{i=0}^{n-1} i (i-1) = n(n+1)(n-1), \quad 
+        \sum_{i=0}^{n-1} \frac{i(n-i)}{n-1} = \frac{n(n+1)}{6}, \nonumber \\
+        && \sum_{i=0}^{n-1} i^3 = \left(\frac{n(n-1)}{2}\right)^2, \quad \sum_{i=0}^{n-1} i^4 = \frac{n(n+1)(2n+1)(3n2+3n-1)}{30}. \nonumber
+    \end{eqnarray}
+    We, thus, have that by rearranging the terms in \eqref{eq: lemma_for_conv_rate_eq5_4th} it holds that 
+    \begin{eqnarray}
+        &&\left[1 - 27\gamma^4 L_{max}^4 \frac{n^2(n-1)^2}{4}\right] \sum_{i=0}^{n-1} \Expep{\norm{x_k^i - x_k^0}^4} \nonumber \\
+        &\leq& 27\gamma^4 \left(\frac{64(n-1)}{n}A_{4} + 18n(n+1) A\right) \norm{x_k-x^*}^{4} + 1728 \gamma^4 (n-1) \sigma_*^{4} \nonumber \\
+        && + \gamma^4 \frac{972n(n+1)}{n-1} (\sigma_*^2)^2 + 27\gamma^4 \frac{n(n+1)(2n+1)(3n^2+3n-1)}{30} \norm{F(x_k^0)}^4 \nonumber
+    \end{eqnarray}
+    For $\gamma \leq \frac{1}{3nL_{max}}$ we have that $(1 - 27\gamma^4 L_{max}^4 \frac{n^2(n-1)^2}{4}) \geq \frac{1}{2}$, and thus we obtain
+    \begin{eqnarray}
+        \sum_{i=0}^{n-1} \Expep{\norm{x_k^i - x_k^0}^4} &\leq& 54\gamma^4 \left(\frac{64(n-1)}{n}A_{4} + 18n(n+1) A\right) \norm{x_k-x^*}^{4} \nonumber \\
+        && + 3456 \gamma^4 (n-1) \sigma_*^{4} + \gamma^4 \frac{972 n(n+1)}{n-1} (\sigma_*^2)^2 \nonumber \\
+        && + 54\gamma^4 \frac{n(n+1)(2n+1)(3n^2+3n-1)}{30} \norm{F(x_k^0)}^4 \nonumber \\
+        &\stackrel{\ref{assumpt: lipschitz}}{\leq}& 54\gamma^4 \left(64 A_{4} + 18n(n+1) A + \frac{n^2(n+1)^2(2n+1)L^4}{10}\right) \norm{x_k-x^*}^{4} \nonumber \\
+        && + 3456 \gamma^4 (n-1) \sigma_*^{4} + \gamma^4 \frac{972n(n+1)}{n-1} (\sigma_*^2)^2 \nonumber \\
+        &\leq& 54\gamma^4 \left(64n L_{max}^2 + 36n^2(n+1) L_{max}^2 + \frac{n^2(n+1)^2(2n+1)L^4}{10}\right) \norm{x_k-x^*}^{4} \nonumber \\
+        && + 3456 \gamma^4 (n-1) \sigma_*^{4} + \gamma^4 \frac{972n(n+1)}{n-1} (\sigma_*^2)^2 \nonumber
+    \end{eqnarray}
+    where at the last step we used the fact that $A_4 = \sum_{i=0}^{n-1} L_i^4 \leq n L_{max}^4$ and $A = 2 \sum_{i=0}^{n-1} L_i^2 \leq 2n L_{max}^2$.
+\end{proof}
+
+
+To establish Theorem~\ref{thm: rr_1_rr_2}, we will first prove upper bounds on the higher moments of the distance of the epoch-level iterates from the optimum, as well as the connection of the Lipschitz property of the per-step operators $F_i, i \in [n],$ and the Lipschitz constant of the epoch-level operator $G_{\omega_k}$. We start by providing the bound on the higher moments in the following Lemma. 
+
+\begin{lemma}\label{lemma strongly monotone 4th-moment}
+Let Assumption~\ref{assumt: sol_set_non_empty}-\ref{assumpt: lipschitz} hold and $\lambda = 0$. Then, the iterates of {Perturbed SGD–\RRresh} with stepsize $\gamma \leq \gamma_{max}$ satisfy
+    \begin{eqnarray}
+        \Expe{\|x_{k+1}^{0} - x_*\|^3} &=& \mathcal{O}\left(n^{\frac{3}{2}}\gamma^3\right) \nonumber \\
+        \Expe{\|x_{k+1}^{0} - x_*\|^4} &=& \mathcal{O}\left(\gamma^4\right) \nonumber 
+    \end{eqnarray}
+    where $\gamma_{max} = \gammaubmoments$. 
+\end{lemma}
+\begin{proof}
+We, first, provide the bound on the third moment. From Holder's inequality, we have that
+\begin{eqnarray}
+    \Expe{\|x_{k+1}^{0} - x_*\|^3} &\leq& \left(\Expep{\|x_{k+1}^{0} - x_*\|^2}\right)^{\frac{3}{2}} \nonumber 
+\end{eqnarray}
+From Theorem~\ref{thm: convergence_rate}, it holds that 
+\begin{eqnarray}
+    \Expe{\|x^k_0 - x^*\|^2} &=& \mathcal{O}\left(n\gamma^2\right) , \nonumber
+\end{eqnarray}
+and thus substituting we obtain
+\begin{eqnarray}
+   \Expe{\|x_{k+1}^{0} - x_*\|^3} &\leq& \mathcal{O}\left(n^{\frac{3}{2}}\gamma^3\right), \nonumber
+\end{eqnarray}
+where we have used the fact that the fourth moment of the stochastic oracles is bounded from Assumption~\ref{assumpt: 4th-moment bounded}. 
+Taking the limit of the Markov chain we obtain the bound on the third moment
+\begin{eqnarray}
+    \Expe{\|x_{k+1}^{0} - x_*\|^3} &\leq& \mathcal{O}\left(n^{\frac{3}{2}}\gamma^3\right) \nonumber
+\end{eqnarray}
+We, next, bound the fourth moment $\Expe{\|x_{k+1}^{0} - x_*\|^4}$. We have that
+\begin{eqnarray}
+	\| x^{k+1}_0 - x^*\|^4 &=& \left(\| x^{k+1}_0 - x^*\|^2\right)^2 \nonumber \\ 
+    &\stackrel{\eqref{eq: conv_rate_eq3}}{\leq}& \left(\frac{\left\|x_k^0 - x^* - \gamma  n F(x_k^0) \right\|^2}{1 - \gamma  n\mu} + \frac{2\gamma L_{max}^2}{\mu} \sum_{i=1}^{n-1}\left\|x_k^i - x_k^0\right\|^2 +\frac{2\gamma}{n\mu} \left\|\mathbb{U}_k\right\|^2\right)^2\nonumber 
+\end{eqnarray}
+Letting $T_1 = \left\|x_k - x^* - \gamma  n F(x_k^0) \right\|^2, T_2 = \sum_{i=1}^{n-1}\left\|x_k^i - x_k^0\right\|^2$ and $T_3 = \left\|\mathbb{U}_k\right\|^2$ for brevity, we have 
+\begin{eqnarray}
+  \| x^{k+1}_0 - x^*\|^4 &\stackrel{}{\leq}& \left(\frac{T_1}{1 - \gamma  n\mu} + \frac{2\gamma}{\mu} T_2 + \frac{2\gamma}{\mu} T_3\right)^2 \label{p2_0}
+\end{eqnarray}
+From \eqref{eq: bound_deterministic} in Lemma~\ref{lem: bound_on_deter}, we can bound the term $T_1$ by
+\begin{eqnarray}
+    T_1 &\leq& \left[(1 - \gamma n\mu)^2 + \gamma^2 n^2 L_{max}^2\right] \|x_k - x^*\|^2 + 2 \gamma n \lambda \nonumber
+\end{eqnarray}
+Substituting the bound of $T_1$ into \eqref{p2_0}, we get
+\begin{eqnarray}
+    \| x^{k+1}_0 - x^*\|^4 &\leq& \left(\frac{(1 - \gamma n\mu)^2 + \gamma^2 n^2 L_{max}^2}{1 - \gamma  n\mu} \|x_k - x^*\|^2 +\frac{2\gamma L_{max}^2}{\mu} T_2 + \frac{2\gamma}{n\mu} T_3\right)^2 \nonumber 
+\end{eqnarray}
+Letting $c_1 = \frac{(1 - \gamma n\mu)^2 + \gamma^2 n^2 L_{max}^2}{1 - \gamma  n\mu}$ for brevity and performing Young's inequality \eqref{ineq_young_for_t} with $t = c_1$, we obtain that
+\begin{eqnarray}
+     \| x^{k+1}_0 - x^*\|^4 &\leq& \frac{1}{c_1} \left(c_1 \|x_k - x^*\|^2 + \frac{2\gamma}{n\mu} T_3\right)^2 + \frac{4\gamma^2 L_{max}^4}{c_1 \mu^2} T_2^2 \nonumber\\
+    &\leq& c_1 \|x^k_0 - x^*\|^4 + \frac{4\gamma^2}{\mu^2 n^2 c_1} T_3^2 + \frac{4c_1\gamma}{n\mu} T_3\|x_k - x^*\|^2 + \frac{2\gamma^2 L_{max}^4}{\mu^2} T_2^2 \nonumber 
+\end{eqnarray}
+
+Taking expectation with respect to the permutation $\omega_k$ and condition on the filtration $\mathcal{F}^k$ (history of $x_k^0$) as well as using the fact that the noise $\noise_k$ is independent of the stochasticity of $\omega_k$, we get 
+ \begin{eqnarray}
+    \Expep{\|x_{k+1}^{0} - x^*\|^4} &\leq& c_1 \|x^k_0 - x^*\|^4 + \frac{4\gamma^2}{\mu^2 n^2 c_1} T_3^2 + \frac{4c_1\gamma}{n\mu} T_3\|x_k - x^*\|^2 + \frac{2\gamma^2 L_{max}^4}{\mu^2} \Expep{T_2^2} \quad \quad \label{eq: to_fourth} 
+\end{eqnarray}
+
+Using Lemma~\ref{lem: bound_on_stochastic_part_2}, we can bound the term 
+\begin{eqnarray}
+    \Expep{T_2^2} &\leq& 54\gamma^4 C \norm{x_k-x^*}^{4}  + 3456 \gamma^4 (n-1) \sigma_*^{4} + 972 \gamma^4 \frac{n(n+1)}{n-1} (\sigma_*^2)^2 \nonumber
+\end{eqnarray}
+where $C = 64n L_{max}^2 + 3n^2(n+1) L_{max}^2 + \frac{n^2(n+1)^2(2n+1)L^4}{10}$ and thus substituting into \eqref{eq: to_fourth} we obtain that
+\begin{eqnarray}
+    \Expep{\|x_{k+1}^{0} - x^*\|^4} &\leq& \left(c_1 + \frac{108 \gamma^6 L_{max}^4}{\mu^2} C \right) \|x^k_0 - x^*\|^4 + \frac{4\gamma^2}{\mu^2 n^2 c_1} T_3^2 + \frac{4c_1\gamma}{n\mu} T_3\|x_k - x^*\|^2 \nonumber \\
+    && + \frac{6912 \gamma^6 L_{max}^4}{\mu^2} (n-1) \sigma_*^{4} +  \frac{1944 \gamma^6 L_{max}^4}{\mu^2} \frac{n(n+1)}{n-1} (\sigma_*^2)^2. \label{eq: to_take_expecta}
+\end{eqnarray}
+
+The next step involves taking expectation on both sides with respect to the randomness of the $\noise_k$ and will require a bound on the terms $\Expe{T_3}, \Expe{T_3^2}$. Since $\mathbb{U}_k \sim \mathcal{N}\left(0, \frac{\gamma^2n^2}{d} \sigma_*^2\mathbb{I}_d\right)$, we obtain \[
+\mathbb{E}\big[\|\mathbb{U}_k\|^2\big] 
+= \operatorname{tr}\!\left(\frac{\gamma^2n^2}{d} \sigma_*^2 I_d\right)
+= \gamma^2 n^2 \sigma_*^2 .
+\]
+and 
+\[
+\mathbb{E}\big[\|\noise_k\|^4\big] = d(d+2) \left(\frac{\gamma^2n^2}{d} \sigma_*^2\right)^2 \leq \gamma^4n^4 (\sigma_*^2)^2,\nonumber
+\]
+as $\|\noise_k\|^2 / \left(\frac{\gamma^2n^2}{d} \sigma_*^2\right)^2 \sim \chi^2_d$ and $\mathbb{E}\big[(\chi^2_d)^2\big] = d^2 + 2d$.
+
+Thus, taking expectation on both sides of \eqref{eq: to_take_expecta} and substituting the bounds on $\Expe{T_3}, \Expe{T_3^2}$, we have that
+\begin{eqnarray}
+    \Expe{\|x_{k+1}^{0} - x^*\|^4} &\leq& \left(c_1 + \frac{108 \gamma^6 L_{max}^4}{\mu^2} C \right) \|x^k_0 - x^*\|^4 + \frac{4\gamma^2}{\mu^2 n^2 c_1} \Expe{T_3^2} + \frac{4c_1\gamma}{n\mu} \Expe{T_3} \|x_k - x^*\|^2 \nonumber \\
+    && + \frac{6912 \gamma^6 L_{max}^4}{\mu^2} (n-1) \sigma_*^{4} + \frac{1944 \gamma^6 L_{max}^4}{\mu^2} \frac{n(n+1)}{n-1} (\sigma_*^2)^2 \nonumber\\
+    &\leq& \left(c_1 + \frac{108 \gamma^6 L_{max}^4}{\mu^2} C \right) \|x^k_0 - x^*\|^4 + \frac{4\gamma^6n^2}{\mu^2 c_1} (\sigma_*^2)^2 + \frac{4c_1\gamma^3 n}{\mu} \sigma_*^2 \|x_k - x^*\|^2 \nonumber \\
+    && + \frac{6912 \gamma^6 L_{max}^4}{\mu^2} (n-1) \sigma_*^{4} + \frac{1944 \gamma^6 L_{max}^4}{\mu^2} \frac{n(n+1)}{n-1} (\sigma_*^2)^2 \nonumber 
+\end{eqnarray}
+Taking expectation on both sides, using the tower law of expectation and the fact that from Theorem~\ref{thm: convergence_rate} $\Expe{\|x^k_0 - x^*\|^2} = \mathcal{O}\left(n\gamma^2\right) \sigma_*^2$, we obtain
+\begin{eqnarray}
+    \Expe{\|x_{k+1}^{0} - x^*\|^4} &\leq& \left(c_1 + \frac{108 \gamma^6 L_{max}^4}{\mu^2} C \right) \Expe{\|x^k_0 - x^*\|^4} + \frac{4\gamma^6n^2}{\mu^2 c_1} (\sigma_*^2)^2 \nonumber \\ 
+    && + \frac{1944 \gamma^6 L_{max}^4}{\mu^2} (\sigma_*^2)^2 + \frac{4c_1\gamma^3 n}{\mu} \sigma_*^2 \Expe{\|x_k - x^*\|^2} \nonumber \\
+    && + \frac{6912 \gamma^6 L_{max}^4}{\mu^2} (n-1) \sigma_*^{4} + \frac{1944 \gamma^6 L_{max}^4}{\mu^2} \frac{n(n+1)}{n-1} (\sigma_*^2)^2 \nonumber\\
+    &\leq& \left(c_1 + \frac{108 \gamma^6 L_{max}^4}{\mu^2} C \right) \Expe{\|x^k_0 - x^*\|^4} + \frac{4\gamma^6n^2}{\mu^2 c_1} (\sigma_*^2)^2 \nonumber \\
+    && + \frac{1944 \gamma^6 L_{max}^4}{\mu^2} (\sigma_*^2)^2 + \frac{4c_1\gamma^3 n}{\mu} \mathcal{O}\left(n\gamma^2\right) (\sigma_*^2)^2 \nonumber \\
+    && + \frac{6912 \gamma^6 L_{max}^4}{\mu^2} (n-1) \sigma_*^{4} + \frac{1944 \gamma^6 L_{max}^4}{\mu^2} \frac{n(n+1)}{n-1} (\sigma_*^2)^2 \nonumber \\
+    &\leq& \left(c_1 + \frac{108 \gamma^6 L_{max}^4}{\mu^2} C \right) \Expe{\|x^k_0 - x^*\|^4} + \mathcal{O}\left(\frac{\gamma^6 n^2}{c_1} + \frac{c_1n\gamma^5}{\mu} + \gamma^6 n\right) (\sigma_*^2)^2  \nonumber \\
+    && + \frac{6912 \gamma^6 L_{max}^4}{\mu^2} (n-1) \sigma_*^{4} \label{eq: eq_t2}
+\end{eqnarray}
+
+Selecting the stepsize $\gamma \leq \min\left\{\frac{1}{3nL_{max}}, \frac{\mu}{3nL_{max}^2}, \frac{\mu^{3/5}}{8nL_{max}^{3/5}}\right\}$, we have that
+\begin{equation}
+    c_1 =  1 - \gamma n\mu + \frac{\gamma^2 n^2 L_{max}^2}{1 - \gamma  n\mu} \leq 1 - \frac{\gamma n \mu}{2} \nonumber
+\end{equation}
+and 
+\begin{eqnarray}
+   c_1 + \frac{108 \gamma^6 L_{max}^4}{\mu^2} C &\leq& 1 - \frac{\gamma n \mu}{2} + \frac{108 \gamma^6 L_{max}^4}{\mu^2} C \nonumber \\
+   &\stackrel{C \leq 64n^5 L_{max}^4}{\leq}& 1 - \frac{\gamma n \mu}{2} + \frac{108 \gamma^6 L_{max}^4}{\mu^2} 64n^5 L_{max}^4 \nonumber \\
+   &\leq& 1 - \frac{\gamma n \mu}{4} \label{p2_2}
+\end{eqnarray}
+Thus, substituting \eqref{p2_2} in \eqref{eq: eq_t2} 
+\begin{eqnarray}
+   \Expe{\|x_{k+1}^{0} - x^*\|^4} &\leq& \left(1 - \frac{\gamma n \mu}{4}\right) \Expe{\|x^k_0 - x^*\|^4} + \mathcal{O}\left(\gamma^5 n\right) (\sigma_*^2)^2 + \frac{6912 \gamma^6 L_{max}^4}{\mu^2} (n-1) \sigma_*^{4} \nonumber
+\end{eqnarray}
+
+Taking expectation with respect to the invariant measure $\pi_{\gamma}$ and using Assumption~\ref{assumpt: 4th-moment bounded} and the fact that $\sigma_*^2 < +\infty$, we obtain
+\begin{eqnarray}
+    \frac{\gamma n \mu}{4} \ex_{x \sim \pi_{\gamma}}{\|x - x^*\|^4} &\leq& \mathcal{O}\left(\gamma^5 n\right) \nonumber
+\end{eqnarray}
+and thus we have 
+\begin{eqnarray}
+    \ex_{x \sim \pi_{\gamma}}{\|x - x^*\|^4} &\leq& \mathcal{O}\left(\gamma^4 \right) \nonumber
+\end{eqnarray}
+\end{proof}
+

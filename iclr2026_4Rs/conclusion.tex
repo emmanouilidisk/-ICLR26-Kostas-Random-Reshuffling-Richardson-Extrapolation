@@ -1,0 +1,16 @@
+% !TEX root = ./iclr2026_conference.tex
+\vspace{-1em}
+\section{Conclusion}
+\vspace{-0.75em}
+In summary, our work establishes that the synergy of random reshuffling and extrapolation yields a principled reduction of bias, culminating in accelerated convergence guarantees for structured non-monotone VIPs.  
+By combining Markov chain techniques, spectral analysis, and higher-moment bounds, we provide the first rigorous evidence that these heuristics can be synergistically integrated rather than studied in isolation.  
+This perspective bridges a long-standing gap between practice and theory, offering a systematic framework that extends naturally to a broad class of constant step-size stochastic methods.  
+We view this as a foundation for a new generation of analyses where practical heuristics are not only empirically verified but also theoretically grounded to deliver provable performance improvements in complex stochastic optimization landscapes.
+% We view this as a foundation for a new generation of analyses where practical heuristics are not only justified but shown to deliver provable performance improvements in complex stochastic optimization landscapes.
+
+% In this work, we study the synergy of two common heuristics in stochastic gradient methods, showing that their combination leads to a refined bias and an accelerated rate of convergence in structured non-monotone VIPs. In particular, for the heuristic of random reshuffling we initially perform an analysis of the dynamics under the biased oracle and establish a rate of convergence in the setting of weakly quasi strong monotone operators. Additionally, by smoothing the discrete noise induced by reshuffling we employ a Markov chain analysis to establish a law of large numbers and a central limit theorem for its iterates. Then, we leverage spectral tensor techniques to show that the heuristic of extrapolation accelerates the convergence of the method even further and can be effectively combined with the reshuffling. The synergy of the aforementioned techniques yields a cubic improvement in the bias of the method, providing an accelerated convergence in the setting of structured non-monotone VIPs.
+
+% There are several interesting avenues for future work. Of immediate interest is examining the role of another variant of extrapolation, focusing on the iterations of the algorithm instead of the step sizes, and exploring its interplay with reshuffling. Extending the current results to other commonly employed algorithms, as the stochastic Extragradient method or the Optimistic Gradient Descent Ascent, is another interesting future direction. Applying the aforementioned techniques to the training of deep networks and generative adversarial networks and exploiting their role in the generalization and the generative quality respectively consist promising avenues for further investigation. 
+
+
+% We believe that our framework offers a principled design paradigm that extends naturally to other constant step-size stochastic methods—ranging from single-call to multi-call extragradient schemes, and encompassing extragradient, optimistic, and mirror-prox variants \citep{hsieh2019convergence, azizian2020tight}. We leave the full exploration of these directions to future work.

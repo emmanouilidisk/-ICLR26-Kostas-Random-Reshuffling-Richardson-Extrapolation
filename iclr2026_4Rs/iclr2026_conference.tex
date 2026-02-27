@@ -1,0 +1,1081 @@
+\documentclass{article} % For LaTeX2e
+\usepackage{iclr2026_conference,times}
+
+%--------------------------------------------------
+% Standard packages
+%--------------------------------------------------
+\usepackage{amsmath,amssymb,amsthm,mathtools}
+\usepackage{tikz}
+\usetikzlibrary{fadings,patterns,shadows.blur,shapes,shapes.geometric}
+\usepackage{array,booktabs,multirow,tabularx}
+\usepackage{yhmath,mathdots,extarrows}
+\usepackage{siunitx,gensymb}
+\usepackage{physics,cancel,color,xcolor,xspace}
+\usepackage{mdframed,thmtools}
+\usepackage{pifont}
+\usepackage[normalem]{ulem} % strikeout text
+\usepackage{bbold}          % for \mathbb{1}
+\usepackage{enumitem}
+\usepackage{wrapfig}
+\usepackage{algorithm}      % floating algorithm environment
+\usepackage{algpseudocode}  % pseudocode macros (from algorithmicx package)
+
+%--------------------------------------------------
+% Hyperref setup
+%--------------------------------------------------
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    citecolor=teal,
+    urlcolor=magenta,
+    pdfauthor={Your Name},
+    pdftitle={Paper Title},
+    pdfborder={0 0 0}
+}
+\usepackage{url}
+\usepackage[sort&compress,capitalize,nameinlink]{cleveref}		% for cleveref formatting
+
+%--------------------------------------------------
+% Colors
+%--------------------------------------------------
+\definecolor{darkgreen}{RGB}{110,192,19}
+\definecolor{shadecolor}{gray}{0.9}
+
+%--------------------------------------------------
+% Theorem styles
+%--------------------------------------------------
+\newtheoremstyle{informal}
+  {3pt}{3pt}{\itshape}{}{\bfseries}{.}{ }
+    {Main Result (Informal Theorem)}
+%  {Main Result (Informal Theorem)~\thmnumber{#2}}
+
+\theoremstyle{informal}
+\newtheorem*{maininformal}{}
+%\newtheorem{maininformal}{}
+
+\newtheoremstyle{remark}
+  {3pt}{3pt}{\itshape}{}{\bfseries}{.}{ }
+%    {Main Result (Informal Theorem)}
+  {Remark~\thmnumber{#2}}
+\theoremstyle{remark}
+\newtheorem{draftremark}{}
+
+\declaretheoremstyle[
+  headfont=\normalfont\bfseries,
+  notefont=\mdseries, notebraces={(}{)},
+  bodyfont=\normalfont,
+  postheadspace=0.5em,
+  spaceabove=1pt,
+  mdframed={
+    skipabove=8pt, skipbelow=8pt,
+    hidealllines=true,
+    backgroundcolor={shadecolor},
+    innerleftmargin=4pt,
+    innerrightmargin=4pt}
+]{shaded}
+
+\declaretheorem[style=shaded,within=section]{definition}
+\declaretheorem[style=shaded,sibling=definition]{theorem}
+\declaretheorem[style=shaded,sibling=definition]{proposition}
+\declaretheorem[style=shaded,sibling=definition]{assumption}
+\declaretheorem[style=shaded,sibling=definition]{corollary}
+\declaretheorem[style=shaded,sibling=definition]{lemma}
+\declaretheorem[style=shaded,sibling=definition]{example}
+
+
+%--------------------------------------------------
+% Editing / debugging helpers
+%--------------------------------------------------
+\newcommand{\debug}[1]{#1}
+\newcommand{\kostas}[1]{\textcolor{blue}{[Kostas: #1]}}
+
+%--------------------------------------------------
+% Handy wrappers for operators/macros
+%--------------------------------------------------
+\newcommand{\textbrac}[1]{\textup[#1\textup]}
+\newcommand{\textpar}[1]{\textup(#1\textup)}
+\newcommand{\newmacro}[2]{\newcommand{#1}{\debug{#2}}}
+\newcommand{\newop}[2]{\DeclareMathOperator{#1}{\debug{#2}}}
+
+%--------------------------------------------------
+% Custom macros (RR, noise, prob, expectations, etc.)
+%--------------------------------------------------
+\newcommand{\RRresh}{\texttt{RR}\textsubscript{1}} % Random Reshuffling
+\newcommand{\RRrom}{\texttt{RR}\textsubscript{2}}  % Richardson–Romberg
+\newcommand{\gammaub}{\min\left\{\frac{1}{3nL_{max}}, \frac{\sqrt{1+6 \mu^2 L_{max}^2} -1}{12nL_{max}^2}\right\}}
+\newcommand{\gammaubmoments}{\min\left\{\frac{\mu}{3nL_{max}^2}, \frac{\sqrt{1+6 \mu^2 L_{max}^2} -1}{12nL_{max}^2}, \frac{\mu^{3/5}}{8nL_{max}^{3/5}}\right\}}
+\newcommand{\gammaubbothrr}{\min\left\{\frac{\mu}{3nL_{max}^2}, \frac{\sqrt{1+6 \mu^2 L_{max}^2} -1}{12nL_{max}^2}, \frac{\mu^{3/5}}{8nL_{max}^{3/5}}\right\}}
+\newcommand{\as}{\debug{\textpar{a.s.}}\xspace}
+
+%% Math commands 
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\Var}{\operatorname{\textrm{Var}}}
+\newcommand{\goto}{\rightarrow}
+\newcommand{\sgn}{\mathop\mathrm{sgn}}
+\newcommand{\N}{\mathcal{N}}
+\newcommand{\A}{\mathcal{A}}
+\newcommand{\F}{\mathcal{F}}
+\renewcommand{\P}{\operatorname{\mathbb{P}}}
+\newcommand{\E}{\operatorname{\mathbb{E}}}
+\newcommand{\e}{\mathrm{e}}
+\renewcommand\d{\operatorname{\mathrm{d}}}
+\newcommand{\deq}{\overset{\mathrm{d}}{=}}
+\newcommand{\EE}{\operatorname{\mathbb{E}}}
+% \newcommand{\eps}{{\epsilon}}
+\newcommand{\cO}{\operatorname{\mathcal{O}}}
+\newcommand{\RR}{\operatorname{\mathbb{R}}}
+
+\newcommand{\nullspace}{{\mathcal N}}
+\newcommand{\range}{{\mathcal R}}
+\newcommand{\Rank}{\mathop{\bf Rank}}
+% \newcommand{\diag}{\mathop{\bf diag}}
+% \newcommand{\card}{\mathop{\bf card}}
+% \newcommand{\rank}{\mathop{\bf rank}}
+% \newcommand{\conv}{\mathop{\bf conv}}
+% \newcommand{\prox}{\mathbf{prox}}
+% \newcommand{\proj}{\mathbf{proj}}
+
+\newop{\ex}{\mathbb{E}}     % expectation
+\newop{\prob}{\mathbb{P}}   % probability
+\newop{\simplex}{\hull}
+
+\newmacro{\noise}{U}
+\newmacro{\filter}{\mathcal{F}}
+\newmacro{\sgda}{\text{SGDA}}
+\newmacro{\seg}{\text{SEG}}
+\newcommand{\Expep}[1]{\ex\left[#1 \Big| \filter_k\right]}
+\newcommand{\Expepgamma}[1]{\ex_{\pi_{\gamma}}\left[#1 \right]}
+\newcommand{\ie}{i.e.,\xspace}
+
+%--------------------------------------------------
+% Geometry / sets / points
+%--------------------------------------------------
+\newmacro{\point}{x}
+\newmacro{\pointalt}{\alt\point}
+\newmacro{\pointaltalt}{\altalt\point}
+\newmacro{\points}{\mathcal{X}}
+\newmacro{\intpoints}{\relint\points}
+\newmacro{\base}{p}
+\newmacro{\basealt}{q}
+\newmacro{\basealtalt}{u}
+\newmacro{\open}{\mathcal{U}}
+\newmacro{\closed}{\mathcal{C}}
+\newmacro{\cpt}{\mathcal{K}}
+\newmacro{\nhd}{\mathcal{U}}
+\newmacro{\gmat}{g}
+\newmacro{\gdist}{\dist_{\gmat}}
+\newmacro{\mfld}{M}
+\newmacro{\form}{\omega}
+\newmacro{\tvec}{z}
+\newmacro{\uvec}{u}
+\newmacro{\basin}{\mathbb{B}}
+\newmacro{\ball}{\basin}
+\newmacro{\sphere}{\mathbb{S}}
+
+
+%----------------------------------------------------------------------
+%% Dynamical systems
+%----------------------------------------------------------------------
+\newmacro{\tstart}{0}		% for time start
+\renewcommand{\time}{\debug{t}}		% for continuous time
+\newmacro{\timealt}{s}		% for dummy continuous time
+\newmacro{\horizon}{T}		% for horizon
+
+\newmacro{\traj}{x}		% for trajectory
+\newmacro{\trajalt}{y}		% for variant trajectory
+\newmacro{\trajaltalt}{z}		% for second variant
+
+\newmacro{\flowmap}{\Theta}		% for (semi)flow map
+\DeclarePairedDelimiterXPP{\flowof}[2]{\flowmap_{#1}}{(}{)}{}{#2}		% for flow
+
+
+
+%----------------------------------------------------------------------
+%% Optimization (basics)
+%----------------------------------------------------------------------
+\newop{\Opt}{Opt}		% for value of problem
+\newop{\Sol}{Sol}		% for solution of problem
+\newop{\gap}{Gap}	
+\newop{\dualitygap}{Duality-Gap}		% for gap function
+% for gap function
+\newop{\orcl}{Or}		% for oracle
+
+\newmacro{\tfun}{f}		% for test function
+\newmacro{\obj}{f}		% for objective function
+\newmacro{\objalt}{g}		% for variant objective (smooth etc.)
+\newmacro{\sobj}{F}		% for stochastic objective
+
+\newmacro{\gvec}{g}		% for gradient vector
+\newmacro{\oper}{A}		% for operator
+\newmacro{\vecfield}{v}		% for vector field (selection etc.)
+%\newmacro{\payfield}{v}		% for payoff field (selection etc.)
+
+\newcommand{\sol}[1][\point]{#1^{\ast}}		% for solution point (x by default)
+\newcommand{\sols}{\sol[\points]}		% for set of solutions
+\newmacro{\solvec}{\vecfield(\sol)}		% for vector at a solution
+\newmacro{\solpay}{\eq[\payv]}		% for vector at a solution
+
+\newcommand{\test}[1][\point]{\hat#1}		% for test point (x by default)
+
+\newmacro{\signal}{V}		% for signal
+\newmacro{\step}{\gamma}		% for step-size
+\newmacro{\learn}{\eta}		% for learning rate
+
+\newmacro{\vbound}{G}		% for vector bound
+\newmacro{\lips}{\ell}		% for Lipschitz modulus
+\newmacro{\strong}{\mu}		% for strong convexity modulus
+\newmacro{\smooth}{\beta}		% for strong smoothness modulus
+
+
+%----------------------------------------------------------------------
+%% Optimization (convex analysis)
+%----------------------------------------------------------------------
+\newop{\tspace}{T}		% for tangent space
+\newop{\tcone}{TC}		% for tangent cone
+\newop{\dcone}{\tcone^{\ast}}		% for dual cone
+\newop{\ncone}{NC}		% for normal cone
+\newop{\pcone}{PC}		% for polar cone
+\newop{\hull}{\Delta}		% for hull
+
+\newmacro{\cvx}{\mathcal{C}}		% for generic convex set
+\newmacro{\subd}{\partial}		% for subdifferential
+\newcommand{\subsel}{\nabla}		% for subdifferential
+
+
+%----------------------------------------------------------------------
+%% Optimization (min-max)
+%----------------------------------------------------------------------
+\newmacro{\minmax}{\mathcal{L}}		% for minmax objective
+
+\newmacro{\minvar}{{\point_{1}}}		% for minimization variable
+\newmacro{\minvaralt}{\alt\minvar}		% for variant minvar
+\newmacro{\minvars}{\points_{1}}		% for set of minvars
+\newmacro{\minsol}{\sol[\minvar]}		% for min solution
+
+\newmacro{\maxvar}{\point_{2}}		% for maximization variable
+\newmacro{\maxvaaltr}{\alt\maxvar}		% for variant maxvar
+\newmacro{\maxvars}{\points_{2}}		% for set of maxvars
+\newmacro{\maxsol}{\sol[\maxvar]}		% for max solution
+
+
+%----------------------------------------------------------------------
+%% Optimization (mirror descent)
+%----------------------------------------------------------------------
+\newop{\Eucl}{\Pi}		% for Euclidean projection
+\newop{\logit}{\Lambda}		% for logit map
+\newop{\dkl}{KL}		% for Kullback Leibler
+
+\newmacro{\hreg}{h}		% for regularizer
+\newmacro{\hconj}{\hreg^{\ast}}		% for regularizer
+\newmacro{\breg}{D}		% for Bregman divergence
+\newmacro{\mprox}{P}		% for Bregman prox-mapping
+\newmacro{\mirror}{Q}		% for mirror map
+\newmacro{\fench}{F}		% for Fenchel coupling
+\newmacro{\depth}{H}		% for regularizer depth
+\newmacro{\hstr}{K}		% for strong convexity constant
+\newmacro{\hker}{\theta}		% for regularizer kernel
+
+\newmacro{\proxdom}{\points_{\hreg}}		% for prox-domain
+\newmacro{\proxdomi}{\points_{\hreg_{\play}}}		% for prox-domain of player i
+\newmacro{\zone}{\mathbb{D}}		% for Bregman zone
+
+\DeclarePairedDelimiterXPP{\proxof}[2]{\mprox_{#1}}{(}{)}{}{#2}		% for Bregman prox step
+
+\newcommand{\lazy}[1]{#1^{\textup{lazy}}}		% for lazy iterate
+\newcommand{\eager}[1]{#1^{\textup{eager}}}		% for eager iterate
+
+
+
+%--------------------------------------------------
+% Algorithms / states
+%--------------------------------------------------
+\newmacro{\state}{x}
+\newmacro{\statealt}{y}
+\newmacro{\statealtalt}{z}
+\newmacro{\solb}{\mathrm{R}}
+\newmacro{\growth}{L}
+\newmacro{\wqsmscale}{\mu}
+\newmacro{\wqsmshift}{\lambda}
+\newcommand{\steps}[1]{\gamma^{\text{\tiny #1}}}
+\newcommand{\stepsalt}[1]{\alpha^{\text{\tiny #1}}}
+\newmacro{\stepalt}{\alpha}
+\newcommand{\deltaminor}[1]{\delta^{\braces{\text{\tiny #1}}}}
+\newcommand{\cnstminor}[1]{c_1^{\braces{\text{\tiny #1}}}}
+\newcommand{\cnstminoralt}[1]{c_2^{\braces{\text{\tiny #1}}}}
+\newcommand{\cnstsminor}[1]{(c_1,c_2)^{\braces{\text{\tiny {#1}}}}}
+\newmacro{\rvar}{g}
+\newmacro{\kyrt}{\delta_{\text{\tiny{KYRT}}}}
+\newmacro{\energy}{\mathcal{E}}
+\newcommand{\meas}[1]{\nu^{\text{\tiny #1}}}
+\newmacro{\irr}{\psi}
+\newcommand{\distr}[2]{\pi_{#2}^{\braces{\text{\tiny #1}}}}
+\newmacro{\set}{C}
+\newmacro{\tf}{\phi}
+\newcommand{\tconst}[1]{\rho^{\braces{\text{\tiny #1}}}}
+\newcommand{\tconstalt}[1]{\kappa^{\braces{\text{\tiny #1}}}}
+\newcommand{\law}{\text{law}}
+\newmacro{\normal}{\mathcal{N}}
+\newmacro{\thres}{\theta}
+\newmacro{\borel}{\mathcal{B}}
+\newcommand{\snorm}{\norm{\state_\time-\state^*}}
+\newcommand{\ssnorm}{\norm{\state-\state^*}}
+
+%--------------------------------------------------
+% Delimiters
+%--------------------------------------------------
+\DeclarePairedDelimiter{\ourbraces}{\{}{\}}
+\DeclarePairedDelimiter{\bracks}{[}{]}
+\DeclarePairedDelimiter{\parens}{(}{)}
+\DeclarePairedDelimiter{\clip}{[}{]}
+\DeclarePairedDelimiter{\negpart}{[}{]_{-}}
+\DeclarePairedDelimiter{\pospart}{[}{]_{+}}
+\DeclarePairedDelimiter{\setof}{\lbrace}{\rbrace}
+\DeclarePairedDelimiterX{\setdef}[2]{\lbrace}{\rbrace}{#1:#2}
+\DeclarePairedDelimiterX{\inner}[2]{\langle}{\rangle}{#1,#2}
+\DeclarePairedDelimiterXPP{\exclude}[1]{\mathopen{}\setminus}{\lbrace}{\rbrace}{}{#1}
+
+\providecommand\given{} % empty for conditional bar
+\DeclarePairedDelimiterXPP{\exof}[1]{\ex}{\Big[}{\Big]}{}{%
+  \renewcommand\given{\nonscript\,\delimsize\vert\nonscript\,\mathopen{}} #1}
+\DeclarePairedDelimiterXPP{\probof}[1]{\prob}{(}{)}{}{%
+  \renewcommand\given{\nonscript\:\delimsize\vert\nonscript\:\mathopen{}} #1}
+\DeclarePairedDelimiterXPP{\oneof}[1]{\one}{\lbrace}{\rbrace}{}{%
+  \renewcommand\given{\nonscript\,\delimsize\vert\nonscript\,\mathopen{}} #1}
+
+\newcommand{\Expe}[1]{\exof{#1}}
+
+%--------------------------------------------------
+% Operators
+%--------------------------------------------------
+\DeclareMathOperator*{\intersect}{\bigcap}
+\DeclareMathOperator*{\union}{\bigcup}
+\DeclareMathOperator{\aff}{aff}
+\DeclareMathOperator{\lspan}{span}
+\DeclareMathOperator{\bd}{bd}
+\DeclareMathOperator{\littleoh}{o}
+\DeclareMathOperator{\bigoh}{\mathcal{O}}
+\DeclareMathOperator{\card}{card}
+\DeclareMathOperator{\cl}{cl}
+\DeclareMathOperator{\conv}{conv}
+\DeclareMathOperator{\crit}{crit}
+\DeclareMathOperator{\diam}{diam}
+\DeclareMathOperator{\dist}{dist}
+\DeclareMathOperator{\eig}{eig}
+\DeclareMathOperator{\ess}{ess}
+\DeclareMathOperator{\Hess}{Hess}
+\DeclareMathOperator{\ind}{ind}
+\DeclareMathOperator{\im}{im}
+\DeclareMathOperator{\intr}{int}
+\DeclareMathOperator{\Jac}{Jac}
+\DeclareMathOperator{\one}{\mathbb{1}} % indicator
+\DeclareMathOperator{\proj}{pr}
+\DeclareMathOperator{\prox}{prox}
+\DeclareMathOperator{\relint}{ri}
+\DeclareMathOperator{\supp}{supp}
+\DeclareMathOperator{\Sym}{Sym}
+\DeclareMathOperator{\unif}{unif}
+\DeclareMathOperator{\vol}{vol}
+
+%%%%%%%%%
+%%%%%%%%%\documentclass{article} % For LaTeX2e
+%%%%%%%%%\usepackage{iclr2026_conference,times}
+%%%%%%%%%
+%%%%%%%%%% Optional math commands from https://github.com/goodfeli/dlbook_notation.
+%%%%%%%%%\input{math_commands.tex}
+%%%%%%%%%
+%%%%%%%%%\usepackage{hyperref}
+%%%%%%%%%% --- Hyperref setup ---
+%%%%%%%%%\hypersetup{
+%%%%%%%%%    colorlinks=true,
+%%%%%%%%%    linkcolor=blue,
+%%%%%%%%%    citecolor=teal,
+%%%%%%%%%    urlcolor=magenta,
+%%%%%%%%%    pdfauthor={Your Name},
+%%%%%%%%%    pdftitle={Paper Title},
+%%%%%%%%%    pdfborder={0 0 0}
+%%%%%%%%%}
+%%%%%%%%%\usepackage{url}
+%%%%%%%%%\usepackage{cancel}
+%%%%%%%%%\usepackage{physics}
+%%%%%%%%%\usepackage{amsmath}
+%%%%%%%%%\usepackage{tikz}
+%%%%%%%%%\usepackage{mathdots}
+%%%%%%%%%\usepackage{yhmath}
+%%%%%%%%%\usepackage{cancel}
+%%%%%%%%%\usepackage{color}
+%%%%%%%%%\usepackage{siunitx}
+%%%%%%%%%\usepackage{array}
+%%%%%%%%%\usepackage{multirow}
+%%%%%%%%%\usepackage{amssymb}
+%%%%%%%%%\usepackage{gensymb}
+%%%%%%%%%\usepackage{tabularx}
+%%%%%%%%%\usepackage{extarrows}
+%%%%%%%%%\usepackage{booktabs}
+%%%%%%%%%\usetikzlibrary{fadings}
+%%%%%%%%%\usetikzlibrary{patterns}
+%%%%%%%%%\usetikzlibrary{shadows.blur}
+%%%%%%%%%\usetikzlibrary{shapes}
+%%%%%%%%%\usetikzlibrary{shapes.geometric}
+%%%%%%%%%
+%%%%%%%%%\usepackage{xcolor}
+%%%%%%%%%
+%%%%%%%%%% Define the dark green color
+%%%%%%%%%\definecolor{darkgreen}{RGB}{110,192,19}
+%%%%%%%%%
+%%%%%%%%%\usepackage{amsthm}
+%%%%%%%%%
+%%%%%%%%%\newtheoremstyle{informal}   % name
+%%%%%%%%%  {3pt}                      % Space above
+%%%%%%%%%  {3pt}                      % Space below
+%%%%%%%%%  {\itshape}                 % Body font
+%%%%%%%%%  {}                         % Indent amount
+%%%%%%%%%  {\bfseries}                % Theorem head font
+%%%%%%%%%  {.}                        % Punctuation after theorem head
+%%%%%%%%%  { }                        % Space after theorem head
+%%%%%%%%%  {Main Result (Informal Theorem)~\thmnumber{#2}} % Theorem head spec
+%%%%%%%%%
+%%%%%%%%%\theoremstyle{informal}
+%%%%%%%%%\newtheorem{maininformal}{}
+%%%%%%%%%%%%%%%%%%% SHADED COLORS %%%%%%%%%%%%%%%%
+%%%%%%%%%% \let\proof\undefined
+%%%%%%%%%\usepackage{mdframed}
+%%%%%%%%%\usepackage{thmtools}
+%%%%%%%%%
+%%%%%%%%%\definecolor{shadecolor}{gray}{0.9}
+%%%%%%%%%\declaretheoremstyle[
+%%%%%%%%%headfont=\normalfont\bfseries,
+%%%%%%%%%notefont=\mdseries, notebraces={(}{)},
+%%%%%%%%%bodyfont=\normalfont,
+%%%%%%%%%postheadspace=0.5em,
+%%%%%%%%%spaceabove=1pt,
+%%%%%%%%%mdframed={
+%%%%%%%%%  skipabove=8pt,
+%%%%%%%%%  skipbelow=8pt,
+%%%%%%%%%  hidealllines=true,
+%%%%%%%%%  backgroundcolor={shadecolor},
+%%%%%%%%%  innerleftmargin=4pt,
+%%%%%%%%%  innerrightmargin=4pt}
+%%%%%%%%%]{shaded}
+%%%%%%%%%
+%%%%%%%%%\declaretheorem[style=shaded,within=section]{definition}
+%%%%%%%%%\declaretheorem[style=shaded,sibling=definition]{theorem}
+%%%%%%%%%\declaretheorem[style=shaded,sibling=definition]{proposition}
+%%%%%%%%%\declaretheorem[style=shaded,sibling=definition]{assumption}
+%%%%%%%%%\declaretheorem[style=shaded,sibling=definition]{corollary}
+%%%%%%%%%% \declaretheorem[style=shaded,sibling=definition]{conjecture}
+%%%%%%%%%\declaretheorem[style=shaded,sibling=definition]{lemma}
+%%%%%%%%%% \declaretheorem[style=shaded,sibling=definition]{remark}
+%%%%%%%%%\declaretheorem[style=shaded,sibling=definition]{example}
+%%%%%%%%%
+%%%%%%%%%\usepackage{pifont}
+%%%%%%%%%\usepackage[normalem]{ulem}		% for strikeout text
+%%%%%%%%%\usepackage{xspace}
+%%%%%%%%%
+%%%%%%%%%%\usepackage[suppress]{color-edits}		% for editing macros / use [suppress] for final
+%%%%%%%%%
+%%%%%%%%%% \newcommand{\debug}[1]{{\color{RevColor}#1}}		% for macro coloring
+%%%%%%%%%\newcommand{\debug}[1]{#1}		% for removing macro coloring
+%%%%%%%%%\newcommand{\textbrac}[1]{\textup[#1\textup]}		% for upshape brackets
+%%%%%%%%%\newcommand{\textpar}[1]{\textup(#1\textup)}		% for upshape parentheses
+%%%%%%%%%\newcommand{\newmacro}[2]{\newcommand{#1}{\debug{#2}}}		% for shorthand definitions
+%%%%%%%%%\newcommand{\newop}[2]{\DeclareMathOperator{#1}{\debug{#2}}}		% for shorthand definitions
+%%%%%%%%%\newcommand{\RRresh}{\texttt{RR}\textsubscript{1}} % Random Reshuffling
+%%%%%%%%%\newcommand{\RRrom}{\texttt{RR}\textsubscript{2}}  % Richardson–Romberg
+%%%%%%%%%\newcommand{\gammaub}{\frac{1}{3nL_{max}}}
+%%%%%%%%%\newcommand{\as}{\debug{\textpar{a.s.}}\xspace}		% for almost surely
+%%%%%%%%%\newop{\ex}{\mathbb{E}}		% for expectations
+%%%%%%%%%\newop{\prob}{\mathbb{P}}		% for probability
+%%%%%%%%%\newop{\simplex}{\hull}
+%%%%%%%%%\newmacro{\noise}{U}		% for noise
+%%%%%%%%%\newmacro{\filter}{\mathcal{F}}	
+%%%%%%%%%\newmacro{\sgda}{\text{SGDA}}
+%%%%%%%%%\newmacro{\seg}{\text{SEG}}	% for filtration
+%%%%%%%%%\newcommand{\Expep}[1]{\ex\left[#1 \Big| \filter_k\right]}
+%%%%%%%%%\newcommand{\Expepgamma}[1]{\ex_{\pi_{\gamma}}\left[#1 \Big| \filter_k\right]}
+%%%%%%%%%\newcommand{\ie}{i.e.,\xspace}		% for consistency
+%%%%%%%%%
+%%%%%%%%%
+%%%%%%%%%%----------------------------------------------------------------------
+%%%%%%%%%%% Points and sets
+%%%%%%%%%%----------------------------------------------------------------------
+%%%%%%%%%\newmacro{\point}{x}		% for generic point
+%%%%%%%%%\newmacro{\pointalt}{\alt\point}		% for variant point
+%%%%%%%%%\newmacro{\pointaltalt}{\altalt\point}		% for second variant
+%%%%%%%%%\newmacro{\points}{\mathcal{X}}		% for set of points
+%%%%%%%%%\newmacro{\intpoints}{\relint\points}		%for point set interior
+%%%%%%%%%
+%%%%%%%%%\newmacro{\base}{p}		% for reference point
+%%%%%%%%%\newmacro{\basealt}{q}		% for variant reference point
+%%%%%%%%%\newmacro{\basealtalt}{u}		% for second variant
+%%%%%%%%%
+%%%%%%%%%\newmacro{\open}{\mathcal{U}}		% for open sets
+%%%%%%%%%\newmacro{\closed}{\mathcal{C}}		% for closed sets
+%%%%%%%%%\newmacro{\cpt}{\mathcal{K}}		% for compact sets
+%%%%%%%%%\newmacro{\nhd}{\mathcal{U}}		% for neighborhoods
+%%%%%%%%%
+%%%%%%%%%
+%%%%%%%%%
+%%%%%%%%%%----------------------------------------------------------------------
+%%%%%%%%%%% Geometry
+%%%%%%%%%%----------------------------------------------------------------------
+%%%%%%%%%\newmacro{\gmat}{g}		% for metric tensor
+%%%%%%%%%\newmacro{\gdist}{\dist_{\gmat}}
+%%%%%%%%%\newmacro{\mfld}{M}		% for manifold
+%%%%%%%%%\newmacro{\form}{\omega}		% for generic form
+%%%%%%%%%
+%%%%%%%%%\newmacro{\tvec}{z}		% for tangent vector
+%%%%%%%%%\newmacro{\uvec}{u}		% for unit vector
+%%%%%%%%%\newmacro{\basin}{\mathbb{B}}
+%%%%%%%%%\newmacro{\ball}{\basin}		% for ball
+%%%%%%%%%\newmacro{\sphere}{\mathbb{S}}		% for sphere
+%%%%%%%%%
+%%%%%%%%%
+%%%%%%%%%
+%%%%%%%%%%----------------------------------------------------------------------
+%%%%%%%%%%% Algorithms (states and recursions)
+%%%%%%%%%%----------------------------------------------------------------------
+%%%%%%%%%\newmacro{\state}{x}		% for main iterate
+%%%%%%%%%\newmacro{\statealt}{y}		% for variant state
+%%%%%%%%%\newmacro{\statealtalt}{z}		% for second variant
+%%%%%%%%%
+%%%%%%%%%
+%%%%%%%%%
+%%%%%%%%%\newmacro{\solb}{\mathrm{R}} %for bound of the solution
+%%%%%%%%%\newmacro{\growth}{L} %for the linear growth
+%%%%%%%%%\newmacro{\wqsmscale}{\mu} %for the scaling parameter of wqsm
+%%%%%%%%%\newmacro{\wqsmshift}{\lambda} %for the shifting parameter of wqsm
+%%%%%%%%%\newcommand{\steps}[1]{\gamma^{\text{\tiny #1}}}
+%%%%%%%%%\newcommand{\stepsalt}[1]{\alpha^{\text{\tiny #1}}}
+%%%%%%%%%\newmacro{\stepalt}{\alpha}
+%%%%%%%%%\newcommand{\deltaminor}[1]{\delta^{\braces{\text{\tiny #1}}}}
+%%%%%%%%%\newcommand{\cnstminor}[1]{c_1^{\braces{\text{\tiny #1}}}} %constant for minorization
+%%%%%%%%%\newcommand{\cnstminoralt}[1]{c_2^{\braces{\text{\tiny #1}}}} %constant for minorization
+%%%%%%%%%\newcommand{\cnstsminor}[1]{(c_1,c_2)^{\braces{\text{\tiny {#1}}}}} %for pair of constants in minor
+%%%%%%%%%\newmacro{\rvar}{g}
+%%%%%%%%%\newmacro{\kyrt}{\delta_{\text{\tiny{ KYRT}}}}
+%%%%%%%%%\newmacro{\energy}{\mathcal{E}}
+%%%%%%%%%\newcommand{\meas}[1]{\nu^{\text{\tiny #1}}}
+%%%%%%%%%\newmacro{\irr}{\psi}
+%%%%%%%%%\newcommand{\distr}[2]{\pi_{#2}^{\braces{\text{\tiny #1}}}}
+%%%%%%%%%\newmacro{\set}{C}
+%%%%%%%%%\newmacro{\tf}{\phi}
+%%%%%%%%%\newcommand{\tconst}[1]{\rho^{\braces{\text{\tiny #1}}}}
+%%%%%%%%%\newcommand{\tconstalt}[1]{\kappa^{\braces{\text{\tiny #1}}}}
+%%%%%%%%%\newcommand{\law}{\text{law}}
+%%%%%%%%%\newmacro{\normal}{\mathcal{N}}
+%%%%%%%%%\newmacro{\thres}{\theta}
+%%%%%%%%%\newmacro{\borel}{\mathcal{B}}
+%%%%%%%%%\newcommand{\snorm}{\norm{\state_\time-\state^*}}
+%%%%%%%%%\newcommand{\ssnorm}{\norm{\state-\state^*}}
+%%%%%%%%%
+%%%%%%%%%% \newop{\Var}{Var}		% for variance
+%%%%%%%%%
+%%%%%%%%%%----------------------------------------------------------------------
+%%%%%%%%%%% Delimiters
+%%%%%%%%%%----------------------------------------------------------------------
+%%%%%%%%%\usepackage{mathtools} % στο preamble
+%%%%%%%%%
+%%%%%%%%%%\RenewPairedDelimiter{\braces}{\lbrace}{\rbrace}
+%%%%%%%%%\DeclarePairedDelimiter{\bracks}{[}{]}		% for brackets
+%%%%%%%%%\DeclarePairedDelimiter{\parens}{(}{)}		% for parentheses
+%%%%%%%%%\DeclarePairedDelimiter{\clip}{[}{]}		% for clipping
+%%%%%%%%%\DeclarePairedDelimiter{\negpart}{[}{]_{-}}		% for negative part
+%%%%%%%%%\DeclarePairedDelimiter{\pospart}{[}{]_{+}}		% for positive part
+%%%%%%%%%
+%%%%%%%%%\DeclarePairedDelimiter{\setof}{\{}{\}}		% for sets
+%%%%%%%%%\DeclarePairedDelimiterX{\setdef}[2]{\{}{\}}{#1:#2}		% for set builder notation
+%%%%%%%%%\DeclarePairedDelimiterX{\inner}[2]{\langle}{\rangle}{#1,#2}		% for scalar product
+%%%%%%%%%\DeclarePairedDelimiterXPP{\exclude}[1]{\mathopen{}\setminus}{\{}{\}}{}{#1}		% for exclusion
+%%%%%%%%%
+%%%%%%%%%\providecommand\given{}		% empty command for conditionals
+%%%%%%%%%\DeclarePairedDelimiterXPP{\exof}[1]{\ex}{\Big[}{\Big]}{}{%		% for conditional expectations
+%%%%%%%%%\renewcommand\given{\nonscript\,\delimsize\vert\nonscript\,\mathopen{}} #1}	
+%%%%%%%%%\DeclarePairedDelimiterXPP{\probof}[1]{\prob}{(}{)}{}{%		% for conditional probabilities
+%%%%%%%%%\renewcommand\given{\nonscript\:\delimsize\vert\nonscript\:\mathopen{}} #1}
+%%%%%%%%%\DeclarePairedDelimiterXPP{\oneof}[1]{\one}{\{}{\}}{}{%		% for conditional expectations
+%%%%%%%%%\renewcommand\given{\nonscript\,\delimsize\vert\nonscript\,\mathopen{}} #1}
+%%%%%%%%%\newcommand{\Expe}[1]{\exof{#1}}
+%%%%%%%%%
+%%%%%%%%%
+%%%%%%%%%
+%%%%%%%%%
+%%%%%%%%%%----------------------------------------------------------------------
+%%%%%%%%%%% Operators
+%%%%%%%%%%----------------------------------------------------------------------
+%%%%%%%%%% \DeclareMathOperator*{\argmax}{arg\,max}		% for argmax
+%%%%%%%%%% \DeclareMathOperator*{\argmin}{arg\,min}		% for argmin
+%%%%%%%%%\DeclareMathOperator*{\intersect}{\bigcap}		% for intersections
+%%%%%%%%%\DeclareMathOperator*{\union}{\bigcup}		% for unions
+%%%%%%%%%
+%%%%%%%%%\DeclareMathOperator{\aff}{aff}		% for affine hull
+%%%%%%%%%\DeclareMathOperator{\lspan}{span}		% for linear span
+%%%%%%%%%\DeclareMathOperator{\bd}{bd}		% for boundary
+%%%%%%%%%\DeclareMathOperator{\littleoh}{o}		% for Landau o
+%%%%%%%%%\DeclareMathOperator{\bigoh}{\mathcal{O}}		% for Landau O
+%%%%%%%%%\DeclareMathOperator{\card}{card}		% for cardinality
+%%%%%%%%%\DeclareMathOperator{\cl}{cl}		% for closure
+%%%%%%%%%\DeclareMathOperator{\conv}{conv}		% for convex hull (but see also \simplex)
+%%%%%%%%%\DeclareMathOperator{\crit}{crit}		% for critical set
+%%%%%%%%%% \DeclareMathOperator{\diag}{diag}		% for diagonal matrices
+%%%%%%%%%\DeclareMathOperator{\diam}{diam}		% for diameter
+%%%%%%%%%\DeclareMathOperator{\dist}{dist}		% for distance
+%%%%%%%%%% \DeclareMathOperator{\dom}{dom}		% for domain
+%%%%%%%%%\DeclareMathOperator{\eig}{eig}		% for eigenvalues
+%%%%%%%%%\DeclareMathOperator{\ess}{ess}		% for essential
+%%%%%%%%%\DeclareMathOperator{\Hess}{Hess}		% for Hessian
+%%%%%%%%%\DeclareMathOperator{\ind}{ind}		% for index
+%%%%%%%%%\DeclareMathOperator{\im}{im}		% for image
+%%%%%%%%%\DeclareMathOperator{\intr}{int}		% for interior
+%%%%%%%%%\DeclareMathOperator{\Jac}{Jac}		% for Jacobian
+%%%%%%%%%\usepackage{bbold}
+%%%%%%%%%\DeclareMathOperator{\one}{\mathbb{1}}		% for indicator
+%%%%%%%%%\DeclareMathOperator{\proj}{pr}		% for projection
+%%%%%%%%%\DeclareMathOperator{\prox}{prox}		% for prox
+%%%%%%%%%% \DeclareMathOperator{\rank}{rank}		% for rank
+%%%%%%%%%\DeclareMathOperator{\relint}{ri}		% for relative interior
+%%%%%%%%%\DeclareMathOperator{\supp}{supp}		% for support
+%%%%%%%%%\DeclareMathOperator{\Sym}{Sym}		% for symmetric
+%%%%%%%%%\DeclareMathOperator{\unif}{unif}		% for uniform distribution
+%%%%%%%%%\DeclareMathOperator{\vol}{vol}		% for volume
+%%%%%%%%%
+%%%%%%%%%\newcommand{\kostas}[1]{\textcolor{blue}{[Kostas: #1]}}
+
+\makeatletter
+% Disable writing to .toc
+\newcommand{\onlyappendixintoc}{%
+  \let\oldaddcontentsline\addcontentsline
+  \renewcommand{\addcontentsline}[3]{}%
+}
+% Restore writing to .toc
+\newcommand{\restoreaddcontentsline}{%
+  \let\addcontentsline\oldaddcontentsline
+}
+\makeatother
+
+
+\input{./titles}
+
+% Authors must not appear in the submitted version. They should be hidden
+% as long as the \iclrfinalcopy macro remains commented out below.
+% Non-anonymous submissions will be rejected without review.
+
+\author{Konstantinos Emmanouilidis$^*$,  Emmanouil-Vasileios Vlatakis-Gkaragkounis$^\#$, Ren\'{e} Vidal$^*$ 
+% \thanks{ Use footnote for providing further information
+% about author (webpage, alternative address)---\emph{not} for acknowledging
+% funding agencies.  Funding acknowledgements go at the end of the paper.} 
+\\
+Department of Computer Science\\
+$^*$University of Pennsylvania, $^\#$University of Wisconsin-Madison\\
+% Department of ESE, Radiology \& IDEAS, University of Pennsylvania
+%Pittsburgh, PA 15213, USA \\
+% \texttt{\{hippo,brain,jen\}@cs.cranberry-lemon.edu} \\
+% \And
+% Ji Q. Ren \& Yevgeny LeNet \\
+% Department of Computational Neuroscience \\
+% University of the Witwatersrand \\
+% Joburg, South Africa \\
+% \texttt{\{robot,net\}@wits.ac.za} 
+% \AND
+% Coauthor \\
+% Affiliation \\
+% Address \\
+% \texttt{email}
+}
+
+% The \author macro works with any number of authors. There are two commands
+% used to separate the names and addresses of multiple authors: \And and \AND.
+%
+% Using \And between authors leaves it to \LaTeX{} to determine where to break
+% the lines. Using \AND forces a linebreak at that point. So, if \LaTeX{}
+% puts 3 of 4 authors names on the first line, and the last on the second
+% line, try using \AND instead of \And before the third author name.
+
+\newcommand{\fix}{\marginpar{FIX}}
+\newcommand{\new}{\marginpar{NEW}}
+
+\iclrfinalcopy % Uncomment for camera-ready version, but NOT for submission.
+\begin{document}
+\onlyappendixintoc        % <-- main sections won't be recorded in .toc
+
+
+\maketitle
+
+
+\begin{abstract}
+From adversarial robustness to multi-agent learning, many machine learning tasks can be cast as finite-sum min–max optimization  or, more generally, as variational inequality problems (VIPs). Owing to their simplicity and scalability, stochastic gradient methods with constant step size are widely used, despite the fact that they converge only up to a bias term. Among the many heuristics adopted in practice, two classical techniques have recently attracted attention to mitigate this issue: \emph{Random Reshuffling} of data and \emph{Richardson–Romberg extrapolation} across iterates. In this work, we show that their composition not only cancels the leading linear bias term, but also yields an asymptotic cubic refinement. To the best of our knowledge, our work provides the first theoretical guarantees for such a synergy in structured non-monotone VIPs. Our analysis proceeds in two steps: (i)
+we smooth the discrete noise induced by reshuffling
+to leverage tools from continuous-state Markov chain theory establishing a novel law of large numbers and a central limit theorem for its iterates; and (ii) we employ spectral tensor techniques to prove that extrapolation 
+debiases and sharpens the asymptotic behavior %accelerates convergence 
+even under the biased gradient oracle induced by reshuffling. Finally, extensive experiments validate our theory, consistently demonstrating substantial speedups in practice.
+\end{abstract}
+\input{./introduction}
+\input{./problem_setup}
+\input{./results}
+\input{./experiments}
+\input{./conclusion}
+\newpage
+\input{iclr2026_4Rs/acknowledgments}
+
+\bibliographystyle{iclr2026_conference}
+\bibliography{full_cleaned}
+
+\appendix
+\restoreaddcontentsline   % <-- appendix sections will be recorded
+
+\newpage
+\input{./appendix_material}
+
+
+\end{document}
+
+\newpage
+\section{Submission of conference papers to ICLR 2026}
+
+ICLR requires electronic submissions, processed by
+\url{https://openreview.net/}. See ICLR's website for more instructions.
+
+If your paper is ultimately accepted, the statement {\tt
+  {\textbackslash}iclrfinalcopy} should be inserted to adjust the
+format to the camera ready requirements.
+
+The format for the submissions is a variant of the NeurIPS format.
+Please read carefully the instructions below, and follow them
+faithfully.
+
+\subsection{Style}
+
+Papers to be submitted to ICLR 2026 must be prepared according to the
+instructions presented here.
+
+%% Please note that we have introduced automatic line number generation
+%% into the style file for \LaTeXe. This is to help reviewers
+%% refer to specific lines of the paper when they make their comments. Please do
+%% NOT refer to these line numbers in your paper as they will be removed from the
+%% style file for the final version of accepted papers.
+
+Authors are required to use the ICLR \LaTeX{} style files obtainable at the
+ICLR website. Please make sure you use the current files and
+not previous versions. Tweaking the style files may be grounds for rejection.
+
+\subsection{Retrieval of style files}
+
+The style files for ICLR and other conference information are available online at:
+\begin{center}
+   \url{http://www.iclr.cc/}
+\end{center}
+The file \verb+iclr2026_conference.pdf+ contains these
+instructions and illustrates the
+various formatting requirements your ICLR paper must satisfy.
+Submissions must be made using \LaTeX{} and the style files
+\verb+iclr2026_conference.sty+ and \verb+iclr2026_conference.bst+ (to be used with \LaTeX{}2e). The file
+\verb+iclr2026_conference.tex+ may be used as a ``shell'' for writing your paper. All you
+have to do is replace the author, title, abstract, and text of the paper with
+your own.
+
+The formatting instructions contained in these style files are summarized in
+sections \ref{gen_inst}, \ref{headings}, and \ref{others} below.
+
+\section{General formatting instructions}
+\label{gen_inst}
+
+The text must be confined within a rectangle 5.5~inches (33~picas) wide and
+9~inches (54~picas) long. The left margin is 1.5~inch (9~picas).
+Use 10~point type with a vertical spacing of 11~points. Times New Roman is the
+preferred typeface throughout. Paragraphs are separated by 1/2~line space,
+with no indentation.
+
+Paper title is 17~point, in small caps and left-aligned.
+All pages should start at 1~inch (6~picas) from the top of the page.
+
+Authors' names are
+set in boldface, and each name is placed above its corresponding
+address. The lead author's name is to be listed first, and
+the co-authors' names are set to follow. Authors sharing the
+same address can be on the same line.
+
+Please pay special attention to the instructions in section \ref{others}
+regarding figures, tables, acknowledgments, and references.
+
+
+There will be a strict upper limit of \textbf{9 pages} for the main text of the initial submission, with unlimited additional pages for citations. This limit will be expanded to \textbf{10 pages} for rebuttal/camera ready.
+
+\section{Headings: first level}
+\label{headings}
+
+First level headings are in small caps,
+flush left and in point size 12. One line space before the first level
+heading and 1/2~line space after the first level heading.
+
+\subsection{Headings: second level}
+
+Second level headings are in small caps,
+flush left and in point size 10. One line space before the second level
+heading and 1/2~line space after the second level heading.
+
+\subsubsection{Headings: third level}
+
+Third level headings are in small caps,
+flush left and in point size 10. One line space before the third level
+heading and 1/2~line space after the third level heading.
+
+\section{Citations, figures, tables, references}
+\label{others}
+
+These instructions apply to everyone, regardless of the formatter being used.
+
+\subsection{Citations within the text}
+
+Citations within the text should be based on the \texttt{natbib} package
+and include the authors' last names and year (with the ``et~al.'' construct
+for more than two authors). When the authors or the publication are
+included in the sentence, the citation should not be in parenthesis using \verb|\citet{}| (as
+in ``See \citet{Hinton06} for more information.''). Otherwise, the citation
+should be in parenthesis using \verb|\citep{}| (as in ``Deep learning shows promise to make progress
+towards AI~\citep{Bengio+chapter2007}.'').
+
+The corresponding references are to be listed in alphabetical order of
+authors, in the \textsc{References} section. As to the format of the
+references themselves, any style is acceptable as long as it is used
+consistently.
+
+\subsection{Footnotes}
+
+Indicate footnotes with a number\footnote{Sample of the first footnote} in the
+text. Place the footnotes at the bottom of the page on which they appear.
+Precede the footnote with a horizontal rule of 2~inches
+(12~picas).\footnote{Sample of the second footnote}
+
+\subsection{Figures}
+
+All artwork must be neat, clean, and legible. Lines should be dark
+enough for purposes of reproduction; art work should not be
+hand-drawn. The figure number and caption always appear after the
+figure. Place one line space before the figure caption, and one line
+space after the figure. The figure caption is lower case (except for
+first word and proper nouns); figures are numbered consecutively.
+
+Make sure the figure caption does not get separated from the figure.
+Leave sufficient space to avoid splitting the figure and figure caption.
+
+You may use color figures.
+However, it is best for the
+figure captions and the paper body to make sense if the paper is printed
+either in black/white or in color.
+\begin{figure}[h]
+\begin{center}
+%\framebox[4.0in]{$\;$}
+\fbox{\rule[-.5cm]{0cm}{4cm} \rule[-.5cm]{4cm}{0cm}}
+\end{center}
+\caption{Sample figure caption.}
+\end{figure}
+
+\subsection{Tables}
+
+All tables must be centered, neat, clean and legible. Do not use hand-drawn
+tables. The table number and title always appear before the table. See
+Table~\ref{sample-table}.
+
+Place one line space before the table title, one line space after the table
+title, and one line space after the table. The table title must be lower case
+(except for first word and proper nouns); tables are numbered consecutively.
+
+\begin{table}[t]
+\caption{Sample table title}
+\label{sample-table}
+\begin{center}
+\begin{tabular}{ll}
+\multicolumn{1}{c}{\bf PART}  &\multicolumn{1}{c}{\bf DESCRIPTION}
+\\ \hline \\
+Dendrite         &Input terminal \\
+Axon             &Output terminal \\
+Soma             &Cell body (contains cell nucleus) \\
+\end{tabular}
+\end{center}
+\end{table}
+
+\section{Default Notation}
+
+In an attempt to encourage standardized notation, we have included the
+notation file from the textbook, \textit{Deep Learning}
+\cite{goodfellow2016deep} available at
+\url{https://github.com/goodfeli/dlbook_notation/}.  Use of this style
+is not required and can be disabled by commenting out
+\texttt{math\_commands.tex}.
+
+
+\centerline{\bf Numbers and Arrays}
+\bgroup
+\def\arraystretch{1.5}
+\begin{tabular}{p{1in}p{3.25in}}
+$\displaystyle a$ & A scalar (integer or real)\\
+$\displaystyle \va$ & A vector\\
+$\displaystyle \mA$ & A matrix\\
+$\displaystyle \tA$ & A tensor\\
+$\displaystyle \mI_n$ & Identity matrix with $n$ rows and $n$ columns\\
+$\displaystyle \mI$ & Identity matrix with dimensionality implied by context\\
+$\displaystyle \ve^{(i)}$ & Standard basis vector $[0,\dots,0,1,0,\dots,0]$ with a 1 at position $i$\\
+$\displaystyle \text{diag}(\va)$ & A square, diagonal matrix with diagonal entries given by $\va$\\
+$\displaystyle \ra$ & A scalar random variable\\
+$\displaystyle \rva$ & A vector-valued random variable\\
+$\displaystyle \rmA$ & A matrix-valued random variable\\
+\end{tabular}
+\egroup
+\vspace{0.25cm}
+
+\centerline{\bf Sets and Graphs}
+\bgroup
+\def\arraystretch{1.5}
+
+\begin{tabular}{p{1.25in}p{3.25in}}
+$\displaystyle \sA$ & A set\\
+$\displaystyle \R$ & The set of real numbers \\
+$\displaystyle \{0, 1\}$ & The set containing 0 and 1 \\
+$\displaystyle \{0, 1, \dots, n \}$ & The set of all integers between $0$ and $n$\\
+$\displaystyle [a, b]$ & The real interval including $a$ and $b$\\
+$\displaystyle (a, b]$ & The real interval excluding $a$ but including $b$\\
+$\displaystyle \sA \backslash \sB$ & Set subtraction, i.e., the set containing the elements of $\sA$ that are not in $\sB$\\
+$\displaystyle \gG$ & A graph\\
+$\displaystyle \parents_\gG(\ervx_i)$ & The parents of $\ervx_i$ in $\gG$
+\end{tabular}
+\vspace{0.25cm}
+
+
+\centerline{\bf Indexing}
+\bgroup
+\def\arraystretch{1.5}
+
+\begin{tabular}{p{1.25in}p{3.25in}}
+$\displaystyle \eva_i$ & Element $i$ of vector $\va$, with indexing starting at 1 \\
+$\displaystyle \eva_{-i}$ & All elements of vector $\va$ except for element $i$ \\
+$\displaystyle \emA_{i,j}$ & Element $i, j$ of matrix $\mA$ \\
+$\displaystyle \mA_{i, :}$ & Row $i$ of matrix $\mA$ \\
+$\displaystyle \mA_{:, i}$ & Column $i$ of matrix $\mA$ \\
+$\displaystyle \etA_{i, j, k}$ & Element $(i, j, k)$ of a 3-D tensor $\tA$\\
+$\displaystyle \tA_{:, :, i}$ & 2-D slice of a 3-D tensor\\
+$\displaystyle \erva_i$ & Element $i$ of the random vector $\rva$ \\
+\end{tabular}
+\egroup
+\vspace{0.25cm}
+
+
+\centerline{\bf Calculus}
+\bgroup
+\def\arraystretch{1.5}
+\begin{tabular}{p{1.25in}p{3.25in}}
+% NOTE: the [2ex] on the next line adds extra height to that row of the table.
+% Without that command, the fraction on the first line is too tall and collides
+% with the fraction on the second line.
+$\displaystyle\frac{d y} {d x}$ & Derivative of $y$ with respect to $x$\\ [2ex]
+$\displaystyle \frac{\partial y} {\partial x} $ & Partial derivative of $y$ with respect to $x$ \\
+$\displaystyle \nabla_\vx y $ & Gradient of $y$ with respect to $\vx$ \\
+$\displaystyle \nabla_\mX y $ & Matrix derivatives of $y$ with respect to $\mX$ \\
+$\displaystyle \nabla_\tX y $ & Tensor containing derivatives of $y$ with respect to $\tX$ \\
+$\displaystyle \frac{\partial f}{\partial \vx} $ & Jacobian matrix $\mJ \in \R^{m\times n}$ of $f: \R^n \rightarrow \R^m$\\
+$\displaystyle \nabla_\vx^2 f(\vx)\text{ or }\mH( f)(\vx)$ & The Hessian matrix of $f$ at input point $\vx$\\
+$\displaystyle \int f(\vx) d\vx $ & Definite integral over the entire domain of $\vx$ \\
+$\displaystyle \int_\sS f(\vx) d\vx$ & Definite integral with respect to $\vx$ over the set $\sS$ \\
+\end{tabular}
+\egroup
+\vspace{0.25cm}
+
+\centerline{\bf Probability and Information Theory}
+\bgroup
+\def\arraystretch{1.5}
+\begin{tabular}{p{1.25in}p{3.25in}}
+$\displaystyle P(\ra)$ & A probability distribution over a discrete variable\\
+$\displaystyle p(\ra)$ & A probability distribution over a continuous variable, or over
+a variable whose type has not been specified\\
+$\displaystyle \ra \sim P$ & Random variable $\ra$ has distribution $P$\\% so thing on left of \sim should always be a random variable, with name beginning with \r
+$\displaystyle  \E_{\rx\sim P} [ f(x) ]\text{ or } \E f(x)$ & Expectation of $f(x)$ with respect to $P(\rx)$ \\
+$\displaystyle \Var(f(x)) $ &  Variance of $f(x)$ under $P(\rx)$ \\
+$\displaystyle \Cov(f(x),g(x)) $ & Covariance of $f(x)$ and $g(x)$ under $P(\rx)$\\
+$\displaystyle H(\rx) $ & Shannon entropy of the random variable $\rx$\\
+$\displaystyle \KL ( P \Vert Q ) $ & Kullback-Leibler divergence of P and Q \\
+$\displaystyle \mathcal{N} ( \vx ; \vmu , \mSigma)$ & Gaussian distribution %
+over $\vx$ with mean $\vmu$ and covariance $\mSigma$ \\
+\end{tabular}
+\egroup
+\vspace{0.25cm}
+
+\centerline{\bf Functions}
+\bgroup
+\def\arraystretch{1.5}
+\begin{tabular}{p{1.25in}p{3.25in}}
+$\displaystyle f: \sA \rightarrow \sB$ & The function $f$ with domain $\sA$ and range $\sB$\\
+$\displaystyle f \circ g $ & Composition of the functions $f$ and $g$ \\
+  $\displaystyle f(\vx ; \vtheta) $ & A function of $\vx$ parametrized by $\vtheta$.
+  (Sometimes we write $f(\vx)$ and omit the argument $\vtheta$ to lighten notation) \\
+$\displaystyle \log x$ & Natural logarithm of $x$ \\
+$\displaystyle \sigma(x)$ & Logistic sigmoid, $\displaystyle \frac{1} {1 + \exp(-x)}$ \\
+$\displaystyle \zeta(x)$ & Softplus, $\log(1 + \exp(x))$ \\
+$\displaystyle || \vx ||_p $ & $\normlp$ norm of $\vx$ \\
+$\displaystyle || \vx || $ & $\normltwo$ norm of $\vx$ \\
+$\displaystyle x^+$ & Positive part of $x$, i.e., $\max(0,x)$\\
+$\displaystyle \1_\mathrm{condition}$ & is 1 if the condition is true, 0 otherwise\\
+\end{tabular}
+\egroup
+\vspace{0.25cm}
+
+
+
+\section{Final instructions}
+Do not change any aspects of the formatting parameters in the style files.
+In particular, do not modify the width or length of the rectangle the text
+should fit into, and do not change font sizes (except perhaps in the
+\textsc{References} section; see below). Please note that pages should be
+numbered.
+
+\section{Preparing PostScript or PDF files}
+
+Please prepare PostScript or PDF files with paper size ``US Letter'', and
+not, for example, ``A4''. The -t
+letter option on dvips will produce US Letter files.
+
+Consider directly generating PDF files using \verb+pdflatex+
+(especially if you are a MiKTeX user).
+PDF figures must be substituted for EPS figures, however.
+
+Otherwise, please generate your PostScript and PDF files with the following commands:
+\begin{verbatim}
+dvips mypaper.dvi -t letter -Ppdf -G0 -o mypaper.ps
+ps2pdf mypaper.ps mypaper.pdf
+\end{verbatim}
+
+\subsection{Margins in LaTeX}
+
+Most of the margin problems come from figures positioned by hand using
+\verb+\special+ or other commands. We suggest using the command
+\verb+\includegraphics+
+from the graphicx package. Always specify the figure width as a multiple of
+the line width as in the example below using .eps graphics
+\begin{verbatim}
+   \usepackage[dvips]{graphicx} ...
+   \includegraphics[width=0.8\linewidth]{myfile.eps}
+\end{verbatim}
+or % Apr 2009 addition
+\begin{verbatim}
+   \usepackage[pdftex]{graphicx} ...
+   \includegraphics[width=0.8\linewidth]{myfile.pdf}
+\end{verbatim}
+for .pdf graphics.
+See section~4.4 in the graphics bundle documentation (\url{http://www.ctan.org/tex-archive/macros/latex/required/graphics/grfguide.ps})
+
+A number of width problems arise when LaTeX cannot properly hyphenate a
+line. Please give LaTeX hyphenation hints using the \verb+\-+ command.
+
+\subsubsection*{Author Contributions}
+If you'd like to, you may include  a section for author contributions as is done
+in many journals. This is optional and at the discretion of the authors.
+
+\subsubsection*{Acknowledgments}
+Use unnumbered third level headings for the acknowledgments. All
+acknowledgments, including those to funding agencies, go at the end of the paper.
+
+
+\appendix
+\section{Appendix}
+You may include other additional sections here.
+
+
+\end{document}

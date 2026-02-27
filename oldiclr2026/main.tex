@@ -1,0 +1,995 @@
+
+\documentclass{article} % For LaTeX2e
+\usepackage{iclr2026_conference,times}
+
+
+% For authors' comments
+% \usepackage{comment}
+% \includecomment{showcomments}   % To show comments
+% \excludecomment{showcomments} % To hide comments
+\newcommand{\kostas}[1]{\begin{showcomments}\textcolor{blue}{[Kostas: #1]}\end{showcomments}}
+
+\newcommand{\gammaub}{\frac{1}{3nL_{max}}}
+
+
+%\input{math_commands.tex}
+\input{my_macros.sty}
+
+\usepackage{hyperref}
+\usepackage{url}
+\usepackage{cancel}
+\usepackage{physics}
+\usepackage{amsmath}
+\usepackage{tikz}
+\usepackage{mathdots}
+\usepackage{yhmath}
+\usepackage{cancel}
+\usepackage{color}
+\usepackage{siunitx}
+\usepackage{array}
+\usepackage{multirow}
+\usepackage{amssymb}
+\usepackage{gensymb}
+\usepackage{tabularx}
+\usepackage{extarrows}
+\usepackage{booktabs}
+\usetikzlibrary{fadings}
+\usetikzlibrary{patterns}
+\usetikzlibrary{shadows.blur}
+\usetikzlibrary{shapes}
+\usetikzlibrary{shapes.geometric}
+
+
+\newtheoremstyle{informal}   % name
+  {3pt}                      % Space above
+  {3pt}                      % Space below
+  {\itshape}                 % Body font
+  {}                         % Indent amount
+  {\bfseries}                % Theorem head font
+  {.}                        % Punctuation after theorem head
+  { }                        % Space after theorem head
+  {Main Result (Informal Theorem)~\thmnumber{#2}} % Theorem head spec
+
+\theoremstyle{informal}
+\newtheorem{maininformal}{}
+\newcommand{\RRresh}{\texttt{RR}\textsubscript{1}} % Random Reshuffling
+\newcommand{\RRrom}{\texttt{RR}\textsubscript{2}}  % Richardson–Romberg
+
+% \newcommand{\kostas}[1]{  \ifthenelse{\boolean{showcomments}}
+
+\input{iclr2026/titles}
+
+%\title{Reshuffle, Extrapolate, Accelerate: Two Bias Reductions are Better than One in Stochastic Optimization}% for Stochastic Gradient Methods}
+
+%\title{SGD(A) with Random Reshuffling \& Richardson Romberg Extrapolation: Faster Convergence to the Solution}
+
+% Authors must not appear in the submitted version. They should be hidden
+% as long as the \iclrfinalcopy macro remains commented out below.
+% Non-anonymous submissions will be rejected without review.
+
+\author{
+}
+
+% The \author macro works with any number of authors. There are two commands
+% used to separate the names and addresses of multiple authors: \And and \AND.
+%
+% Using \And between authors leaves it to \LaTeX{} to determine where to break
+% the lines. Using \AND forces a linebreak at that point. So, if \LaTeX{}
+% puts 3 of 4 authors names on the first line, and the last on the second
+% line, try using \AND instead of \And before the third author name.
+
+\newcommand{\fix}{\marginpar{FIX}}
+\newcommand{\new}{\marginpar{NEW}}
+
+
+%\iclrfinalcopy % Uncomment for camera-ready version, but NOT for submission.
+\begin{document}
+
+
+\maketitle
+
+\begin{abstract}
+From adversarial robustness to multi-agent reinforcement learning, many machine learning tasks can be casted as finite-sum min–max optimization or, more generally, as variational inequality problems (VIPs). Owing to their simplicity and scalability, stochastic gradient methods with constant step size are widely used in this setting, yet they converge only up to a bias term. Among the heuristics adopted in practice, two classical techniques have recently attracted attention to mitigate this issue: \emph{Random Reshuffling} of data and \emph{Richardson–Romberg extrapolation} across iterates.
+
+Inspired by this, we show that their composition not only cancels the leading linear bias term, but also yields an asymptotic cubic refinement. To the best of our knowledge, our work provides the first theoretical guarantees for such a synergy in structured non-monotone VIPs. Our analysis proceeds in two steps: (i) by smoothing the discrete noise induced by reshuffling, we leverage tools from continuous-state Markov chain theory to establish a law of large numbers and a central limit theorem for its iterates; and (ii) we employ spectral tensor techniques to prove that extrapolation accelerates convergence even under the biased gradient oracle induced by reshuffling. Finally, extensive experiments validate our theory, consistently demonstrating substantial speedups in practice.
+\end{abstract}
+
+
+% In this work, we show that their composition not only cancels the leading linear bias term but also yields a sharper cubic term—strictly better than either heuristic alone. To the best of our knowledge, this provides the first theoretical guarantees for such a synergy in structured non-monotone VIPs. Our analysis proceeds in two steps: (i) by smoothing the combinatorial nature of random reshuffling, we leverage tools of continuous-state Markov chain theory, establishing a law of large numbers and a central limit theorem for its iterates; and (ii) we employ spectral tensor techniques to prove that extrapolation accelerates convergence even under the biased gradient oracle induced by reshuffling. Finally, extensive experiments corroborate our theory, consistently demonstrating substantial speedups in practice.
+
+
+
+% % \begin{abstract}
+% % A recent surge of advancements from adversarial robustness of AI models to multi-agent reinforcement learning has brought renewed interest in Variational Inequalities (VIs) problems. Stochastic gradient methods with a constant step size are typically used for solving VIs, converging to the solution but only up to a bias term. Prior literature has established that the random reshuffling heuristic that is heavily used in practice is beneficial for reducing the remaining bias, while the classical Richardson - Romberg extrapolation technique from numerical analysis has been known to also suppress bias in iterative algorithms. However, the synergy of the two heuristics and their impact in the performance of a stochastic optimization algorithm remains nascent. In this work, we study the combined effect of random reshuffling and Richardson - Romberg extrapolation on the bias of an algorithm. Initially, we provide convergence guarantees for a class of structured non-monotone problems, showing that RR reduces the bias of the method to $\mathcal{O}\left(\gamma^2\right)$ for a large class of non-monotone problems. By unveiling the connection of RR with Markov Chain theory, we further establish a law of large numbers and the corresponding central limit theorem for the iterates of the method, indicating that efficient statistics can be computed in practice. Meticulously combining the two techniques we prove that the optimization method attains a reduced $\mathcal{O}\left(\gamma^3\right)$ bias and thus achieves an accelerated rate of convergence in non-monotone problems up to a high accuracy. Extensive experiments indicate empirically the benefits from the combination of the heuristics, leading to improved convergence in practice.
+% % \end{abstract}
+
+% \kostas{Potential Titles:\\
+% 1) Random Reshuffling Meets Richardson Extrapolation: A Bias-Driven Route to Accelerated Convergence in VIs.\\
+% 2) Two Heuristics are Better than One: Theoretical Guarantees: Faster Convergence of Stochastic Gradient Methods in VI. \\
+% 3) Two Heuristics are Better than One: Faster Convergence of Stochastic Gradient Methods via Random Reshuffling and Richardson Extrapolation.\\
+% 4) SGDA with Random Reshuffling and Richardson Extrapolation: Faster Convergence in Stochastic VIs.\\
+% 5) Two Heuristics are Better than One: On the Synergy of Random Reshuffling and Richardson Extrapolation in SGDA\\
+% 6) A Tale of Two Biases: How Random Reshuffling and Richardson Extrapolation Accelerate SGDA\\
+% 7) Two Biases, One Goal: Faster Convergence in VIs \\
+% 8) Random Reshuffling Meets Richardson Extrapolation: Faster Convergence of Stochastic Gradient Methods in VIs.\\
+% 9) Reshuffling the Data, Extrapolating the Stepsize: Two Heuristics Accelerating Convergence in VIs.\\
+% 10) Two Heuristics are Better than One: Random Reshuffling and Richardson Extrapolation Accelerate Stochastic Methods in VIs.\\
+% 11) Richardson Extrapolation and Random Reshuffling: Two Paths to Acceleration in Stochastic Gradient Methods. \\ 
+% 12) Extrapolate the Past, Reshuffle the Future: Faster Stochastic Gradient Methods for Variational Inequalities \\
+% 13) Extrapolate the Past, Reshuffle the Future: A Tale of Two Biases in Stochastic Optimization.\\
+% 14) Extrapolate the Past, Reshuffle the Future: Two Bias Corrections That Accelerate Stochastic Optimization. \\
+% 15) Extrapolate the Past, Reshuffle the Future: Bias-Driven Acceleration in VIs.
+% }
+
+
+\input{iclr2026/introduction}
+\begin{algorithm}[t!]
+\caption{Perturbed SGDA with Random Reshuffling (SGDA-RR)}
+\begin{algorithmic}[1]\label{SGDA-RR}
+\STATE \textbf{Input:} Initial point $x_0$, step size $\gamma$
+\STATE Initialize $x_0^0 = x_0$
+\FOR{$k = 0, \dots, K-1$}
+    \STATE sample a permutation $\omega_k$ of $[n]$ uniformly at random and $\noise_k \sim \mathcal{N}(0, \gamma^2n  \sigma_*^2 I)$
+    \FOR{$i = 0, \dots, n-1$}
+        \STATE $x_k^{i+1} = x_k^i - \gamma F_{\omega_k^i}(x_k^i) - \gamma \noise_k$ 
+    \ENDFOR
+    \STATE $x_{k+1}^0 = x_k^{n}$ \\
+\ENDFOR
+\STATE \textbf{Output:} $x_{K}$.
+\end{algorithmic}
+\end{algorithm}
+\newpage
+\section{Problem Setup}
+
+The Variational Inequality problem is rigorously introduced along with the assumptions that will be necessary as well as an overview of the core techniques applied in order to establish our theoretical results. 
+
+\subsection{The Variational Inequality Framework}
+Consider the Variational Inequality Problem (VIP): find $x^* \in \mathbb{R}^d$ such that it holds that
+\begin{equation} \tag{VIP}
+    \langle F(x^*), x - x^*\rangle \geq 0, \quad \forall x \in \mathbb{R}^d \label{VIP}
+\end{equation}
+where $F: \mathbb{R}^d \rightarrow \mathbb{R}^d$ is the associated VIP operator. In many machine learning problems, the underlying VI operator has a finite-sum form
+\begin{eqnarray}
+    F(x) = \frac{1}{n} \sum\limits_{i=0}^{n-1} F_i(x), 
+\end{eqnarray}
+where each $F_i: \mathbb{R}^d \rightarrow \mathbb{R}^d$ corresponds typically to the evaluation of the gradient at a different data point of the dataset $\mathcal{D}$.
+
+The Variational Inequality framework originally introduced [date] [for problems in game theory] encapsulates a wide range of current applications. Exemplary problems include the following: \\
+\textbf{Example 2.1: Solving Non-linear equations.} A solution $x^*$ to the \eqref{VIP} corresponds to a root of the equation $F(x) = \textbf{0}$, allowing casting any non-linear equation as a specific instantiation of the Variational Inequality framework. The well-known example of that form includes the Navier-Stokes equations in computational dynamics \citep{hao2021gradient}. \\
+\textbf{Example 2.2: Empirical Risk Minimization.} For any $\mathcal{C}^1-$smooth loss function $\ell:\R^d \rightarrow \R$, a solution $x^*$ to the \eqref{VIP} with $F(x) = \nabla \ell(x)$ is a critical point (KKT solution) to the associated empirical risk minimization problem, consisting the cornerstone of machine learning objectives. \\ 
+\textbf{Example 2.3: Nash Equilibria \& Saddle-point Problems.}
+Consider $N$ players, each having an action set in $\R^d$ and a convex cost function $c_i: \R^d\rightarrow \R$. A Nash Equilibrium \eqref{NE} is a joint-action profile $x^* = (x^*_i)_{i=1}^N$ that satisfies
+\begin{equation}\tag{NE}
+    c_i(x^*) \leq c_i(x_i; x^*_{-i}), \quad \forall i, x_i \in \R^d \label{NE}
+\end{equation}
+For convex cost functions $c_i: \R^d \rightarrow \R$, a \eqref{NE} coincides with the solution of a \eqref{VIP} with operator $F(x) = \left(\nabla_{x_{i}} c_i(x)\right)_{i=1}^N$. 
+In the particular case of two players and a (quasi) convex-concave objective $\mathcal{L}: \R^d \times \R^d \rightarrow \R$, the solution $x^* = (x_1^*, x_2^*)$ to the \eqref{VIP} with $F(x) = (\nabla \mathcal{L}(x), - \nabla \mathcal{L}(x))$ is a saddle point of $\mathcal{L}$ satisfying
+\begin{equation*}
+    \mathcal{L}(x^*_1, x_2) \leq \mathcal{L}(x^*_1, x^*_2) \leq \mathcal{L}(x_1, x^*_2), \forall x_1, x_2 \in \R^d \nonumber
+\end{equation*}
+Saddle-point problems and applications of \eqref{NE} are ubiquitous, pertaining from training Generative Adversarial Networks (GANs) to multi-agent reinforcement learning and auction/bandit problems \citep{daskalakis2017training, zhang2021multi, pfau2016connecting}.
+
+\subsection{Blanket Assumptions}
+We present below the main assumptions that will underlie the analysis to follow. We initially impose the standard assumption that there exists a solution $x^*$ to the associated \eqref{VIP}. 
+
+\begin{assumption} \label{assumt: sol_set_non_empty}
+    The solution set $\mathcal{X}^*$ of \eqref{VIP} is nonempty and there exists $x^* \in \mathcal{X}^*, R \in \mathbb{R} $ such that $\|x^*\|_2 \leq R$.
+\end{assumption}
+
+The next assumption introduces the class of operators $F$ of the associated \eqref{VIP} for which our stochastic gradient algorithms will be analyzed for.  
+\begin{assumption}[$\lambda$-weak $\mu$-quasi strong monotonicity] \label{assumpt: weak_quasi_strong_monotonicity}
+    The operator $F$ is $\lambda$-weak $\mu$-quasi strongly monotone, i.e. there exist $\lambda \geq 0, \mu > 0$ such that for some $x^*\in\mathcal{X}^*$ it holds that 
+    \begin{eqnarray}
+        \langle F(x), x - x^*\rangle &\geq& \mu \|x - x^*\|^2 - \lambda, \quad \forall x \in \mathbb{R}^d 
+    \end{eqnarray}
+\end{assumption}
+
+Assumption~\ref{assumpt: weak_quasi_strong_monotonicity} for $\lambda = 0$ coincides with the well-known notions of quasi-strong monotonicity \citep{loizou2020stochastic}, strong stability condition \citep{mertikopoulos2019learning}, and strongly coherent VIPs \citep{song2020optimistic} in the optimization literature. Specifically, it consists a relaxation of the classical notion of strong monotonicity/convexity, requiring that $\langle F(x) - F(x'), x - x'\rangle \geq \mu \|x - x'\|^2, \forall x, x'\in \R^d$. For $\lambda > 0$, Assumption~\ref{assumpt: weak_quasi_strong_monotonicity} represents a further relaxation motivated by dissipative dynamical systems and weakly convex optimization \citep{raginsky2017non, erdogdu2018global} and encompassing non-monotone games and various problems in statistical learning theory \citep{tan2023online}. A simple example of a function satisfying Assumption~\ref{assumpt: weak_quasi_strong_monotonicity} is $f(x, y) = (x^2 + 10 \sin(x)) + xy − (y^2 − 10 \cos(y))$, where the aforementioned assumption is satisfied with $(\mu, \lambda) = (1, 25)$. 
+
+A common assumption in the literature of smooth optimization that we will utilize is that the operators in the finite-sum structure of the \eqref{VIP} are Lipschitz continuous.
+\begin{assumption}[Lipschitz Continuity] \label{assumpt: lipschitz}
+    Each $F_i$ is $L_i$-Lipschitz continuous, i.e. it holds $\forall i \in [n]$ that
+    \begin{eqnarray}
+        \|F_i(x_1) - F_i(x_2)\| \leq L_i \|x_1 - x_2\|, \quad \forall x_1, x_2 \in \mathbb{R}^d
+    \end{eqnarray}
+    and we denote with $L_{max} := \max_{i\in[n]} L_i$.
+\end{assumption}
+The algorithm analyzed uses a stochastic oracle $F_i$ at each iteration for updating the current state. Prior works involving stochastic algorithms for \eqref{VIP} commonly assume the existence of an unbiased stochastic oracle, i.e. $\ex\left[F_i(x)\right] = F(x)$, simplifying the analysis of the dynamics \cite{loizou2021stochastic, vlatakis2024stochastic}. However, in random reshuffling the stochastic oracles between consecutive steps are dependent with each other, resulting to a biased estimator that intriguingly complicates the analysis of the algorithm. A meticulous analysis of the bias introduced in the dynamics is conducted in order to establish the rate of convergence in our results without the assumption of unbiased estimators.
+
+Additionally, an assumption on the variance of the stochastic oracles is typically introduced in the analysis of stochastic algorithms for finite-sum \eqref{VIP}. Prior works require bounded variance of the stochastic oracle at every point, i.e. $\forall x \in \R^d: \ex\left[\|F_i(x) - F(x)\|^2\right] \leq c,$ for $c > 0$, or a growth condition that necessitates the existence of $c_1, c_2 > 0$ such that $\ex\left[\|F_i(x)\|^2\right] \leq c_1 \|F(x)\|^2 + c_2$ \citep{lin2020finite, lin2020gradient, mishchenko2020revisiting}. However, the aforementioned assumptions might constrain the applicability of the results in a narrow set of functions, as they might not be satisfied even for quadratics in an unconstrained domain. In contrast, in light of a new series of results \citep{emmanouilidis2024stochastic, choudhury2023single}, we utilize the Lipschitz property of each $F_i$ to provide closed-form expressions for the upper bound on the variance. Specifically, under Assumption~\ref{assumpt: lipschitz} the variance of the stochastic oracles can be smoothly controlled by the inequality $\frac{1}{n} \sum_{i=0}^{n-1} \|F_i(x) - F(x)\|^2 \leq A \|x - x^*\|^2 + 2 \sigma_*^2$, where $A = \frac{2}{n} \sum_{i=0}^{n-1} L_i^2$ and $\sigma_*^2 = \frac{1}{n} \sum_{i=0}^{n-1} \|F_i(x_*)\|^2$. 
+
+In order to establish bounds on the higher moments of the operators in our results, we require the following regularity condition on the fourth moment of the stochastic oracles at the optimum $x^* \in \mathcal{X}^*$.  
+\begin{assumption}\label{assumpt: 4th-moment bounded}
+    The fourth moment of the stochastic oracles at $x^*\in \mathcal{X}^*$ is bounded and there exists a constant $c > 0$ such that $\left(\sigma_*^2\right)^2 = c \sigma_*^2 < +\infty$.
+\end{assumption}
+
+With those assumptions at hand, we introduce the methodology and core proof techniques used in order to derive our theoretical guarantees. 
+\subsection{Overview of Proof Techniques}
+
+\section{Theoretical Guarantees}
+
+We begin by analyzing the SGDA algorithm equipped with random reshuffling as the sampling strategy defining the stochastic oracles used at each iteration of the algorithm. Our first result establishes the convergence rate of the \eqref{SGDA-RR} algorithm for $\lambda$-weak $\mu$-quasi strongly monotone \eqref{VIP}.
+
+\begin{theorem}\label{thm: convergence_rate}
+    Let Assumptions~\ref{assumt: sol_set_non_empty}-\ref{assumpt: lipschitz} hold. If $\gamma \leq \frac{1}{3nL_{max}}$, then the iterates of \eqref{SGDA-RR} satisfy
+    \begin{eqnarray}
+        \ex\left[\|x_{k+1}^0 - x_*\|^2\right] &\leq& (1 - \gamma n \mu)^{k+1} \|x_0 - x^*\|^2 + \gamma^2 n c \sigma_*^2 \nonumber
+    \end{eqnarray}
+    where $\sigma_*^2 = \frac{1}{n} \sum_{i=0}^{n-1} \|F_i(x^*)\|^2$ and $c = $. 
+\end{theorem}
+
+Theorem~\ref{thm: convergence_rate} establishes a linear convergence of \ref{SGDA-RR} to a solution $x^* \in \mathcal{X}^*$ up to a bias term. Importantly, the additive bias term introduced by the shuffling technique depends on the variance of the stochastic oracles at the optimum and the square of the step size $\mathcal{O}\left(\gamma^2 \sigma_*^2\right)$. This is in stark contrast to classical with-replacement stochastic gradient methods \citep{loizou2020stochastic, gower2019sgd}, where the algorithm converges to a neighbourhood of size $\mathcal{O}\left(\gamma \sigma_*^2\right)$ around the solution $x^*$. Hence, for the same step size $\gamma < 1$ the random reshuffling variant of the algorithm will converge to a smaller neighbourhood around $x^*$. The rate of convergence established in Theorem~\ref{thm: convergence_rate} matches the asymptotic rate introduced in prior work \citep{das2022sampling, emmanouilidis2024stochastic} for the setting of strongly monotone operators, while extending the applicability of the convergence analysis to a wider class of non-monotone \eqref{VIP}. 
+
+The refined bias obtained by utilizing random reshuffling for the sampling of the gradients in an algorithm can be demonstrably translated to an improved rate for obtaining a prespecified accuracy of the solution. Specifically, by running for the same number of epochs $K$ one variant of the algorithm using uniform with-replacement sampling and one variant random reshuffling and letting $\gamma = \frac{1}{nK}$, the classical with-replacement variant will converge to a sufficient high-accuracy estimate of the solution at a rate $\mathcal{O}\left(\frac{1}{nK}\right)$ \citep{das2022sampling, mishchenko2020random}, while the random reshuffling at an accelerated rate of $\mathcal{O}\left(\frac{1}{nK^2}\right)$. This explains the empirical success and widespread preference of without-replacement samplings for instantiating stochastic gradient methods in practice. 
+
+% \kostas{The proof can be found in Appendix \ref{app: thm: convergence_rate}.}
+In the sequel, we study the trajectory of the algorithm through the lens of Markov Chain theory, allowing for a refined analysis of the induced bias and enabling performance efficient estimation of statistics in practice. 
+
+The connection of stochastic gradient methods with Markov Chains dates back to [reference] and includes a rich literature of analyzing algorithms with unbiased gradients. However, in random reshuffling the stochastic oracles are biased, thus departing from the classical Markov Chain analysis. Despite that the steps of the method inside an epoch are correlated, observe that the epoch-level iterates $(x_k)_{k \geq 0}$ constitute a Markov Chain, each one depending solely at the previous epoch-level iterate. In particular, owing to the use of a smoothed stochastic oracle $g(x_k^i)$ and a constant step size $\gamma$, the corresponding Markov chain and its transition kernel are time homogeneous. Another interesting distinct feature with the classical discrete space Markov Chains is that the induced chain lies in the general continuous state space of $\R^d$. 
+
+Analyzing the fundamental properties of irreducibility, aperiodicity and positive Harris recurrence, we first prove the existence of a stationary distribution $\pi_{\gamma}$, where the iterates of the underlying Markov Chain with step size $\gamma$ converge in total variation distance. 
+
+\begin{theorem}\label{thm: efficient_stats}
+    Let Assumptions~\ref{assumt: sol_set_non_empty}-\ref{assumpt: lipschitz} hold. If \eqref{SGDA-RR} is run with step size $\gamma < \gammaub$, then the following hold
+    \begin{enumerate}
+        \item The epoch-level iterates $(x_k)_{k \geq 0}$ have a unique stationary distribution $\pi_\gamma \in \mathcal{P}_2(\R^d),$ where $P_2(\R^d)$ is the set of distributions supported in $\R^d$ with bounded second moment.
+        \item For any initialization $x_0 \in \R^d$ and any test function $\ell: \R^d \rightarrow \R$ satisfying 
+        $\|\ell(x)\| \leq L_{\ell} (1 + \|x\|), \quad \forall x \in \R^d_{\geq 0}$ with $L_{\ell} > 0$, the iterates of \ref{SGDA-RR} converge geometrically in total variation distance to $\pi_\gamma$, i.e. there exist constants $\rho \in (0, 1)$ and $c \in (0, +\infty)$ such that
+        \begin{eqnarray}
+            \left|\ex_{x_k}\left[\ell(x_k)\right] - \ex_{x \sim \pi_\gamma}\left[\ell(x)\right]\right| &\leq& c (1 - \rho)^k
+        \end{eqnarray}
+        \item For any test function $\ell: \R^d \rightarrow \R$ satisfying $\ex_{x\sim\pi_\gamma}\left[\ell(x)\right] < \infty$ and $|\ell(x)| \leq L_{\ell} (1 + \|x\|^2)$ with $L_{\ell} > 0$ the following hold
+        \begin{eqnarray}
+            \left|\ex_{x\sim\pi_\gamma}\left[\ell(x)\right] - \ell(x^*)\right| &\leq& L_{\ell} \sqrt{C}.
+        \end{eqnarray}
+    \end{enumerate}
+\end{theorem}
+
+Theorem~\ref{thm: efficient_stats} establishes the geometric convergence of the iterates of the Markov chain and provides a refined characterization of the distance between the mean of the limit distribution and the solution of the underlying \eqref{VIP}. The aforementioned result is based on a combination of the Foster-Lyapunov property and a minorization condition that the induced Markov chain is shown to satisfy. 
+
+We continue with a theorem that allows to perform efficient statistics of the underlying quantities characterized by the dynamics of the method. Using the analogue of
+the Birkhoff–Khinchin ergodic theorem for continuous state space Markov Chains, we establish a Law of Large Numbers (LLN) and a Central Limit Theorem (CLT) for the averaged iterates of the induced Markov chain.
+\begin{theorem}
+    Let Assumptions~\ref{assumt: sol_set_non_empty} - \ref{assumpt: lipschitz} hold. If \ref{SGDA-RR} is run with step size $\gamma < \gammaub$, then for any function $\ell: \R^d \rightarrow \R$ satisfying $\ex_{x\sim\pi_\gamma}\left[\ell(x)\right] < \infty$ and $|\ell(x)| \leq L_{\ell} (1 + \|x\|^2)$ with $L_{\ell} > 0$ the following hold
+    \begin{enumerate}
+        \item A Law of Large Numbers for the epoch-level iterates of \ref{SGDA-RR}:
+            \begin{eqnarray*}
+                \lim_{T\rightarrow+\infty} \frac{1}{T}\sum_{t=0}^{T-1} \ell(x_t) = \ex_{x\sim\pi_\gamma}\left[\ell(x)\right] \quad \as
+            \end{eqnarray*}
+        \item A Central Limit Theorem for the epoch-level iterates of \ref{SGDA-RR}:
+            \begin{eqnarray*}
+                T^{-1/2} \sum_{t=0}^{T-1} \left[\ell(x_t) - \ex_{x\sim\pi_\gamma}\left[\ell(x)\right]\right] \xrightarrow{d} \mathcal{N}(0, \sigma_{\pi_{\gamma}}^2),
+            \end{eqnarray*}
+            where $\sigma_{\pi_{\gamma}}^2(\ell) = \lim\limits_{T\rightarrow+\infty} \frac{1}{T}\ex_{\pi_{\gamma}} \left[S_T^2\right]$ and $S_T^2 = \sum_{t=0}^{T-1} \left[\ell(x_t) - \ex_{x\sim\pi_\gamma}\left[\ell(x)\right]\right]^2$.
+     \end{enumerate}
+\end{theorem}
+
+% Proof can be found in Appendix~\ref{app: efficient_statistic}. 
+Paragraph to be added comparing with prior work. 
+
+Having established the role of \RRresh in a stochastic algorithm, we next examine the interplay between \RRresh and \RRrom and the effect of the combination of the heuristics in the bias. To do so, we focus on quasi-monotone operators ($\lambda = 0$ in Assumption~\ref{assumpt: weak_quasi_strong_monotonicity}) capturing a wide range of non-monotone regimes. By meticulously characterizing the higher order moments of the distance between the iterates of \RRresh and the solution of the \eqref{VIP}, we are able to construct a further refined trajectory by applying the debiasing scheme \RRrom. In the following theorem, an explicit expansion of the steady-state expectation of the refined iterates with respect to the step size is provided, establishing provably that the refined iterate scheme converges closer to the optimal solution $x^*\in\mathcal{X}^*$.
+
+% In the following theorem, the  debiasing mechanism that combines the random reshuffling with the Richardson - Romberg extrapolation scheme.
+\begin{theorem}\label{thm: rr_1_rr_2}
+Let Assumptions \ref{assumt: sol_set_non_empty} - \ref{assumpt: 4th-moment bounded} hold and $\lambda = 0$. Then, $\text{SGDA}_{\RRresh \oplus \RRrom}$ with step size $\gamma \leq \gammaub$ attains a bias of
+    \begin{eqnarray}
+        \mathbb{E}_{x_{\gamma} \sim \pi_{\gamma}} [2x_{\gamma}]-\mathbb{E}_{x_{2\gamma} \sim \pi_{2\gamma}} [x_{2\gamma}] - x^* = \mathcal{O}\left(\gamma^3\right) 
+    \end{eqnarray}
+    and the iterates of the method satisfy for $\rho \in (0, 1)$ and $c \in (0, +\infty)$ that
+        \begin{eqnarray}
+            \left\|\ex_{x_k}\left[x_k - x^*\right]\right\| &\leq& c (1 - \rho)^k + \mathcal{O}\left(\gamma^3\right) \nonumber
+        \end{eqnarray}
+\end{theorem}
+Theorem~\ref{thm: rr_1_rr_2} establishes the refined bias achieved by the combination of heuristics $\RRresh$ and $\RRrom$. More specifically, the refined iterate scheme converges geometrically to a neighbourhood of a solution $x^* \in \mathcal{X}^*$, where the size of the neighbourhood is $\mathcal{O}\left(\gamma^3\right)$. The improved cubic dependence of the bias allows the method to converge faster to a sufficiently high accuracy estimate of the solution $x^*$, attaining an accelerated rate of convergence. For example, selecting the step size as $\gamma = \frac{1}{nK}$ and running the method with both heuristics for $K$ epochs will provide an accelerated rate of $\mathcal{O}\left(\frac{1}{n^3K^3}\right)$, surpassing both the classical SGD with uniform with-replacement sampling with rate $\mathcal{O}\left(\frac{1}{nK}\right)$ and the random reshuffling variant of it with $\mathcal{O}\left(\frac{1}{nK^2}\right)$.
+
+The refined bias is established through a fine-grained analysis of the interplay between \RRresh and \RRrom. Specifically, we first upper bound the higher moments of the distance of the iterates  produced by the \RRresh from the solution $x^*\in\mathcal{X}^*$ and then show through a meticulous argument that \RRrom further refines the bias to match the second moment of the iterates already refined by \RRresh. Thus, the combined use of the heuristics leads to refined higher-order dependence of the bias to the step size used achieving an accelerated reduction of the neighbourhood of convergence around $x^*$.%  a refined higher-order bounds of the moments of the distance of \RRresh from the solution $x^*$ and the 
+
+% \kostas{Should we have a paragraph of comparing with previous results on \RRrom? Similarly, what about the Theorem establishing the LLN and CLT?}
+\section{Experiments}
+In this section, we conduct a series of experiments demonstrating the benefits from the synergy of the two heuristics empirically. More specifically, we compare the relative error and bias attained from the classical SGD(A) algorithm using uniform with-replacement sampling (denoted as \emph{SGDA} in the plots), the same algorithm equipped with \RRresh, \RRrom and the method utilizing both of the heuristics in the strongly monotone setting. 
+
+For each experiment, we report the average of $5$ trials/runs and plot the relative error with respect to the iterations of the algorithm.
+
+\textbf{\textit{Two-player Zero-Sum Games.}} In the strongly monotone case, we consider the two-player zero-sum game from \cite{emmanouilidis2024stochastic, loizou2021stochastic}, consisting a strongly convex - strongly concave quadratic of the form
+\begin{eqnarray}
+    \min_{x_{1} \in \R^d} \max_{x_{2}\in \R^d} f(x_1, x_2) = \frac{1}{n} \sum_{i=1}^{n} \frac{1}{2} x_1^T A_i x_1 + x_1^T B_i x_2 - \frac{1}{2} x_2^T C_i x^2 + \alpha_i^T x_1 - c_i^T x_2. \nonumber
+\end{eqnarray}
+The matrices $A_i$ are sampled by first sampling an orthogonal matrix $P$ and then sampling a diagonal matrix $D_i$ with elements in the diagonal uniformly sampled from the interval $[\mu, L]$. The selected parameters $\mu, L$ correspond to the strong monotonicity parameter in Assumption~\ref{assumpt: weak_quasi_strong_monotonicity} and the Lipschitz parameter of the underlying problem respectively. We acquire the matrices $A_i$ as the product $A_i = P D_i P^T$. We sample the matrices $B_i, C_i$ similarly to sampling the matrices $A_i$ with the only difference that the elements of the diagonal matrices $D_i$ lie in the interval $[0, 0.1]$ and $[\mu, L]$ respectively. The vectors $a_i, c_i$ are follow the normal distribution $\mathcal{N}(\textbf{0}, I)$. In all experiments, we use $n = 100, d = 100$, while we specify the values of $\mu, L$ in each experiment independently as they differ.
+
+\textbf{On the Rate of Convergence.} In the first set of experiments, we aim to validate empirically the result of Theorem~\ref{thm: convergence_rate} by running SGDA with \RRresh and using the step sizes described by theory. We conduct experiments for multiple conditions $\kappa = \frac{L}{\mu}$ with value $\kappa = \{1, 5, 10, 100\}$. In Figure~\ref{?}, we observe that the algorithm converges linearly to a solution $x^*$ up to a bias term that depends on the step size used, validating in this way the results of Theorem~\ref{thm: convergence_rate}.
+
+\textbf{Bias Reduction: \textit{Which heuristic is empirically better?}} In a second set of experiments, we examine the effect of each heuristic (\RRresh, \RRrom, $\RRrom \oplus \RRresh$) in the bias attained. More specifically, we plot the corresponding bias term induced for multiple step sizes $\gamma$
+
+\textbf{Efficient Statistics \& .} In
+Something additional
+
+\newpage
+\bibliography{iclr2026/iclr2026_conference}
+\bibliographystyle{iclr2026/iclr2026_conference}
+
+\appendix
+\newpage
+\section*{Supplemental Material}
+\addcontentsline{toc}{section}{Appendix}
+\tableofcontents
+
+\newpage
+\section{Preparatory Lemmas \& Propositions}
+\subsection{Useful Inequalities}
+In this section, we provide inequalities that will be useful in our proofs
+\begin{eqnarray}
+		\left\|\sum_{i=1}^n x_i\right\|^2 &\leq& n\sum_{i=1}^n\left\|x_i\right\|^2 \label{ineq1} \\
+		\left\|a - b\right\|^2 &\geq& \frac{1}{2} \left\|a \right\|^2 - \left\|b\right\|^2 \label{ineqa_b} \\
+		\langle a, b \rangle& =& \frac{1}{2} \left[\left\|a \right\|^2 + \left\|b\right\|^2 - \| a-b\|^2\right] \label{ineq inner product} \\
+		e^{-x} &\geq& 1 - x, \forall x \geq 0 \label{ineq exponential} \\
+            \|a+b\|^2&\leq& \frac{1}{t}\| a \|^2 + \frac{1}{1-t}\|b\|^2, \forall t \in (0, 1) \label{ineq_young_for_t}
+\end{eqnarray}
+
+\subsection{Useful Lemmas}
+
+\begin{proposition} [Proposition 5.5.3 \citep{meyn2012markov}]\label{prop: petite_set}
+    If a set $C \in \mathcal{B}(\R^d)$ is $\nu_m$-small, then it is $\nu_{\delta_m}$-petite for some $\delta_m > 0$.
+\end{proposition}
+Notation: Consider the epoch-wise update rule of~\ref{SGDA-RR}
+\begin{eqnarray}
+    x_{k+1}^0 = x^n_{k} &=& x_k^{n-1} - \gamma \sum\limits_{i=0}^{n-1} F_{\omega_{k}^i}(x_k^i) - \gamma \noise_k \nonumber \\
+    &=& x_k^{n-1} - \gamma G_{\omega_k}(x_k^0) - \gamma \noise_k \label{epoch_wise_update}
+\end{eqnarray}
+where $G_{\omega_k}(x_k^0) := \sum\limits_{i=0}^{n-1} F_{\omega_{k}^i}(x_k^i)$.
+
+\section{Proof of Theorem~\ref{thm: rate_of_convergence}}
+We first provide two Lemmas that are necessary for deriving the rate of convergence of the Theorem~\ref{thm: rate_of_convergence}. 
+
+\begin{lemma}
+\label{lem: bound_on_deter}
+    Let Assumptions~\ref{assumt: sol_set_non_empty}-\ref{assumpt: lipschitz} hold. The iterates of \ref{algo: SGDA-RR} satisfy for any $x^* \in\mathcal{X}^*$ it holds that
+    \begin{eqnarray}
+        \exof{\left\|x_{k+1} - x^* - \gamma n F(x_k)\right\|^2\given\filter_k} &\leq& (1 - 2 \gamma n\mu +\gamma^2 n^2 L_{max}^2) \|x_k - x^*\|^2 + 2 \gamma n \lambda \nonumber
+    \end{eqnarray}
+\end{lemma}
+\begin{proof}
+    For any fixed $x^*\in \mathcal{X}^*$, it holds that 
+    \begin{eqnarray}
+        \left\|x_{k+1} - x^* - \gamma n F(x_k)\right\|^2 &=& \|x_k - x^*\|^2 - 2 \gamma n\langle x_k - x^*, F(x_k)\rangle + \gamma^2 n^2 \|F(x_k)\|^2 \nonumber\\
+        &\leq& \|x_k - x^*\|^2  - 2 \gamma n\mu \|x_k - x^*\|^2  + 2 \gamma n \lambda + \gamma^2 n^2\| F(x_k)\|^2 \nonumber \\
+        &\leq& (1 - 2 \gamma n\mu) \|x^{0}_k - x^*\|^2 + 2 \gamma n \lambda + \gamma^2 n^2\| F(x_k)\|^2\nonumber \\
+        &\stackrel{\text{Assumption } \ref{assumpt: lipschitz}}{\leq}& (1 - 2 \gamma n\mu +\gamma^2 n^2 L_{max}^2) \|x_k - x^*\|^2 + 2 \gamma n \lambda \nonumber 
+    \end{eqnarray}
+    Taking expectation condition on the filtration $\filter_k$, gives
+    \begin{eqnarray}
+       \exof{\left\|x_{k+1} - x^* - \gamma n F(x_k)\right\|^2\given\filter_k} &\leq& (1 - 2 \gamma n\mu +\gamma^2 n^2 L_{max}^2) \|x_k - x^*\|^2 + 2 \gamma n \lambda \nonumber
+    \end{eqnarray}
+\end{proof}
+\begin{lemma}
+\label{lem: bound_on_stochastic_part}
+    Let Assumptions~\ref{assumt: sol_set_non_empty},~\ref{assumpt: lipschitz} hold. If \ref{SGDA-RR} is run with step size $\gamma \leq \frac{1}{\sqrt{3n(n-1)}L_{max}}$, then it holds that
+    \begin{eqnarray}
+        \exof{\sum_{i=1}^{n-1}\left\|F_{\omega_k^i}(x_k^i) - F_{\omega_k^i}(x_k^0)\right\|^2\given\filter_k} &\leq& \gamma^2 n(n+1) A L_{max}^2 \norm{x_k^0 - x^*}^2 + 2 n(n+1) L_{max}^2 \gamma^2\sigma_*^2 \nonumber \\
+       && +n(n-1)(2n-1) L_{max}^2 \gamma^2\norm{F(x_k^0)}^2 \nonumber
+    \end{eqnarray}
+\end{lemma}
+\begin{proof}
+    From the Lipschitz property of the operators $F_i, \forall i \in [n],$ it holds that
+   \begin{eqnarray}
+       \exof{\sum_{i=1}^{n-1}\left\|F_{\omega_k^i}(x_k^i) - F_{\omega_k^i}(x_k^0)\right\|^2\given\filter_k} &\leq& L_{max}^2 \exof{\sum_{i=1}^{n-1}\left\|x_k^i - x_k^0\right\|^2\given\filter_k} \label{eq: lemma_for_conv_rate_eq_main}
+   \end{eqnarray}
+   Thus, it suffices to upper bound the sum on the right-hand side of \eqref{eq: lemma_for_conv_rate_eq_main}.
+   From the epoch-level update of \ref{SGDA-RR}, it holds 
+    \begin{eqnarray}
+        \|x^i_k - x^k_0\|^2 &=& \gamma^2 i^2 \left\|\frac{1}{i} \sum\limits_{j=0}^{i-1} F_{\omega_k^j}(x^i_k)\right\|^2 \nonumber\\
+    &\stackrel{\eqref{ineq1}}{\leq}& 3\gamma^2 i \sum\limits_{j=0}^{i-1} \norm{F_{\omega_k^j}  (x_k^i)-F_{\omega_k^j} (x_k^0)}^2  + 3\gamma^2 i^2 \norm{\frac{1}{i}\sum\limits_{j=0}^{i-1} F_{\omega_k^j} (x_k^0)-F (x_k^0)}^2 \nonumber \\
+    && + 3\gamma^2 i^2 \norm{F(x_k^0)}^2\nonumber\\
+    &\stackrel{\text{Assumption } \ref{assumpt: lipschitz}}{\leq}& 3\gamma^2 L_{max}^2 i\sum\limits_{j=0}^{i-1} \norm{x_k^i-x_k^0}^2 + 3\gamma^2 i^2 \norm{\frac{1}{i}\sum\limits_{j=0}^{i-1} F_{\omega_k^j} (x_k^0)-F (x_k^0)}^2 \nonumber \\
+    && + 3\gamma^2 i^2 \norm{F(x_k^0)}^2 \nonumber
+    \end{eqnarray}
+    where at the last step we have used the Lipschitz property of the operators $F_i, \forall i \in [n]$. 
+    Taking expectation condition on the filtration $\mathcal{F}_k$, we get
+    \begin{eqnarray}
+        \Expep{\norm{x_i^k - x_k^0}^2} &\leq& 3\gamma^2 L_{max}^2 i\Expep{\sum\limits_{j=0}^{i-1} \norm{x_k^i-x_k^0}^2} + 3\gamma^2 i^2 \Expep{\norm{\frac{1}{i}\sum\limits_{j=0}^{i-1} F_{\omega_k^j} (x_k^0)-F (x_k^0)}^2}\nonumber \\ 
+        && + 3\gamma^2 i^2 \norm{F(x_k^0)}^2 \label{eq: lemma_for_conv_rate_eq1}
+    \end{eqnarray}
+    From Lemma A.3 in \citep{emmanouilidis2024stochastic}, it holds for $A = \frac{2}{n} \sum_{i=0}^{n-1} L_i^2$, $\sigma_*^2 = \frac{1}{n} \sum_{i=0}^{n-1} \|F_i(z_*)\|^2$ and $\forall i \in [n]$ that
+    \begin{eqnarray}
+        i^2 \Expep{\norm{\frac{1}{i}\sum\limits_{j=0}^{i-1} F_{\omega_k^j} (x_k^0)-F (x_k^0)}^2} &\leq& \frac{i(n-i)}{n-1} \left(A \|x_k^0 - x^*\|^2 +2 \sigma_*^2\right) \label{eq: lemma_for_conv_rate_eq2}   
+    \end{eqnarray} 
+    From inequality \eqref{eq: lemma_for_conv_rate_eq2} and \eqref{eq: lemma_for_conv_rate_eq1}, thus, we obtain
+    \begin{eqnarray}
+            \Expep{\norm{x_k^i - x_k^0}^2} &\leq& 3\gamma^2 L_{max}^2 i \Expep{\sum\limits_{j=0}^{i-1} \norm{x_k^i-x_k^0}^2} + 3 \gamma^2 \frac{i(n-i)}{n-1} A\norm{x_k^0 - x^*}^2 \nonumber \\
+            && + 6\gamma^2 \frac{i(n-i)}{n-1} \sigma_*^2 + 3\gamma^2 i^2 \norm{F(x_k^0)}^2 \label{eq: lemma_for_conv_rate_eq4} 
+    \end{eqnarray}
+    By summing over $0\leq i \leq n-1$ we have that 
+    \begin{eqnarray}
+        \sum_{i=0}^{n-1} \Expep{\norm{x_k^i - x_k^0}^2} &\leq& 3\gamma^2 L_{max}^2\frac{n(n-1)}{2} \sum_{i=0}^{n-1} \Expep{\norm{x_k^i - x_k^0}^2} + \gamma^2 A \frac{n(n+1)}{2} \norm{x_k^0 - x^*}^2 \nonumber \\
+        && + \gamma^2 n(n+1)\sigma_*^2 + \frac{\gamma^2n(n-1)(2n-1)}{2} \norm{F(x_k^0)}^2, \label{eq: lemma_for_conv_rate_eq5}
+    \end{eqnarray}
+    where we used the facts 
+        \begin{eqnarray}
+    \sum_{i=0}^{n-1} i = \frac{n(n-1)}{2}, \quad \sum_{i=0}^{n-1} i^2  = \frac{n(n-1)(2n-1)}{6}, \quad \sum_{i=0}^{n-1} \frac{i(n-i)}{n-1} = \frac{n(n+1)}{6} \nonumber.
+    \end{eqnarray}
+    For $\gamma \leq \frac{1}{\sqrt{3n(n-1)}L_{max}}$, rearranging the terms in \eqref{eq: lemma_for_conv_rate_eq5} we obtain
+    \begin{eqnarray}
+        \sum_{i=0}^{n-1} \Expep{\norm{x_k^i - x_k^0}^2} &\leq& \gamma^2 n(n+1) A \norm{x_k^0 - x^*}^2 + 2 n(n+1) \gamma^2\sigma_*^2 \nonumber \\
+       && +n(n-1)(2n-1) \gamma^2\norm{F(x_k^0)}^2\nonumber \\ 
+       &\stackrel{\text{Assumption }\ref{assumpt: lipschitz}}{}\label{eq: lemma_for_conv_rate_eq6}
+    \end{eqnarray}
+    Substituting \eqref{eq: lemma_for_conv_rate_eq6} into \eqref{eq: lemma_for_conv_rate_eq_main}, we obtain
+    \begin{eqnarray}
+       \sum_{i=0}^{n-1} \Expep{\norm{x_k^i - x_k^0}^2} &\leq& \gamma^2 n(n+1) A L_{max}^2 \norm{x_k^0 - x^*}^2 + 2 n(n+1) L_{max}^2 \gamma^2\sigma_*^2 \nonumber \\
+       && +n(n-1)(2n-1) L_{max}^2 \gamma^2\norm{F(x_k^0)}^2\nonumber
+    \end{eqnarray}
+\end{proof}
+\subsection{Proof of Lemma~\ref{lemma strongly monotone 4th-moment}}
+\label{app: lemma strongly monotone 4th-moment}
+\begin{lemma}\label{lemma strongly monotone 4th-moment}
+Assume that $f(x)$ is $\mu-$strongly convex and each $f_i(x), \forall i \in [n],$ is $L_i-$smooth. Then, the iterates of SGD-RR with stepsize $\gamma \leq \frac{\mu}{4nL_{max}^2}$ satisfy
+    \begin{eqnarray}
+        Mom(3) &=& \mathcal{O}\left(n^{\frac{3}{2}}\gamma^3\right) \sigma_*^2 \nonumber \\
+        Mom(4) &=& \mathcal{O}\left(n^3\gamma^4\right) \sigma_*^2 \nonumber 
+    \end{eqnarray}
+\end{lemma}
+\begin{proof}
+We, first, provide the bound on the third moment. From Holder's inequality, we have that
+\begin{eqnarray}
+    \Expe{\|x_{k+1}^{0} - x_*\|^3} &\leq& \left(\Expe{\|x_{k+1}^{0} - x_*\|^2}\right)^{\frac{3}{2}} \nonumber 
+\end{eqnarray}
+From Theorem~\ref{thm strongly monotone}, it holds that 
+\begin{eqnarray}
+    \Expe{\|x^k_0 - x^*\|^2} &=& \mathcal{O}\left(n\gamma^2\right) \sigma_*^2, \nonumber
+\end{eqnarray}
+and thus substituting we obtain
+\begin{eqnarray}
+   \Expe{\|x_{k+1}^{0} - x_*\|^3} &\leq& \mathcal{O}\left(n^{\frac{3}{2}}\gamma^3\right) \sigma_*^2 \nonumber
+\end{eqnarray}
+where we have used the fact that the fourth moment of the stochastic oracles is bounded from Assumption~\ref{assumpt: 4th-moment bounded}. 
+Taking the limit of the Markov chain we obtain the bound on the third moment
+\begin{eqnarray}
+    Mom(3) &\leq& \mathcal{O}\left(n^{\frac{3}{2}}\gamma^3\right) \sigma_*^2 \nonumber
+\end{eqnarray}
+We, next, bound the fourth moment 
+\begin{eqnarray}
+	\| x^{k+1}_0 - x^*\|^4 &=& \left(\| x^{k+1}_0 - x^*\|^2\right)^2 \nonumber \\ 
+        &\stackrel{\eqref{p1_2b}}{\leq}& \left(\frac{\left\|x_k - x^* - \gamma  n F(x_k^0) \right\|^2}{1 - \gamma  n\mu} +\frac{2\gamma}{\mu} \sum_{i=0}^{n-1}\left\|F_{\omega_k^i}(x_k^i) - F_{\omega_k^i}^k(x_k^0)\right\|^2 + \frac{2\gamma}{\mu} \sum_{i=0}^{n-1}\left\|\mathbb{U}_k\right\|^2\right)^2\nonumber 
+\end{eqnarray}
+Letting $T_1 = \left\|x_k - x^* - \gamma  n F(x_k^0) \right\|^2, T_2 = \sum_{i=0}^{n-1}\left\|F_{\omega_k^i}(x_k^i) - F_{\omega_k^i}^k(x_k^0)\right\|^2$ and $T_3 = \sum_{i=0}^{n-1}\left\|\mathbb{U}_k\right\|^2$ for brevity, we have 
+\begin{eqnarray}
+  \| x^{k+1}_0 - x^*\|^4 &\stackrel{}{\leq}& \left(\frac{1}{1 - \gamma  n\mu} T_1 +\frac{2\gamma}{\mu} T_2 + \frac{2\gamma}{\mu} T_3\right)^2\label{p2_0}
+\end{eqnarray}
+Using Lemmas~\ref{lem: bound_on_deter}, \ref{lem: bound_on_stochastic_part} we can bound the terms $T_1, T_2$, as follows
+\begin{eqnarray}
+    T_1 &\leq& \left(1 - \gamma n \mu\right)^2 \|x^k_0 - x^*\|^2 \nonumber \\
+    T_2 &\leq& \frac{\gamma^2 L_{max}^2 n^3}{1 - 2\gamma^2L_{max}^2n^2} \left(2 L_{max}^2 \|x^k_0 - x^*\|^2 + \sigma_*^2\right)\nonumber
+\end{eqnarray}
+Substituting the bounds of $T_1, T_2$ into \eqref{p2_0}, we get
+\begin{eqnarray}
+    \| x^{k+1}_0 - x^*\|^4 &\leq& \left[\left(1 - \gamma n \mu+\frac{4\gamma^3 L_{max}^4 n^3}{\mu (1 - 2\gamma^2L_{max}^2n^2)}\right) \|x^k_0 - x^*\|^2 +\frac{2\gamma^3 L_{max}^2 n^3}{\mu(1 - 2\gamma^2L_{max}^2n^2)} \sigma_*^2 + \frac{2\gamma}{\mu} T_3\right]^2 \nonumber \\ 
+  &=& \left(1 - \gamma n \mu+\frac{4\gamma^3 L_{max}^4 n^3}{\mu (1 - 2\gamma^2L_{max}^2n^2)}\right)^2 \|x^k_0 - x^*\|^4 + \frac{4\gamma^6 L_{max}^4 n^6}{\mu^2(1 - 2\gamma^2L_{max}^2n^2)^2} \left(\sigma_*^2\right)^2 + \frac{4\gamma^2}{\mu^2} T_3^2\nonumber\\
+  && + \frac{4\gamma^3 L_{max}^2 n^3}{\mu(1 - 2\gamma^2L_{max}^2n^2)} \left(1 - \gamma n \mu+\frac{4\gamma^3 L_{max}^4 n^3}{\mu (1 - 2\gamma^2L_{max}^2n^2)}\right) \|x^k_0 - x^*\|^2 \sigma_*^2 \nonumber \\ 
+  && + \frac{4\gamma}{\mu} \left(1 - \gamma n \mu+\frac{4\gamma^3 L_{max}^4 n^3}{\mu (1 - 2\gamma^2L_{max}^2n^2)}\right) \|x^k_0 - x^*\|^2 T_3 +\frac{8\gamma^4 L_{max}^2 n^3}{\mu^2(1 - 2\gamma^2L_{max}^2n^2)} \sigma_*^2 T_3\nonumber 
+\end{eqnarray}
+
+Taking expectation condition on the filtration $\mathcal{F}^k$ (history of $x_k^0$), we get 
+ \begin{eqnarray}
+    \Expep{\|x_{k+1}^{0} - x^*\|^4} &\leq& \left(1 - \gamma n \mu+\frac{4\gamma^3 L_{max}^4 n^3}{\mu (1 - 2\gamma^2L_{max}^2n^2)}\right)^2 \|x^k_0 - x^*\|^4 + \frac{4\gamma^6 L_{max}^4 n^6}{\mu^2(1 - 2\gamma^2L_{max}^2n^2)^2} \left(\sigma_*^2\right)^2 + \frac{4\gamma^2}{\mu^2} T_3^2\nonumber\\
+  && + \frac{4\gamma^3 L_{max}^2 n^3}{\mu(1 - 2\gamma^2L_{max}^2n^2)} \left(1 - \gamma n \mu+\frac{4\gamma^3 L_{max}^4 n^3}{\mu (1 - 2\gamma^2L_{max}^2n^2)}\right) \|x^k_0 - x^*\|^2 \sigma_*^2 \nonumber \\ 
+  && + \frac{4\gamma}{\mu} \left(1 - \gamma n \mu+\frac{4\gamma^3 L_{max}^4 n^3}{\mu (1 - 2\gamma^2L_{max}^2n^2)}\right) \|x^k_0 - x^*\|^2 T_3 +\frac{8\gamma^4 L_{max}^2 n^3}{\mu^2(1 - 2\gamma^2L_{max}^2n^2)} \sigma_*^2 T_3\nonumber
+ \end{eqnarray}
+
+ Selecting the stepsize $\gamma \leq \min\left\{\frac{1}{2nL_{max}}, \frac{\mu}{4nL_{max}^2}\right\}$, we have that
+\begin{eqnarray}
+    \frac{1}{(1 - 2\gamma^2L_{max}^2n^2)} &\leq& 2 \nonumber \\
+    \text{ and } \left[1 - \gamma n \mu + \frac{4n^3\gamma^3 L_{max}^4}{\mu(1 - 2\gamma^2L_{max}^2n^2)}\right] &\leq& \left(1 - \frac{\gamma n \mu}{2}\right) \nonumber
+\end{eqnarray}
+and thus substituting we get
+\begin{eqnarray}
+   \Expep{\|x_{k+1}^{0} - x^*\|^4} &\leq& \left(1 - \frac{\gamma n \mu}{2}\right)^2 \|x^k_0 - x^*\|^4 + \frac{16\gamma^6 L_{max}^4 n^6}{\mu^2} \left(\sigma_*^2\right)^2 + \frac{4\gamma^2}{\mu^2} T_3^2\nonumber\\
+  && + \frac{8\gamma^3 L_{max}^2 n^3}{\mu} \left(1 - \frac{\gamma n \mu}{2}\right) \|x^k_0 - x^*\|^2 \sigma_*^2 \nonumber \\ 
+  && + \frac{4\gamma}{\mu} \left(1 - \frac{\gamma n \mu}{2}\right) \|x^k_0 - x^*\|^2 T_3 +\frac{16\gamma^4 L_{max}^2 n^3}{\mu^2} \sigma_*^2 T_3\nonumber  
+ \end{eqnarray}
+ Taking expectation on both sides, using the tower law of expectation and the fact that $\Expe{T_3} = n^3 \gamma^2$ (since $\mathbb{U}_k \sim \mathcal{N}\left(0, \gamma^2n^2 \sigma_*^2\mathbb{I}\right)$), we obtain
+ \begin{eqnarray}
+     \Expe{\|x_{k+1}^{0} - x^*\|^4} &\leq& \left(1 - \frac{\gamma n \mu}{2}\right)^2 \Expe{\|x^k_0 - x^*\|^4} + \frac{16\gamma^6 L_{max}^4 n^6}{\mu^2} \left(\sigma_*^2\right)^2 + \frac{4n^6\gamma^6}{\mu^2}\sigma_*^2 \nonumber\\
+  && + \frac{8\gamma^3 L_{max}^2 n^3}{\mu} \left(1 - \frac{\gamma n \mu}{2}\right) \Expe{\|x^k_0 - x^*\|^2} \sigma_*^2 \nonumber \\ 
+  && + \frac{4n^3\gamma^3}{\mu} \left(1 - \frac{\gamma n \mu}{2}\right) \Expe{\|x^k_0 - x^*\|^2} +\frac{16n^6\gamma^6 L_{max}^2}{\mu^2} \sigma_*^2\nonumber s\\
+  &=& (1 - \gamma n \mu + \frac{\gamma^2 n^2 \mu^2}{4}) \Expe{\|x^k_0 - x^*\|^4} + \frac{4n^3\gamma^3}{\mu} \left(1 - \frac{\gamma n \mu}{2}\right) \Expe{\|x^k_0 - x^*\|^2}\nonumber\\
+  && + \frac{8\gamma^3 L_{max}^2 n^3}{\mu} \left(1 - \frac{\gamma n \mu}{2}\right) \Expe{\|x^k_0 - x^*\|^2} \sigma_*^2 + \left(\frac{4n^6\gamma^6}{\mu^2} + \frac{16n^6\gamma^6 L_{max}^2}{\mu^2}\right) \sigma_*^2\nonumber \\ 
+  && + \frac{16\gamma^6 L_{max}^4 n^6}{\mu^2} \left(\sigma_*^2\right)^2 \label{p2_1}
+ \end{eqnarray}
+
+Selecting the stepsize $\gamma \leq \min\left\{\frac{1}{2nL_{max}}, \frac{\mu}{4nL_{max}^2}\right\}$, we have that
+\begin{equation}
+    (1 - \gamma n \mu + \frac{\gamma^2 n^2 \mu^2}{4}) \leq1 - \frac{\gamma n \mu}{2}\label{p2_2}
+\end{equation}
+Thus, substituting \eqref{p2_2} in \eqref{p2_1} 
+\begin{eqnarray}
+   \Expe{\|x_{k+1}^{0} - x^*\|^4} &\leq& (1 - \frac{\gamma n \mu}{2}) \Expe{\|x^k_0 - x^*\|^4} + \frac{4n^3\gamma^3}{\mu} \left(1 - \frac{\gamma n \mu}{2}\right) \Expe{\|x^k_0 - x^*\|^2}\nonumber\\
+  && + \frac{8\gamma^3 L_{max}^2 n^3}{\mu} \left(1 - \frac{\gamma n \mu}{2}\right) \Expe{\|x^k_0 - x^*\|^2} \sigma_*^2 + \left(\frac{4n^6\gamma^6}{\mu^2} + \frac{16n^6\gamma^6 L_{max}^2}{\mu^2}\right) \sigma_*^2\nonumber\\
+  && + \frac{16\gamma^6 L_{max}^4 n^6}{\mu^2} \left(\sigma_*^2\right)^2 \nonumber
+\end{eqnarray}
+
+From Theorem~\ref{thm strongly monotone}, we have that 
+\begin{eqnarray}
+    \Expe{\|x^k_0 - x^*\|^2} &=& \mathcal{O}\left(n\gamma^2\right) \sigma_*^2 \nonumber
+\end{eqnarray}
+and thus we get
+\begin{eqnarray}
+\Expe{\|x_{k+1}^{0} - x^*\|^4} &\leq& (1 - \frac{\gamma n \mu}{2}) \Expe{\|x^k_0 - x^*\|^4} + \left(1 - \frac{\gamma n \mu}{2}\right) \mathcal{O}\left(n^4\gamma^5\right) \sigma_*^2\nonumber\\
+  && + \left(1 - \frac{\gamma n \mu}{2}\right) \mathcal{O}\left(n^4\gamma^5\right) \left(\sigma_*^2\right)^2 + \frac{16\gamma^6 L_{max}^4 n^6}{\mu^2} \left(\sigma_*^2\right)^2 + \left(\frac{4n^6\gamma^6}{\mu^2} + \frac{16n^6\gamma^6 L_{max}^2}{\mu^2}\right) \sigma_*^2\nonumber\\
+  &\leq& (1 - \frac{\gamma n \mu}{2}) \Expe{\|x^k_0 - x^*\|^4} + \mathcal{O}\left(n^4\gamma^5\right) \sigma_*^2 + \mathcal{O}\left(n^4\gamma^5\right) \left(\sigma_*^2\right)^2\nonumber
+\end{eqnarray}
+Taking the limit of the markov chain and rearranging the terms, we obtain %letting $Mom(4) = \Expe{\|x_{k+1}^{0} - x^*\|^4}, Mom(2) = \Expe{\|x^k_0 - x^*\|^2}$, we obtain 
+\begin{eqnarray}
+    \frac{\gamma n \mu}{2} Mom(4) &\leq& \mathcal{O}\left(n^4\gamma^5\right) \sigma_*^2 + \mathcal{O}\left(n^4\gamma^5\right) \left(\sigma_*^2\right)^2\nonumber
+\end{eqnarray}
+
+Using the fact that the fourth moment of the stochastic oracles is bounded from Assumption~\ref{assumpt: 4th-moment bounded} and rearranging the terms, we obtain 
+\begin{eqnarray}
+    Mom(4) &=& \mathcal{O}\left(n^3\gamma^4\right) \sigma_*^2 \nonumber 
+\end{eqnarray}
+which concludes the proof.
+\end{proof}
+\subsection{Proof of Theorem \ref{thm: convergence_rate}}
+\label{app: thm: convergence_rate}
+\begin{theorem}
+    Let Assumptions~\ref{assumt: sol_set_non_empty}-\ref{assumpt: lipschitz} hold. If $\gamma^{\sgda} \leq \frac{}{}$, then the iterates of SGDA-RR satisfy
+    \begin{eqnarray}
+        \ex\left[\|x_{k+1}^0 - x_*\|^2\right] &\leq& (1 - \gamma n \mu)^{k+1} \|x_0 - x^*\|^2 + \gamma^2 n c_{Algo} \sigma_*^2 \nonumber
+    \end{eqnarray}
+    where $\sigma_*^2 = \frac{1}{n} \sum_{i=0}^{n-1} \|F_i(x^*)\|^2$. 
+\end{theorem}
+\begin{proof}
+Using the update rule of \ref{pert}, we have that:
+\begin{eqnarray}
+		x_{k+1}^{0} &=& x^{n-1}_k - \gamma F_{\omega^k_{n-1}}(x^{n-1}_k) - \gamma \mathbb{U}_k \nonumber\\
+		&\stackrel{}{=}\;& x_k^0 -\gamma \sum_{i=0}^{n-1} \left(F_{\omega_k^i}(x_k^i) + \mathbb{U}_k\right) \nonumber \\
+		&=& x^{0}_k -\gamma  n F(x_k^0) - \gamma  \sum_{i=0}^{n-1} \left(F_{\omega_k^i}(x_k^i) - F_{\omega_k^i}(x_k) + \mathbb{U}_k\right) \label{p1_1}
+\end{eqnarray}
+where the last step we used the fact that $\gamma n F(x_k^0) = \gamma \sum \limits_{i=0}^{n-1} F_{\omega^k_{i-1}}(x_k^0)$ and the finite-sum structure of the operator $F$.
+It holds, thus, that 
+\begin{eqnarray}
+    \|x_{k+1}^{0} - x^*\|^2 &=& \left\|x_k^0 - x^* - \gamma  n F(x_k^0) - \gamma \sum_{i=0}^{n-1} (F_{\omega_k^i}(x_k^{i}) - F_{\omega_k^i}^k(x_k^0) +\mathbb{U}_k)\right\|^2 \label{eq: conv_rate_eq2}
+\end{eqnarray}
+From Young's inequality, the right-hand side (RHS) of \eqref{eq: conv_rate_eq2} can be bounded as follows
+\begin{eqnarray}
+    \|x_{k+1}^{0} - x^*\|^2 &\leq& \frac{\left\|x_k^0 - x^* - \gamma n F(x_k^0) \right\|^2}{1 - \gamma n\mu} +\frac{\gamma}{n\mu} \left\|\sum_{i=0}^{n-1}(F_{\omega_k^i}(x_k^i) - F_{\omega_k^i}^k(x_k^0) + \mathbb{U}_k)\right\|^2\nonumber \\
+    &\stackrel{\eqref{ineq1}}{\leq}& \frac{\left\|x_k^0 - x^* - \gamma n F(x_k^0) \right\|^2}{1 - \gamma  n\mu} +\frac{\gamma}{\mu} \sum_{i=0}^{n-1}\left\|F_{\omega_k^i}(x_k^i) - F_{\omega_k^i}(x_k^0) + \mathbb{U}_k\right\|^2\nonumber\\
+    &\stackrel{\eqref{ineq1}}{\leq}& \frac{\left\|x_k^0 - x^* - \gamma  n F(x_k^0) \right\|^2}{1 - \gamma  n\mu} + \frac{2\gamma}{\mu} \sum_{i=0}^{n-1}\left\|F_{\omega_k^i}(x_k^i) - F_{\omega_k^i}(x_k^0)\right\|^2 \nonumber \\
+    && + \frac{2\gamma}{\mu} \sum_{i=0}^{n-1}\left\|\mathbb{U}_k\right\|^2\quad \label{eq: conv_rate_eq3}
+\end{eqnarray}
+Taking expectation condition on the filtration $\filter_k$ (history of $x_k^0$) and using the fact that $\mathbb{U}_k \sim \mathcal{N}\left(0, \gamma^2n^2 \sigma_*^2\mathbb{I}\right)$, we get 
+ \begin{eqnarray}
+    \exof{\|x_{k+1}^{0} - x^*\|^2 \given \filter_k} &\leq& \frac{\exof{\left\|x_k^0 - x^* - \gamma  n F(x_k^0) \right\|^2\given \filter_k}}{1 - \gamma  n\mu} \nonumber \\
+    && + \frac{2\gamma L_{max}^2}{\mu} \exof{\sum_{i=1}^{n-1}\left\|F_{\omega_k^i}(x_k^i) - F_{\omega_k^i}^k(x_k^0)\right\|^2\given\filter_k} +\frac{2n^3\gamma^3\sigma_*^2}{\mu}\label{eq_conv_rate_eq_4}
+ \end{eqnarray}
+To complete the proof, it suffices to bound each term on the right-hand side of \eqref{eq: conv_rate_eq4}. From Lemmas~\ref{lem: bound_on_deter}, ~\ref{lem: bound_on_stochastic_part}, it holds for $\gamma \leq \frac{1}{L_{max}\sqrt{3(n-1)}}$ that
+\begin{eqnarray}
+    \frac{\exof{\left\|x_k^0 - x^* - \gamma  n F(x_k^0) \right\|^2\given \filter_k}}{1 - \gamma  n\mu} &\leq& \left(1 - \gamma n \mu\right) \|x^k_0 - x^*\|^2 \label{bound_on_T1}\\
+    \exof{\sum_{i=1}^{n-1}\left\|F_{\omega_k^i}(x_k^i) - F_{\omega_k^i}(x_k^0)\right\|^2\given\filter_k} &\leq& \gamma^2 n(n+1) A L_{max}^2 \norm{x_k^0 - x^*}^2 + 2 n(n+1) L_{max}^2 \gamma^2\sigma_*^2 \nonumber \\
+       && +n(n-1)(2n-1) L_{max}^2 \gamma^2\norm{F(x_k^0)}^2  \label{bound_on_T2}
+\end{eqnarray}
+Substituting \eqref{bound_on_T1} and \eqref{bound_on_T2} into \eqref{p1_3}, we obtain
+\begin{eqnarray}
+    \Expep{\|x_{k+1}^{0} - x^*\|^2} &\leq& \left[1 - \gamma n \mu + \frac{4n^3\gamma^3 L_{max}^4}{\mu(1 - 2\gamma^2L_{max}^2n^2)}\right] \|x_k^0 - x^*\|^2 + \frac{2n^3\gamma^3}{\mu} \left[\frac{L_{max}^2}{(1 - 2\gamma^2L_{max}^2n^2)}+1\right] \sigma_*^2 \quad \quad \label{p1_4}
+\end{eqnarray}
+Selecting the stepsize $\gamma \leq \min\left\{\frac{1}{2nL_{max}}, \frac{\mu}{4nL_{max}^2}\right\}$, we have that
+\begin{eqnarray}
+    \frac{1}{(1 - 2\gamma^2L_{max}^2n^2)} &\leq& 2 \nonumber \\
+    \text{ and } \left[1 - \gamma n \mu + \frac{4n^3\gamma^3 L_{max}^4}{\mu(1 - 2\gamma^2L_{max}^2n^2)}\right] &\leq& \left(1 - \frac{\gamma n \mu}{2}\right) \nonumber
+\end{eqnarray}
+and thus substituting in \eqref{p1_4} we get
+\begin{eqnarray}
+    \Expep{\|x_{k+1}^{0} - x^*\|^2} &\leq& \left(1 - \frac{\gamma n \mu}{2}\right) \|x_k^0 - x^*\|^2 + \frac{2n^3\gamma^3}{\mu} \left(2L_{max}^2+1\right) \sigma_*^2 \label{ineq_cond_res}
+\end{eqnarray}
+
+Taking expectation on both sides and using the tower property of expectations, we have that:
+\begin{eqnarray}
+        \Expe{\|x_{k+1}^{0} - x^*\|^2} &\leq& \left(1 - \frac{\gamma  n\mu}{2} \right) \|x_k^0 - x^*\|^2 + \frac{2n^3\gamma^3}{\mu} \left(2L_{max}^2+1\right) \sigma_*^2 \nonumber\\
+     &\leq&\left(1 - \frac{\gamma  n\mu}{2}\right)^{k+1}\|x_k^0 - x^*\|^2 +  \frac{2n^3\gamma^3}{\mu} \left(2L_{max}^2+1\right) \sum_{i=1}^k \left(1 - \gamma  n\mu\right)^i  \sigma_*^2 \nonumber\\ 
+   &\leq& \Bigg(1 - \frac{\gamma  n\mu}{2}\Bigg)^{k+1} \|x^0_0 - x^*\|^2 +  \frac{2n^3\gamma^3}{\mu} \left(2L_{max}^2+1\right) \sum_{i=1}^{\infty} \left(1 - \gamma  n\mu\right)^i \sigma_*^2 \nonumber\\ 
+   &\stackrel{}{=}& \left(1 - \frac{\gamma  n\mu}{2}\right)^{k+1} {\|z_0- x^*\|^2} + \frac{4n\gamma^2}{\mu^2} \left(2L_{max}^2+1\right) \sigma_*^2 \nonumber
+\end{eqnarray}
+\end{proof}
+
+\section{Proof of Theorem~\ref{thm: efficient_statistic}}
+\label{app: efficient_statistic}
+We start by proving three Lemmas: the minorization condition, the geometric drift property and ( ) that will be necessary for proving the Theorem~\ref{thm: efficient_statistic}. 
+
+\begin{lemma}\label{lemma: minorization}
+    Let Assumptions~\ref{assumt: sol_set_non_empty}-\ref{assumpt: lipschitz} hold. If $\gamma \leq \frac{}{},$ the iterates of \ref{SGDA-RR} satisfy the minorization condition: there exist constant $\delta > 0$, probability measure $\nu$ and set $C \subseteq \mathbb{R}^d$ such that $\nu(C) = 1$, $\nu(C^\circ) = 0$ and $\forall x \in \mathbb{R}^d$ and any $A \in \mathcal{B}(\mathbb{R}^d)$ it holds 
+    \begin{equation}
+        \text{Pr}\left[x_{k+1} \in A | x_k = x\right] \geq \delta \one_{C}(x) \nu(A) \label{eq: minorization_cond}
+    \end{equation}
+\end{lemma}
+\begin{proof}
+    Consider the Lyapunov function $\mathcal{E}(x) = \|x - x^*\|^2 + 1$ for some $x^* \in \mathcal{X}^*$. We, first, show that $\mathcal{E}(x)$ is unbounded off small sets, \ie the sub-level sets $C(r):=\braces{\point\in\R^d | \energy(\point)\leq r}$ are either small for all $r > 1$ or empty. Assume that $C(r)$ is non-empty, then there is some ball $\ball(x^*, \sqrt{r-1})$ for $r>1$ that contains $C(r)$. 
+    We will show that the ball $\ball(\state^*, \sqrt{r-1})$ for $r>1$ is $\nu_1$-small. According to the epoch-wise update rule \eqref{epoch_wise_update}, it holds for any $A\in \mathcal{B}(\R^d)$ that
+    \begin{align*}
+        P(x, A) &= \prob\parens*{x_{k+1} \in A|x_k =\point}\\
+        &=\prob\parens*{x_{k} - \gamma (G_{\omega_k}(x_k) + \noise_k) \in A|x_k = \point}     \\
+        &=\prob\parens*{x - \gamma (G_{\omega_k}(x) +\noise_k) \in A}\\
+        &=\prob\parens*{\noise_k \in \left(\dfrac{x}{\gamma} - G_{\omega_k}(x)\right) + \left(- \dfrac{1}{\gamma}A\right)},
+    \end{align*}
+where $\noise_k \sim \mathcal{N}(0, n^2\gamma^2\sigma_*^2 I)$. Let $f(x)$ be the pdf of the normal distribution $\mathcal{N}(0, n^2\gamma^2\sigma_*^2 I)$. Using the fact that $\omega_k$ is independent of the noise $\noise_k$ as well as of the iterate $x_k$ already produced the algorithm, we have that for any $A\in \mathcal{B}(\R^d)$
+\begin{align}
+    P(x,A) = \int_{x'\in A} f\left(\dfrac{x-x'}{\gamma}-G_{\omega_k}(x)\right)\dd x' > 0, \label{eq: prob_x_A}
+\end{align}
+as $f(u) > 0, \forall u\in\R^d$.  
+
+We, next, proceed in proving the minorization property for a fixed $r=r_0 >1$. For any $A \in \borel(\R^d)$, define the measures 
+\begin{eqnarray}
+    \nu_{r_0}(A) &=& \int_{a \in A} \inf\limits_{x \in C(r_0)} f\left(\dfrac{x-x'}{\gamma}-G_{\omega_k}(x)\right)\dd a\nonumber\\
+    \tilde{\nu}_{r_0}(A) &=& \one\parens{A \subseteq C(r_0)}\dfrac{\meas{}_{r_0}(A)}{\meas{}_{r_0}(C(r_0))} \nonumber
+\end{eqnarray}
+Observe that $\tilde{\nu}_{r_0}(C(r_0)) = 1$ and $\tilde{\nu}_{r_0}(C(r_0)^c) = 0$, thus the first two equalities stated in the Lemma are proven. 
+In order to show inequality \eqref{eq: minorization_cond}, there are two cases:
+\begin{enumerate}
+    \item $\point\notin C(r_0)\text { or } A\nsubseteq C(r_0)$ and thus we have that $P(x,A) \geq \delta \one_{C(r_0)} (x) \tilde{\nu}_{r_0}(A) = 0$
+    \item $\point\in C(r_0)\text { and } A\subseteq C(r_0)$ and hence $P(x,A) \geq \meas{}_{r_0}(A) = \delta \one_{C(r_0)}(x) \tilde{\nu}_{r_0}(A)$, where the constant $\delta = \meas{}_{r_0}(C(r_0)) > 0$.
+\end{enumerate}
+and thus inequality \eqref{eq: minorization_cond} holds. 
+\end{proof}
+
+\begin{corollary}\label{corol: energy_decrease}
+    Under the assumptions of Theorem~\ref{thm strongly monotone}, the function $\mathcal{E}(x_0^{k}, x^*) = \|x_0^{k} - x^*\|_2^2 + 1$ satisfies for any $x^*\in \mathcal{X}^*$ the inequality
+    \begin{eqnarray}
+        \exof{\mathcal{E}(x^{k+1}_0, x^*)\given \filter_k} &\leq& c_1 \mathcal{E}(x^k_0, x^*) + c_2, \nonumber
+    \end{eqnarray}
+    where $c_1 = 1 - \frac{\gamma n \mu}{2}$ and $c_2 = \gamma n \left(\frac{\mu}{2} + \frac{2n^2\gamma^2}{\mu} \left(2L_{max}^2+1\right) \sigma_*^2\right)$.
+\end{corollary}
+\begin{proof}
+    From inequality \eqref{ineq_cond_res} of Theorem~\ref{thm strongly monotone}, we have that
+    \begin{eqnarray}
+        \exof{\|x_{k+1}^{0} - x^*\|^2\given \filter_k} &\leq& \left(1 - \frac{\gamma n \mu}{2}\right) \|x_k - x^*\|^2 + \frac{2n^3\gamma^3}{\mu} \left(2L_{max}^2+1\right) \sigma_*^2 \nonumber
+    \end{eqnarray}
+    Adding in both sides one and using the definition of $\mathcal{E}(x^k_0, x^*),$ we obtain
+    \begin{eqnarray}
+      \exof{\|x_{k+1}^{0} - x^*\|^2 + 1\given \filter_k} &\leq& \left(1 - \frac{\gamma n \mu}{2}\right) \left(\|x_k - x^*\|^2+1\right) + \frac{\gamma n \mu}{2} + \frac{2n^3\gamma^3}{\mu} \left(2L_{max}^2+1\right) \sigma_*^2 \nonumber  \\
+      \iff \exof{\mathcal{E}(x^{k+1}_0, x^*)\given \filter_k} &\leq& c_1 \mathcal{E}(x^k_0, x^*) + c_2
+    \end{eqnarray}
+    where at the last step we have let $c_1 = 1 - \frac{\gamma n \mu}{2}$ and $c_2 = \frac{\gamma n \mu}{2} + \frac{2n^3\gamma^3}{\mu} \left(2L_{max}^2+1\right) \sigma_*^2$.
+\end{proof}
+
+\kostas{In Lemma~\ref{lemma: geometric_drift_property} the $x^*$ is any arbitrary $x^* \in\mathcal{X}^*$?}
+\begin{lemma}\label{lemma: geometric_drift_property}
+   Let Assumptions~\ref{assumt: sol_set_non_empty}-\ref{assumpt: lipschitz} hold. If $\gamma \leq \frac{}{}$, then for any fixed $x^*\in \mathcal{X}^*$ the functions $\mathcal{E}_1(x, x^*) = \mathcal{E}(x, x^*), \mathcal{E}_2(x, x^*) = \sqrt{\mathcal{E}(x, x^*)}$ satisfy the geometric drift property for the iterates of \ref{SGDA-RR}, \ie $\forall i \in\{1, 2\}$ there exist measurable set $C_i$, constants $\alpha_i > 0, \tilde{\alpha}_i < \infty$ such that $\forall x\in\R^d$ 
+   \begin{equation}
+       \Delta \mathcal{E}_i(x, x^*) &=& - \alpha \mathcal{E}_i(x, x^*) + \one_C \tilde{\alpha}, \label{eq: geometric_drift_property}
+   \end{equation}
+   where $\Delta \mathcal{E}_i(x, x^*) = \int_{x'\in \R^d} P(z,dx')\energy_i(x') - \energy_i(x)$. 
+\end{lemma}
+\begin{proof}
+In order to prove that the geometric drift property is satisfied, we need to show that there exist function $\energy_i: \R^d\rightarrow [1, +\infty]$, measurable set $C_i$ and constants $\alpha_i>0, \tilde{\alpha_i}<\infty$ such that \eqref{eq: geometric_drift_property} holds. From Corollary~\ref{corol: energy_func}, we have that the function $\energy_1: \R^d \rightarrow [1, +\infty]$ with $\energy_1(x, x^*) = \|x - x^*\|^2 + 1$ satisfies along the iterates of \ref{SGDA-RR} that
+\begin{eqnarray}
+    \exof{\energy_1(x_{k+1}, x^*) \given \filter_k:\braces{\state_k = x}}&\leq& c_1 \mathcal{E}_1(x, x^*) + c_2 \label{eq: energy_inequality_for_geometric_drift},
+\end{eqnarray}
+where $c_1 = 1 - \frac{\gamma n \mu}{2}$ and $c_2 = \frac{\gamma n \mu}{2} + \frac{2n^3\gamma^3}{\mu} \left(2L_{max}^2+1\right) \sigma_*^2$. Additionally, for the epoch-level iterates $x_k$ of~\ref{SGDA-RR} the definition of $\Delta \energy$ is
+\begin{equation}
+    \Delta \energy_1(x, x^*) = \int_{x' \in \R^d} P(x,\dd x') \energy_1(x', x^*) - \energy_1(x, x^*)= \exof{\energy_1(x_{k+1}, x^*) - \energy_1(x_k, x^*) \given \filter_k:\braces{\state_k = x}} \label{eq: Delta_Energy}.
+\end{equation}
+From \eqref{eq: energy_inequality_for_geometric_drift} and \eqref{eq: Delta_Energy}, we have that
+\begin{eqnarray}
+    && \exof{\energy_1(x_{k+1}, x^*) \given \filter_k:\braces{\state_k = x}} \leq c_1 \energy_1(x) + c_2 \nonumber\\
+    &\Rightarrow& \exof{\energy_1(x_{k+1}, x^*) - \energy_1(x_k, x^*)\given \filter_k:\braces{\state_k = x}}\leq -(1-c_1) \energy_1(x, x^*) + c_2 \nonumber\\
+    &\Rightarrow& \Delta \energy_1(x, x^*) \leq -(1-c_1) \energy_1(x, x^*) + c_2 
+\end{eqnarray}
+Let $C_1 = \left\{x\in\R^d: \energy_1(x, x^*) \leq \frac{2c_2}{(1-c_1)}\right\}$. We have that
+\begin{eqnarray}
+    \Delta \energy_1(x, x^*) &\leq& -(1-c_1) \energy_1(x, x^*) + \one_C(x) c_2 + \one_{C^{c}}(x) \frac{1-c_1}{2} \energy_1(x, x^*)\nonumber\\
+    &\leq& -\frac{1-c_1}{2} \energy_1(x, x^*) + \one_{C_1(x)} c_2 \label{eq: final_delta}
+\end{eqnarray}
+where at the last step we used the fact that $\one_{C_1^{c}}(x) < 1$ and $c_2 \in (0, 1)$. 
+From \eqref{eq: final_delta} we conclude that $\energy_1(x, x^*)$ satisfies the geometric drift property for the set $C_1 = \left\{x\in\R^d: \energy_1(x) \leq \frac{2c_2}{(1-c_1)}\right\}$ and with constants $\alpha = \frac{1-c_1}{2}, a = c_2$. 
+
+For the $\mathcal{E}_2(x, x^*) = \sqrt{\mathcal{E}(x, x^*)}$, by Jensen's inequality it holds that
+\begin{eqnarray}
+    \exof{\sqrt{\energy(x_{k+1}, x^*)} \given \filter_k:\braces{\state_k = x}} &\leq& \sqrt{\exof{\energy(x_{k+1}, x^*) \given \filter_k:\braces{\state_k = x}}} \nonumber \\
+    &\leq& \sqrt{c_1 \mathcal{E}(x, x^*) + c_2} \nonumber \\
+    &\leq& \sqrt{c_1} \sqrt{\energy(x, x^*)} + \sqrt{c_2} \nonumber
+\end{eqnarray}
+Thus, there exist constants $d_1 = \sqrt{c_1}, d_2 = \sqrt{c_2}$ such that it holds
+\begin{eqnarray}
+    \exof{\energy_2(x_{k+1}, x^*) \given \filter_k:\braces{\state_k = x}}&\leq& d_1 \mathcal{E}_2(x, x^*) + d_2,
+\end{eqnarray}
+Since it holds that
+\begin{equation}
+    \Delta \energy_2(x, x^*) = \int_{x' \in \R^d} P(x,\dd x') \energy_2(x', x^*) - \energy_2(x, x^*)= \exof{\energy_2(x_{k+1}, x^*) - \energy_2(x_k, x^*) \given \filter_k:\braces{\state_k = x}},
+\end{equation}
+we have that
+\begin{eqnarray}
+    && \exof{\energy_2(x_{k+1}, x^*) - \energy_2(x_k, x^*)\given \filter_k:\braces{\state_k = x}}\leq -(1-d_1) \energy_2(x, x^*) + d_2 \nonumber\\
+    &\Rightarrow& \Delta \energy_2(x, x^*) \leq -(1-d_1) \energy_2(x, x^*) + d_2 
+\end{eqnarray}
+Let $C_2 = \left\{x\in\R^d: \energy_2(x, x^*) \leq \frac{2d_2}{(1-d_1)}\right\}$. We have that
+\begin{eqnarray}
+    \Delta \energy_2(x, x^*) &\leq& -(1-d_1) \energy_2(x, x^*) + \one_{C_2(x)} d_2 + \one_{C_2^{c}}(x) \frac{1-d_1}{2} \energy_2(x, x^*)\nonumber\\
+    &\leq& -\frac{1-d_1}{2} \energy_2(x, x^*) + \one_{C_2(x)} d_2 \nonumber
+\end{eqnarray}
+where at the last step we used the fact that $\one_{C_2^{c}}(x) < 1$ and $d_2 \in (0, 1)$. 
+Hence, we conclude that $\energy_2(x, x^*)$ satisfies the geometric drift property for the set $C_2 = \left\{x\in\R^d: \energy_2(x) \leq \frac{2d_2}{(1-d_1)}\right\}$ and with constants $\alpha_2 = \frac{1-d_1}{2}, \tilde{\alpha} = d_2$. 
+\end{proof}
+
+\begin{lemma}\label{lemma: properties-mc}
+    The Markov chain $(x_k)_{k \geq 0}$ of \ref{SGDA-RR} is
+    \begin{enumerate}[noitemsep,nolistsep,leftmargin=*]
+        \item $\irr-$irreducible for some non-zero $\sigma$-finite measure $\irr$ on $\R^d$ over the Borel $\sigma$-algebra of $\R^d$. 
+        \item strongly aperiodic. 
+        \item Harris and positive recurrent with an invariant measure.
+    \end{enumerate}
+\end{lemma}
+\begin{proof}
+    We prove each of the three properties: irreducibility, aperiodicity and Harris and positive recurrence, below separately. 
+    \begin{itemize}
+        \item \textbf{Irreducible.} From the proof of \cref{lemma: minorization} for \ref{SGDA-RR} we have from \eqref{eq: prob_x_A} that
+        \begin{equation*}
+            \prob\parens{\state_{\time+1}\in A|\state_\time = x} = \int_{x'\in A} f\left(\dfrac{x-x'}{\gamma}-G_{\omega_k}(x)\right)\dd x',
+        \end{equation*}
+        where $f$ is the pdf of the normal distribution $\mathcal{N}(0, n^2\gamma^2\sigma_*^2 I)$. 
+        
+        Let $\irr$ be a non-zero $\sigma$-finite measure in the Borel $\sigma$-algebra of $\R^d$. 
+        For any $A\subseteq\borel(\R^d)$ with $\irr(A)>0$, we have that $\braces{x}\subseteq \ball(x,1)$ and there exists $\varepsilon>0$ such that $\ball(a_0,\varepsilon)\subseteq A$, for some $a_0\in A$. Thus, it holds that
+        \begin{align*}
+            P(x,A) &\geq \int_{\hat{a} \in\ball(a_0,\varepsilon)} f\left(\dfrac{x-\hat{a}}{\step}-G_{\omega_k}(x)\right)\dd \hat{a} \\
+            &\geq \int_{\hat{a}\in\ball(a_0,\varepsilon)} \inf_{\hat{x} \in\ball(x,1)} f\left(\dfrac{\hat{x} -\hat{a}}{\step}-G_{\omega_k}(\hat{x})\right)\dd \hat{a} > 0,
+        \end{align*}
+        where the non-negativity stems from the positive support of the pdf function everywhere in $\R^d$. 
+        Thus, we conclude the Markov Chain is $\irr$-irreducible.
+        \kostas{After the first inequality, the pdf in Manolis' work was $pdf_{U(\hat{x})}$ where $U(\hat{x})$ is the noise in the stochastic oracle. In our case (finite-sum min problem), how this should be written?}
+        
+        \item \textbf{Strongly Aperiodic.} 
+        From Lemma \ref{lemma: minorization}, we have that there exists constant $\delta > 0$, probability measure $\nu$ and set $C \subseteq \mathbb{R}^d$ such that $\nu(C) = 1$, $\nu(C^\circ) = 0$ and $\forall x \in \mathbb{R}^d$ and any $A \in \mathcal{B}(\mathbb{R}^d)$ it holds 
+        \begin{equation*}
+            \text{Pr}\left[x_{k+1} \in A | x_k = x\right] \geq \delta \one_{C}(x) \nu(A)
+        \end{equation*}
+        Given that the sets $C(r)$ in the proof of the Lemma \ref{lemma: minorization} are small and of positive measure, we get that the Markov chain is strongly aperiodic.
+
+        \item \textbf{Harris \& Positive Recurrent.} By Proposition \ref{prop: petite_set}, the geometric drift property of \ref{lemma: geometric_drift_property} holds for a petite set. According to the Geometric Ergodic Theorem (Theorem 15.0.1) in \citep{meyn2012markov}, since the underlying Markov chain is $\psi$-irreducible and aperiodic we have that it is positive recurrent and has an invariant probability measure. 
+
+        We, next, show that the chain is Harris recurrent. From the proof of Lemma \ref{lemma: geometric_drift_property} we have that there is a function $\mathcal{E}(x)$ that is unbounded off petite sets satisfying $\Delta \mathcal{E} \leq 0$ and given that the chain is $\psi$-irreducible, we have from Theorem 9.1.8 in \citep{meyn2012markov} that the Markov chain is Harris recurrent. 
+\end{itemize}
+\end{proof}
+
+\begin{theorem}\label{thm: efficient_stats_app}
+    Let Assumptions~\ref{assumt: sol_set_non_empty}-\ref{assumpt: lipschitz} hold. If \ref{SGDA-RR} is run with step size $\gamma < $, then the following hold
+    \begin{enumerate}
+        \item The epoch-level iterates $(x_k)_{k \geq 0}$ have a unique stationary distribution $\pi_\gamma \in \mathcal{P}_2(\R^d),$ where $P_2(\R^d)$ is the set of distributions supported in $\R^d$ with bounded second moment.
+        \item For any initialization $x_0 \in \R^d$ and any test function $\ell: \R^d \rightarrow \R$ satisfying 
+        $\|\ell(x)\| \leq L_{\ell} (1 + \|x\|), \quad \forall x \in \R^d_{\geq 0}$ with $L_{\ell} > 0$, the iterates of \ref{SGDA-RR} converge geometrically in total variation distance to $\pi_\gamma$, i.e. there exist constants $\rho \in (0, 1)$ and $c \in (0, +\infty)$ such that
+        \begin{eqnarray}
+            \left|\ex_{x_k}\left[\ell(x_k)\right] - \ex_{x \sim \pi_\gamma}\left[\ell(x)\right]\right| &\leq& c (1 - \rho)^k
+        \end{eqnarray}
+        \item For any $L_{\ell}-$Lipschitz test function $\ell: \R^d \rightarrow \R$, there exists a constant $C \propto \max\{\lambda, \gamma\}/\mu$ such that
+        \begin{eqnarray}
+            \left|\ex_{x\sim\pi_\gamma}\left[\ell(x)\right] - \ell(x^*)\right| &\leq& L_{\ell} \sqrt{C}.
+        \end{eqnarray}
+    \end{enumerate}
+\end{theorem}
+\begin{proof}
+    From Lemma~\ref{lemma: properties-mc}, we have that the underlying Markov Chain has an invariant probability measure. Since from Lemma~\ref{lemma: geometric_drift_property} the induced Markov Chain satisfies the geometric drift property, according to the Strong Ergodic Theorem \citep{meyn2012markov} we conclude that the measure is finite and unique. 
+    From the invariant property of $\pi_{\gamma}$, we have that for $x_0 \sim \pi_{\gamma}$ the iterates satisfy also that $(x_k)_{k>0}\sim\pi_{\gamma}$. From Corollary~\ref{corol: energy_decrease}, we have that for an arbitrary fixed $x^*$ the iterates of \ref{SGDA-RR} with step size $\gamma \leq $ satisfy for $c_1 \in (0, 1), c_2 >0$ that
+    \begin{eqnarray}
+        \exof{\|x_{k+1} - x^*\|_2^2 + 1 \given \filter_k} &\leq& c_1 \left(\|x_{k} - x^*\|_2^2 + 1\right) + c_2. \nonumber
+    \end{eqnarray}
+    Taking expectation with respect to the invariant measure $\pi_\gamma$ and using the tower law of expectation, we get
+    \begin{eqnarray}
+        \ex_{x\sim\pi_{\gamma}}\left[\|x - x^*\|_2^2\right] \leq \frac{c_1 +c_2 -1}{1-c_1} = \mathcal{O}\left(\frac{\max(\gamma, \lambda)}{\mu}\right) < +\infty. \label{eq: big_O_with_max_term}
+    \end{eqnarray}
+    Combining the above inequality with the fact that $\|x_*\| \leq R$ by Assumption~\ref{assumt: sol_set_non_empty}, we conclude that the invariant measure $\pi_{\gamma}\in \mathcal{P}_2(\R^d),$ where $\mathcal{P}_2(\R^d)$ is the set of distributions supported in $\R^d$ with finite second moment.  
+
+    We, next, proceed with proving the second statement of the Theorem. By assumption, we have that the test function satisfies $\forall x \in \R^d_{\geq 0}$ that 
+    \begin{eqnarray}
+        |\ell(x)| &\leq& L_{\ell} (1 + \|x\|) \nonumber \\
+        &\leq& L_{\ell} (1 + \|x^*\| + \|x - x^*\|) \nonumber \\
+        &\leq& L_{\ell} (1 + R + \|x - x^*\|) \nonumber \\
+        &\leq& (1 + R)  L_{\ell} (1 + \|x - x^*\|)
+    \end{eqnarray}
+    where we have used the triangle inequality and the fact that $\|x^*\| \leq R$. Applying Cauchy-Schwarz inequality, we can further upper bound $\|\ell(x)\|$
+    \begin{eqnarray}
+       |\ell(x)| &\leq& \sqrt{2} (1 + R)  L_{\ell} \sqrt{1 + \|x - x^*\|} \nonumber \\
+       &\leq& \max\left(1, \sqrt{2} (1 + R) L_{\ell}\right) \sqrt{\mathcal{E}(x, x^*)} \label{eq: upper_ell_bound}
+    \end{eqnarray}
+    Letting $c = \max\left(1, \sqrt{2} (1 + R) L_{\ell}\right)$ and $\tilde{\mathcal{E}}(x, x^*) = c \sqrt{\mathcal{E}(x, x^*)}$, we have that
+    \begin{eqnarray}
+        |\ell(x)| &\leq& \tilde{\mathcal{E}}(x, x^*) \nonumber
+    \end{eqnarray}
+    From Lemma~\ref{lemma: geometric_drift_property} we have that $\energy_1(x, x^*), \energy_2(x, x^*)$ satisfy the geometric drift property and since $c \geq1$ we have that $\tilde{\energy}(x, x^*) = c \energy_2(x, x^*)$ satisfies also the geometric drift property. According to Theorem 16.0.1 in \citep{meyn2012markov} \ref{SGDA-RR} is $\tilde{\mathcal{E}}$-uniformly ergodic and there exists $\rho \in (0, 1)$ and $R \in (0, +\infty)$ such that
+    \begin{eqnarray}
+        \left|P^k \ell(x_0) - \ex_{x\sim\pi_{\gamma}}\left[\ell(x)\right] \right| &\leq& R (1 - \rho)^k \left|\tilde{\mathcal{E}}(x_0, x^*)\right| \label{eq: P_to_be_taken_sup}
+    \end{eqnarray}
+    Letting $c = R\left|\tilde{\mathcal{E}}(x_0, x^*)\right|$, we have proven the inequality in the statement of the theorem. In order to show that the epoch-level iterates converge under the total variation distance it suffices to consider only functions $\ell: \R^d \rightarrow \R$ that are bounded by 1. In this case, there are constants $\tilde{\rho} \in (0, 1)$ and $\tilde{R} \in (0, +\infty)$ independent of $\ell$ such that it holds 
+    \begin{eqnarray}
+        \sup_{|\ell| \leq1} \Big|P^k \ell(x_0) - \ex_{x\sim\pi_{\gamma}}\left[\ell(x)\right] \Big| &\leq& \tilde{R} (1 - \tilde{\rho})^k \Big|\tilde{\mathcal{E}}(x_0, x^*)\Big| \nonumber
+    \end{eqnarray}
+    implying according to the dual representation of Radon metric for bounded initial conditions \citep{wiki} the geometric convergence under the total variation distance. 
+
+    In order to prove the third statement of the theorem, we apply linearity of expectation and the Lipschitz property of the test function $\ell$ and obtain
+    \begin{eqnarray}
+       \left|\ex_{x\sim\pi_\gamma}\left[\ell(x)\right] - \ell(x^*)\right| &\leq& \ex_{x\sim\pi_\gamma}\left[\left|\ell(x) - \ell(x^*)\right|\right] \nonumber \\
+       &\leq& \ex_{x\sim\pi_\gamma}\left[L_{\ell} \left\|x -x^*\right\|\right] \nonumber
+    \end{eqnarray}
+    Applying Cauchy-Schwarz inequality and using inequality \eqref{eq: big_O_with_max_term}, we obtain that
+    \begin{eqnarray}
+        \left|\ex_{x\sim\pi_\gamma}\left[\ell(x)\right] - \ell(x^*)\right| \leq L_{\ell} \sqrt{\ex_{x\sim\pi_\gamma}\left[ \left\|x -x^*\right\|\right]} \leq L_{\ell}\sqrt{D} \nonumber
+    \end{eqnarray}
+    where $D \propto \frac{\max(\gamma, \lambda)}{\mu}$ according to \eqref{eq: big_O_with_max_term}.
+\end{proof}
+Consider the epoch-wise update of SGD-RR 
+\begin{eqnarray}
+    x^{k+1}_0 = x_k^0 - \gamma \sum_{i=0}^{n-1} \left(F_{\omega_k^i}(x_k^i) + \mathbb{U}_{\omega_{i}^k}\right) \nonumber 
+\end{eqnarray}
+Let $G_\omega(x_k^0) = \sum_{i=0}^{n-1} F_{\omega_i}(x_i^k)$. Then, we have that
+\begin{eqnarray}
+    x^{k+1}_0 = x_k^0 - \gamma G_{\omega^k}(x_k^0) - \gamma \sum_{i=0}^{n-1} \mathbb{U}_{\omega_{i}^k}\nonumber
+\end{eqnarray}
+
+\begin{theorem}
+    Let Assumptions~\ref{assumt: sol_set_non_empty}-\ref{assumpt: lipschitz} hold. If \ref{SGDA-RR} is run with step size $\gamma < $, then for any function $\ell: \R^d \rightarrow \R$ satisfying $\ex_{x\sim\pi_\gamma}\left[\ell(x)\right] < \infty$ and $|\ell(x)| \leq L_{\ell} (1 + \|x\|^2)$ with $L_{\ell} > 0$ the following hold
+    \begin{enumerate}
+        \item A Law of Large Numbers for the epoch-level iterates of \ref{SGDA-RR}:
+            \begin{eqnarray*}
+                \lim_{T\rightarrow+\infty} \frac{1}{T}\sum_{t=0}^{T-1} \ell(x_t) = \ex_{x\sim\pi_\gamma}\left[\ell(x)\right] \quad \as
+            \end{eqnarray*}
+        \item A Central Limit Theorem for the epoch-level iterates of \ref{SGDA-RR}:
+            \begin{eqnarray*}
+                T^{-1/2} \sum_{t=0}^{T-1} \left[\ell(x_t) - \ex_{x\sim\pi_\gamma}\left[\ell(x)\right]\right] \xrightarrow{d} \mathcal{N}(0, \sigma_{\pi_{\gamma}}^2),
+            \end{eqnarray*}
+            where $\sigma_{\pi_{\gamma}}^2(\ell) = \lim\limits_{T\rightarrow+\infty} \frac{1}{T}\ex_{\pi_{\gamma}} \left[S_T^2\right]$ and $S_T^2 = \sum_{t=0}^{T-1} \left[\ell(x_t) - \ex_{x\sim\pi_\gamma}\left[\ell(x)\right]\right]^2$.
+     \end{enumerate}
+\end{theorem}
+\begin{proof}
+We show that the Markov Chain induced by the epoch-level iterates of \ref{SGDA-RR} is Harris positive recurrent, it has an invariant measure and satisfies $\energy$-uniform ergodicity, and hence by Theorem 17.0.1 in \citep{meyn2012markov} the stated Law of Large Numbers and Central Limit Theorem hold. 
+
+From Lemma~\ref{lemma: properties-mc}, we have that the Markov Chain is Harris positive recurrent with an invariant measure. It suffices, thus, to show that the chain is $\energy$-uniform ergodic by proving that there exists a potential function $\energy(\cdot)$ such that the chain satisfies the geometric drift property of \citet{meyn2012markov} and $\|\ell(x)\|^2 \leq \energy(x)$. 
+Let $\energy(x, x^*) = \exof{\mathcal{E}(x^{k+1}_0, x^*)\given \filter_k}$ for any fixed $x^*\in\mathcal{X}^*$. According to Lemma~\ref{lemma: geometric_drift_property}, $\energy(x, x^*)$ satisfies the geometric drift property. Additionally, since $\ell$ has a linear growth it holds that
+\begin{eqnarray}
+    |\ell(x)|^2 &\leq& L_{\ell}^2 (1+\|x\|^2)^2 \nonumber \\
+    &\leq& L_{\ell}^2 (1 + \|x^*\| + \|x - x^*\|)^2 \nonumber \\
+    &\leq& L_{\ell}^2 (1 + R + \|x - x^*\|)^2 \nonumber \\
+    &\leq& L_{\ell}^2 (1 + R)^2  (1 + \|x - x^*\|)^2 \label{eq: upper_bound_ell^2}
+\end{eqnarray}
+From Cauchy-Schwarz inequality, it holds that
+\begin{eqnarray}
+    1 + \|x - x^*\| &\leq& \sqrt{2} \sqrt{1+\|x - x^*\|^2} \nonumber \\
+    \Rightarrow (1 + \|x - x^*\|)^2 &\leq& 2 (1+\|x - x^*\|^2) \nonumber \\
+    \Rightarrow (1 + \|x - x^*\|)^2 &\leq& 2 \energy(x, x^*) \label{eq: up_1}
+\end{eqnarray} 
+Thus, combining \eqref{eq: up_1} and \eqref{eq: upper_bound_ell^2}, we obtain
+\begin{eqnarray}
+    |\ell(x)|^2 &\leq& 2 L_{\ell}^2 (1 + R)^2 \energy(x, x^*)
+\end{eqnarray}
+Thus, $\energy(x, x^*)$ satisfies the geometric drift property and it holds that $|\ell(x)|^2 \leq \energy(x, x^*)$ and hence the chain is $\energy$-uniform ergodic, completing the proof.
+\end{proof}
+
+\section{Proof of Theorem~\ref{thm: SGD_with_double_RR}}
+\label{app: rich-romberg-proofs}
+\begin{lemma}\label{lemma: eigenvalues_operator}
+    The maximum eigenvalue of the operator $\nabla G_\omega(x^*)$ is $L_{max}^G = 1 + \sum\limits_{i=1}^{n} (\gamma L_{max})^i$.
+\end{lemma}
+\begin{proof}
+    Let $\phi_{\omega_i}(\omega, z) = \omega - \gamma v_{\omega_i}(z)$. Define, also, the $k-$step operator $\phi^k_{\omega, \omega}(z) = \phi_{\omega, \omega_k}(\phi_{\omega, \omega_{k-1}}( ... \phi_{\omega, \omega_1}(z))...))$ with $\phi^0_{\omega}(\omega, z) = z$ and obtain that
+    \begin{eqnarray}
+       x^{k+1}_0 &=& F^n_\gamma(x^k_0) \nonumber \\
+       F^n_\gamma(x^k_0) &=& x^k_0 - \gamma \sum\limits_{i=0}^{n-1} F_{\omega_i^k}(x_i^k) \nonumber \\
+       \nabla G_\omega(x_k^0) &=& I - \nabla \phi^n_{\omega}(x_k^0, x_k^0) \nonumber
+    \end{eqnarray}
+    The gradient of $G_\omega(\cdot)$ is computed by deriving first the partial derivatives of $\phi^n_{\omega}(\omega, z)$ with respect to $\omega$ and $z$. We prove by induction that
+    \begin{eqnarray}
+        \nabla_z \phi^{n}_{\omega}(\omega,z) &=& (-\gamma)^{n} \nabla v_{\omega_{n}}\left(\phi^{n-1}_{\omega, \omega}(z)\right) \cdot \nabla v_{\omega_{n-1}}\left(\phi^{n-2}_{\omega}(\omega, z)\right) \cdot ... \cdot \nabla v_{\omega_{1}}\left(\phi^{0}_{\omega}(\omega, z)\right) \nonumber\\
+        \nabla_\omega \phi^{n}_{\omega}(\omega, z) &=& \sum\limits_{j=0}^{n-1} (-\gamma)^{j} \nabla v_{\omega_{n-1}}(\phi^{n}_{\omega}(\omega, z)) \nabla v_{\omega_{n-1}}\left(\phi^{n-2}_{\omega}(\omega, z)\right) \cdot ... \cdot \nabla v_{\omega_{n-j+1}}\left(\phi^{n-j}_{\omega}(\omega, z)\right) \nonumber
+    \end{eqnarray}
+    For $k = 1$, we have that $\phi^1_{\omega}(\omega, z) = \phi_{\omega_1}(\omega, z) = \omega - \gamma v_{\omega_1}(z)$ and  
+    \begin{eqnarray}
+        \nabla_z\phi^{1}_{\omega}(\omega, z) &=& -\gamma \nabla v_{\omega_{0}}(z) \nonumber \\
+        \nabla_\omega \phi^{1}_{\omega}(\omega, z) &=& I \nonumber
+    \end{eqnarray}
+    thus the inductive hypothesis holds for $k=1$. 
+    Assuming that it holds for $n-1,$ we, next, prove that it holds for $n$. We have that 
+    \begin{eqnarray}
+        \nabla_z \phi^{n}_{\omega}(\omega,z) &=& \nabla_z \phi_{\omega}\left(\omega, \phi^{n-1}_{\omega}(\omega, z)\right) \nabla_z \phi^{n-1}_{\omega}(\omega, z) \nonumber \\
+        &=& (-\gamma) \nabla v_{\omega_{n}}\left(\phi^{n-1}_{\omega}(\omega, z)\right) \cdot (-\gamma)^{n-1} \nabla v_{\omega_{n-1}}\left(\phi^{n-2}_{\omega}(\omega, z)\right) \cdot ... \cdot \nabla v_{\omega_{1}}\left(\phi^{0}_{\omega}(\omega, z)\right) \nonumber \\
+        &=& (-\gamma)^{n} \nabla v_{\omega_{n}}\left(\phi^{n-1}_{\omega}(\omega, z)\right) \cdot \nabla v_{\omega_{n-1}}\left(\phi^{n-2}_{\omega}(\omega, z)\right) \cdot ... \cdot \nabla v_{\omega_{1}}\left(\phi^{0}_{\omega}(\omega, z)\right) \nonumber
+    \end{eqnarray}
+    We, next, compute the gradient with respect to $\omega$ and get 
+    \begin{eqnarray}
+        \nabla_\omega \phi^{n}_{\omega}(\omega, z) &=& \nabla_\omega \phi_{\omega}(\omega, \phi^{n-1}_{\omega}(\omega, z)) + \nabla_z \phi_{\omega}\left(\omega, \phi^{n-1}_{\omega}(\omega, z)\right) \nabla_\omega \phi^{n-1}_{\omega}(\omega, z)
+    \end{eqnarray}
+    Using the fact that $\nabla_\omega \phi_{\omega}(\omega, \phi^{n-1}_{\omega}(\omega, z)) = I, $ $\nabla_z \phi_{\omega}\left(\omega, \phi^{n-1}_{\omega}(\omega, z)\right) = \nabla v_{\omega_{n}}(\phi^{n-1}_{\omega}(\omega, z))$ and the inductive hypothesis for $\nabla_\omega \phi^{n-1}_{\omega}(\omega, z), $ we obtain
+    \begin{eqnarray}
+        \nabla_z \phi^{n}_{\omega}(\omega,z) &=& I - \gamma \nabla v_{\omega_{n}}(\phi^{n-1}_{\omega}(\omega, z)) \sum\limits_{j=0}^{n-2} (-\gamma)^j \nabla v_{\omega_{n-1}}\left(\phi^{n-2}_{\omega}(\omega, z)\right) \cdot ... \cdot \nabla v_{\omega_{n-j}}\left(\phi^{n-1-j}_{\omega}(\omega, z)\right) \\
+        &=& I + \sum\limits_{j=0}^{n-2} (-\gamma)^{j+1} \nabla v_{\omega_{n-1}}(\phi^{n}_{\omega}(\omega, z)) \nabla v_{\omega_{n-1}}\left(\phi^{n-2}_{\omega}(\omega, z)\right) \cdot ... \cdot \nabla v_{\omega_{n-j}}\left(\phi^{n-1-j}_{\omega}(\omega, z)\right) \\
+        &=& I + \sum\limits_{j=1}^{n-1} (-\gamma)^{j} \nabla v_{\omega_{n-1}}(\phi^{n}_{\omega, \omega}(z)) \nabla v_{\omega_{n-1}}\left(\phi^{n-2}_{\omega, \omega}(z)\right) \cdot ... \cdot \nabla v_{\omega_{n-j+1}}\left(\phi^{n-j}_{\omega, \omega}(z)\right) \\
+        &=& \sum\limits_{j=0}^{n-1} (-\gamma)^{j} \nabla v_{\omega_{n-1}}(\phi^{n}_{\omega}(\omega, z)) \nabla v_{\omega_{n-1}}\left(\phi^{n-2}_{\omega}(\omega, z)\right) \cdot ... \cdot \nabla v_{\omega_{n-j+1}}\left(\phi^{n-j}_{\omega}(\omega, z)\right)
+    \end{eqnarray}
+    Thus, in order to compute $\nabla G_\omega(x^*) = I - \nabla \phi^n_{\omega}(x^*, x^*)$, we first compute $\nabla \phi^n_{\omega}(x^*, x^*)$. Since $x^*$ is a stationary point, it is a fixed point of the operator $\phi^j_{\omega}(x^*, x^*) = x^*, \forall j \geq 0$. From chain rule, we have that
+    \begin{eqnarray}
+        \nabla \phi^n_{\omega}(x^*,x^*) &=& \nabla_z \phi^{n}_{\omega}(x^*, x^*) + \nabla_\omega \phi^{n}_{\omega}(x^*, x^*) \\
+        &=& (-\gamma)^{n} \prod_{j=1}^{n} \nabla v_{\omega_{j}}\left(x^*\right) + \sum\limits_{i=1}^{n-1} \prod\limits_{j=1}^{i} (-\gamma \nabla v_{\omega_{n-j}}(x^*)) \\
+        &=& \sum\limits_{i=1}^{n} \prod\limits_{j=1}^{i} (-\gamma \nabla v_{\omega_{n-j}}(x^*)) 
+    \end{eqnarray}
+    In order to find the maximum eigenvalue of the operator $\nabla \phi^n_{\omega}(x^*, x^*)$, we apply the sub-multiplicative property of the operator norm to get
+    \begin{eqnarray}
+        \left\|\sum\limits_{i=1}^{n} \prod\limits_{j=1}^{i} (-\gamma \nabla v_{\omega_{n-j}}(x^*))\right\|_{\text{op}} &\leq& \sum\limits_{i=1}^{n}\left\|\prod\limits_{j=1}^{i} (-\gamma \nabla v_{\omega_{n-j}}(x^*))\right\|_{\text{op}} \nonumber \\
+        &\leq& \sum\limits_{i=1}^{n}\prod\limits_{j=1}^{i} \|-\gamma \nabla v_{\omega_{n-j}}(x^*)\|_{\text{op}} \nonumber \\
+        &\leq& \sum\limits_{i=1}^{n}\gamma^i \prod\limits_{j=1}^{i}  L_{n-j} \\
+        &\leq& \sum\limits_{i=1}^{n} (\gamma L_{max})^i
+    \end{eqnarray}
+    where $L_i$ is the maximum eigenvalue of $\nabla v_i(x^*)$ and $L_{max}$ is the maximum over all eigenvalues of $\nabla v_i(x^*), \forall i\in[n]$. 
+    Since $\nabla G_{\omega}(x^*) = I - \nabla \phi^n_{x_k^0, \omega}(x^*),$ using the submultiplicative property of the operator norm we have that 
+    $\|\nabla G_{\omega}(x^*)\|_{\text{op}} \leq 1 + \|\nabla \phi^n_{x_k^0, \omega}(x^*)\|_{\text{op}}$ and thus the maximum eigenvalue of $\nabla G_{\omega}(x^*)$ is $L_{max}^G = 1 + \sum\limits_{i=1}^{n} (\gamma L_{max})^i$.
+\end{proof}
+\begin{lemma}\label{lemma: convergence_of_x}
+Assume that [Assumptions] hold. For $\gamma < \min\left\{\frac{2}{\Tilde{L}_{max}^G}, 1\right\},$ it holds that
+\begin{eqnarray}
+        \Expepgamma{x} = x_* + \gamma A + \mathcal{O}\left(\gamma^3\right) \nonumber
+    \end{eqnarray}
+    where $A = - \frac{1}{2} \nabla G_\omega(x^*)^{-1}\nabla^2 G_\omega(x^*)M \int_{\mathbb{R}^d} C(x) \omega_\gamma(dx)$, $M = \nabla G_\omega(x^*)\otimes I + I \otimes \nabla G_\omega(x^*)-\gamma \nabla G_\omega(x^*)\otimes \nabla G_\omega(x^*), C = \Expe{\mathbb{U}_{\omega_{1^k}}^{\otimes 2}}$ and $\Tilde{L}_{max}^G = 1 + \sum\limits_{i=1}^{n} L_{max}^i$.
+\end{lemma}
+\begin{proof}
+    From a third order Taylor expansion of $G$ around $x_*,$ we have that
+    \begin{eqnarray}
+        G_\omega(x) = \nabla G_\omega(x^*) (x - x^*) + \frac{1}{2} \nabla^2 G_\omega(x^*) (x - x^*)^{\otimes2} + R_1(x), \forall x \in \mathbb{R}^d 
+    \end{eqnarray}
+    where the reminder $R_1(x)$ satisfies $\sup_{x\in\mathbb{R}^d}\left\{\frac{R_1(x)\|}{\|x - x^*\|^3}\right\} < +\infty$.
+    Taking expectation with respect to the invariant distribution $\omega_\gamma$ and using the fact that $\Expepgamma{G_\omega(x)} = 0,$ we get 
+    \begin{eqnarray}
+        0 = \Expepgamma{\nabla G_\omega(x^*) (x - x^*) + \frac{1}{2} \nabla^2 G_\omega(x^*) (x - x^*)^{\otimes2} + R_1(x)} 
+    \end{eqnarray}
+    From Lemma~\ref{lemma strongly monotone 4th-moment} and using Holder inequality and the fact that $\sup_{x\in\mathbb{R}^d}\left\{\frac{R_1(x)\|}{\|x - x^*\|^3}\right\} < +\infty$, we obtain
+    \begin{eqnarray}
+        \nabla G_\omega(x^*)\Expepgamma{x - x^*} + \frac{1}{2} \nabla^2 G_\omega(x^*)\int_{\mathbb{R}^d} (x - x^*)^{\otimes2}\omega_\gamma(dx) = \mathcal{O}\left(\gamma^3\right) \label{eq1_lemma}
+    \end{eqnarray}
+    Taking the second order Taylor of $G$ around $x^*$, we have that 
+    \begin{eqnarray}
+        x^1_0 - x^* = x_0^0 - x^* - \gamma \nabla G_\omega(x^*)(x_0^0 - x^*) + \gamma \mathbb{U}_1^k(x_0^0)+\gamma R_2(x^0_0) \label{eq2_lemma}
+    \end{eqnarray}
+    with $\mathcal{R}_2$ the second order reminder satisfying $\sup_{x\in\mathbb{R}^d}\left\{\frac{R_2(x)\|}{\|x - x^*\|^2}\right\} < +\infty$. 
+    From the second order moment of equation \eqref{eq2_lemma}, the unbiasedness of the noise $\mathbb{U}_k, \forall i, k \in \mathbb{N},$ and Theorem~\ref{lemma strongly monotone 4th-moment}, we have that
+    \begin{eqnarray}
+        \int_{\mathbb{R}^d} (x - x^*)^{\otimes2} \omega_\gamma(dx) = \left[I - \gamma \nabla G_\omega(x^*)\right] \int_{\mathbb{R}^d}(x - x^*)^{\otimes 2}\omega_\gamma(dx) \left[I - \gamma \nabla G_\omega(x^*)\right] + \gamma^2 \int_{\mathbb{R}^d} C(x) \omega_\gamma(dx) + \mathcal{O}\left(\gamma^5\right)\nonumber
+    \end{eqnarray}
+    Rearranging the terms, we get
+    \begin{eqnarray}
+        M \int_{\mathbb{R}^d} (x - x^*)^{\otimes2} \omega_\gamma(dx) &=& \gamma \int_{\mathbb{R}^d} C(x) \omega_\gamma(dx) + \mathcal{O}\left(\gamma^3\right) \label{eq3_lemma}
+    \end{eqnarray}
+    where $M = \nabla G_\omega(x^*)\otimes I + I \otimes \nabla G_\omega(x^*)-\gamma \nabla G_\omega(x^*)\otimes \nabla G_\omega(x^*)$.
+    
+    We, next, show that the operator $M$ is invertible for the selected step size by proving that it is symmetric and positive definite. Let $\lambda_i, \forall i \in [d],$ be the eigenvalues of $\nabla G_\omega(x^*)$ with $\{u_i\}_{i\in[d]}$ the corresponding eigenvectors. Note that $I - \frac{\gamma}{2} \nabla G_\omega(x^*)$ has eigenvalues $(1-\frac{\gamma}{2} \lambda_i) > 0$ and thus for $\gamma < \frac{2}{\lambda_{max}(\nabla G_\omega(x_*))}$ it is symmetric positive definite on the same basis $\{u_i\}_{i\in[d]}$. Hence we can factor the operator $M$ as 
+    \begin{eqnarray}
+        M &=& \nabla G_\omega(x^*)\otimes I + I \otimes \nabla G_\omega(x^*)-\gamma \nabla G_\omega(x^*)\otimes \nabla G_\omega(x^*) \nonumber \\
+        &=& \nabla G_\omega(x^*)\otimes(I-\frac{\gamma}{2}\nabla G_\omega(x^*)) + (I - \frac{\gamma}{2} \nabla G_\omega(x^*)) \otimes \nabla G_\omega(x^*) \nonumber
+    \end{eqnarray}
+    Thus, the vectors $u_i \otimes u_j, \forall i, j\in[d]$ diagonalize $M$ with eigenvalues $\mu_{i, j} =\lambda_i (1-\gamma \lambda_j)+\lambda_j(1 - \gamma\lambda_i), \forall i, j\in[d]$. From Lemma~\ref{lemma: eigenvalues_operator}, we have that the maximum eigenvalue of $\nabla G_\omega(x^*)$ is $L_{max}^G = 1 + \sum\limits_{i=1}^{n} (\gamma L_{max})^i$ and hence for $\gamma < 1$ we obtain $L_{max}^G < \Tilde{L}_{max}^G =: 1 + \sum\limits_{i=1}^{n} L_{max}^i$. Selecting the stepsize such that $\gamma < \min\left\{\frac{2}{\Tilde{L}_{max}^G}, 1\right\},$ it holds that $\mu_{i, j} > 0, \forall i, j\in[d],$ and thus $M$ is positive definite and invertible. 
+    Thus, multiplying \eqref{eq3_lemma} with $M^{-1}$ from the left, we get
+    \begin{eqnarray}
+        \int_{\mathbb{R}^d} (x - x^*)^{\otimes2} \omega_\gamma(dx) &=& \gamma M^{-1} \int_{\mathbb{R}^d} C(x) \omega_\gamma(dx) + \mathcal{O}\left(\gamma^3\right) \label{eq4_lemma}
+    \end{eqnarray}
+    Substituting \eqref{eq4_lemma} into \eqref{eq1_lemma} and rearranging the terms, we obtain
+    \begin{eqnarray}
+        \nabla G_\omega(x^*)\Expepgamma{x - x^*} = - \frac{\gamma}{2} \nabla^2 G_\omega(x^*)M \int_{\mathbb{R}^d} C(x) \omega_\gamma(dx) + \mathcal{O}\left(\gamma^3\right) \nonumber \\
+        \Rightarrow \Expepgamma{x - x^*} = - \frac{\gamma}{2} \nabla G_\omega(x^*)^{-1}\nabla^2 G_\omega(x^*)M \int_{\mathbb{R}^d} C(x) \omega_\gamma(dx) + \mathcal{O}\left(\gamma^3\right)
+    \end{eqnarray}
+    Letting $A = - \frac{1}{2} \nabla G_\omega(x^*)^{-1}\nabla^2 G_\omega(x^*)M \int_{\mathbb{R}^d} C(x) \omega_\gamma(dx),$ we obtain 
+    \begin{eqnarray}
+        \Expepgamma{x} = x_* + \gamma A + \mathcal{O}\left(\gamma^3\right) 
+    \end{eqnarray}
+\end{proof}
+
+\begin{theorem}\label{thm: SGD_with_double_RR}
+    Under Assumptions~\ref{assumt: sol_set_non_empty}-, the Richardson-Romberg iterates of SGD-RR satisfy
+    \begin{eqnarray}
+        \mathbb{E}_{x_{\gamma} \sim \pi_{\gamma}} [2x]-\mathbb{E}_{x_{2\gamma} \sim \pi_{2\gamma}} [x_{2\gamma}] - x^* = \mathcal{O}\left(\gamma^3\right) 
+    \end{eqnarray}
+\end{theorem}
+\begin{proof}
+    From Lemma~\ref{lemma: convergence_of_x}, we have that the iterates $x_{\gamma, t}$ of SGR-RR with step size $\gamma$ satisfy
+    \begin{eqnarray}
+        \mathbb{E}_{x_{\gamma} \sim \pi_{\gamma}} [x] = x_* + \gamma A + \mathcal{O}\left(\gamma^3\right) \label{eq_1_thm1}
+    \end{eqnarray}
+    Similarly the iterates $(x_{2\gamma,t})_{t}$ of SGD-RR with step size $2\gamma$ satisfy
+    \begin{eqnarray}
+        \mathbb{E}_{x_{2\gamma} \sim \pi_{2\gamma}} [x_{2\gamma}] = x_* + 2\gamma A + \mathcal{O}\left(\gamma^3\right) \label{eq_2_thm1}
+    \end{eqnarray}
+    Thus, from \eqref{eq_1_thm1}, \eqref{eq_2_thm1} we can compute the Richardson Romberg iterates as
+    \begin{eqnarray}
+        \left(\mathbb{E}_{x_{\gamma} \sim \pi_{\gamma}} [2x]-\mathbb{E}_{x_{2\gamma} \sim \pi_{2\gamma}} [x_{2\gamma}]\right) = \mathcal{O}\left(\gamma^3\right) \nonumber
+    \end{eqnarray}
+\end{proof}
+\end{document}

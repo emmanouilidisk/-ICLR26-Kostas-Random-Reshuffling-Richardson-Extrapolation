@@ -1,0 +1,92 @@
+% !TEX root = ./iclr2026_conference.tex
+\newpage
+\section{On Experiments}
+\label{app: additional_experiments}
+In this section, we provide additional details on the experimental setting used for the conducted experiments. We consider the setup of strongly monotone quadratic min-max problems
+\begin{eqnarray}
+    \min_{x_{1} \in \R^d} \max_{x_{2}\in \R^d} f(x_1, x_2) = \frac{1}{n} \sum_{i=1}^{n} \frac{1}{2} x_1^T A_i x_1 + x_1^T B_i x_2 - \frac{1}{2} x_2^T C_i x^2 + \alpha_i^T x_1 - c_i^T x_2. \nonumber
+\end{eqnarray}
+The matrices $A_i$ are sampled by first sampling an orthogonal matrix $P$ and then sampling a diagonal matrix $D_i$ with elements in the diagonal uniformly sampled from the interval $[\mu, L]$. The selected parameters $\mu, L$ correspond to the strong monotonicity parameter in Assumption~\ref{assumpt: weak_quasi_strong_monotonicity} and the Lipschitz parameter of the underlying problem respectively. We acquire the matrices $A_i$ as the product $A_i = P D_i P^T$. We sample the matrices $B_i, C_i$ similarly to sampling the matrices $A_i$ with the only difference that the elements of the diagonal matrices $D_i$ lie in the interval $[0, 0.1]$ and $[\mu, L]$ respectively. The vectors $a_i, c_i$ are follow the normal distribution $\mathcal{N}(\textbf{0}, I)$. In all experiments, we use $n = 100, d = 100$, while we specify the values of $\mu, L$ in each experiment independently as they differ.
+
+We provide additional experiments on the effect of each heuristic in the convergence of the algorithm. More specifically, we compare the classical with-replacement SGDA algorithm, the \RRresh variant, the \RRrom variant and the algorithm utilizing both heuristics. We run the experiment for multiple stepsizes $\gamma = \{10^{-3}, 10^{-4}, 10^{-5}\}$ and multiple condition numbers $\kappa = \{1, 5, 10\}$. 
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.3\linewidth]{iclr2026_4Rs/figures/relative_error_plots/new_plot_manolis_gamma_0.001_condition_num_1.pdf.pdf}
+    \includegraphics[width=0.3\linewidth]{iclr2026_4Rs/figures/relative_error_plots/new_plot_manolis_gamma_0.001_condition_num_5.pdf.pdf}
+    \includegraphics[width=0.3\linewidth]{iclr2026_4Rs/figures/relative_error_plots/new_plot_manolis_gamma_0.001_condition_num_10.pdf.pdf}\\
+    \includegraphics[width=0.3\linewidth]{iclr2026_4Rs/figures/relative_error_plots/new_plot_manolis_gamma_0.0001_condition_num_1.pdf.pdf}
+    \includegraphics[width=0.3\linewidth]{iclr2026_4Rs/figures/relative_error_plots/new_plot_manolis_gamma_0.0001_condition_num_5.pdf.pdf}
+    \includegraphics[width=0.3\linewidth]{iclr2026_4Rs/figures/relative_error_plots/new_plot_manolis_gamma_0.0001_condition_num_10.pdf.pdf}\\
+    \includegraphics[width=0.3\linewidth]{iclr2026_4Rs/figures/relative_error_plots/new_plot_manolis_gamma_1e-05_condition_num_1.pdf.pdf}
+    \includegraphics[width=0.3\linewidth]{iclr2026_4Rs/figures/relative_error_plots/new_plot_manolis_gamma_1e-05_condition_num_5.pdf.pdf}
+    \includegraphics[width=0.3\linewidth]{iclr2026_4Rs/figures/relative_error_plots/new_plot_manolis_gamma_1e-05_condition_num_10.pdf.pdf}\\
+    
+    \caption{Relative Error of the different variants of SGDA. Each row corresponds to a strongly monotone problem with condition number $\kappa = \{1, 5, 10\}$ and each row corresponds to a different step size $\gamma = \{10^{-3}, 10^{-4}, 10^{-5}\}$. The combination of both heuristics \RRrom$\oplus$\RRresh achieves the smallest relative error in comparison to the other methods.}
+    \label{fig: add_experim}
+\end{figure}
+
+In Figure~\ref{fig: add_experim}, we observe that all variants converge linearly to a neighbourhood of the solution. Demonstrably, the variant leveraging both heuristics outperforms the other variants, reducing faster the relative error and validating the theoretical results established so far.
+
+\color{red}
+
+We, next, provide an ablation study on the effect of the proposed heuristic in a variety of common algorithms used in VI and machine learning settings.
+
+\textbf{Wasserstein GANs.} We train a Wasserstein GAN (WGAN) \citep{arjovsky2017wasserstein} for learning the mean of a multivariate Gaussian and consider the effects of each heuristic in the training of the GAN. In a Wasserstein GAN, the optimization objective is a two-player zero-sum game between the generator $G(\cdot)$ and the discriminator $D(\cdot)$, given by 
+\begin{eqnarray}
+    \inf_{\theta} \sup_{w} \mathbb{E}_{x\sim N(v, I)}\left[ \langle w, x \rangle \right] - \mathbb{E}_{z\sim N(0,I)}\left[\langle w, z + \theta \rangle\right].
+\end{eqnarray}
+The discriminator consists a linear classifier $D(x; w) = \langle w, x\rangle$ of the input $x \in \R^d$, while 
+the generator returns a noisy estimation $G(z; \theta) = z + \theta$ of the learned parameter $\theta \in \R^d$, after sampling a noise vector $z \sim \mathcal{N}(0, I)$.
+In our experiments, the aim of the generator is to learn the mean $\mu$ of the true Gaussian distribution with mean $\mu = [3, 4]^T$ and covariance $\Sigma = \frac{1}{10}I$.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.3\linewidth]{iclr2026_4Rs/figures/additional/SEG_RR1_RR2_RR12_vs_SEG.pdf}
+    \includegraphics[width=0.3\linewidth]{iclr2026_4Rs/figures/relative_error_plots/SOMD_variants.pdf}
+    \includegraphics[width=0.3\linewidth]{iclr2026_4Rs/figures/additional/sco_plot_final (5).pdf}
+    
+    \caption{Wasserstein GAN trained with different heuristics on top of a base algorithm. For all base algorithms, the generator trained with the combination of both heuristics \RRrom$\oplus$\RRresh converges closer to the optimal parameters than the generator trained with any other algorithmic variant.}
+    \label{fig: wgan: variants}
+\end{figure}
+We examine the effect of the heuristics in a variety of different training algorithms and report the distance from the generator's optimal parameters for each experiment. Similar to \citet{emmanouilidis2024stochastic}, we, first, consider the Stochastic Extragradient (SEG) method as the main algorithmic template for training and 
+use each one of the 4 variants (SEG, SEG-$\RRresh$, SEG-$\RRrom$, SEG-$\RRrom\oplus\RRresh$) to train a GAN. We use the same constant step size for the generator and discriminator as in \citet{emmanouilidis2024stochastic} and double the step size of the variants that implement Richardson-Romberg extrapolation. Figure \ref{fig: wgan: variants} shows that the generator trained with SEG-$\RRrom\oplus\RRresh$ is able to converge
+closer to the optimal parameters than the generator trained with any other variant and thus the synergy of both heuristics ($\RRrom\oplus\RRresh$) is beneficial in training.
+
+Following \citet{daskalakis2017training}, we train a WGAN with the use of Optimistic Mirror Descent (OMD). Aiming to see the effect of each heuristic even for this
+algorithm, we use the classical OMD method, the $\RRresh$ variant, the random reshuffling ($\RRrom$) and the combination of both ($\RRrom\oplus\RRresh$). We let the step size of the generator and the discriminator be $\gamma_G = 0.02, \gamma_D = 0.01$ respectively. As shown in Figure \ref{fig: wgan: variants}, the $\RRrom\oplus\RRresh$ outperforms all other variants, indicating that the advantages of this heuristic remain apparent even for the OMD algorithm.
+
+Lastly, we test lightweight second order methods common in the literature of VIs \citep{mescheder2017numerics, loizou2020stochastic}. More specifically, Stochastic Consensus Optimization (SCO) is an algorithm that can be seen as a combination of the SGDA algorithm and the Stochastic Hamiltonian (SHMD) method \citep{loizou2020stochastic}, where a regularizer $\lambda$ articulates the contribution of SHMD that is being introduced in the update rule. Given that the SCO method is related to the SGDA but requires Jacobian vector products, thus being a lightweight second order method, we have run experiments to examine whether the $\RRrom\oplus\RRresh$ provides benefits in higher-order methods. According to Figure \ref{fig: wgan: variants}, the generator trained with the heuristic $\RRrom\oplus\RRresh$ converges closer to the optimal parameters than the generator trained with plain SCO or any other variant.  
+
+\textbf{On Single-Run Experiments \& Variance of Observed Behaviour.}
+For completeness, we report the variability of our experimental results over single runs, establishing a more refined description of the effect of each heuristic empirically. More specifically, in Figure \ref{fig: add_experim2} we plot the mean and standard deviations for each of the 4 variants over 5 runs. As shown in Figure \ref{fig: add_experim2}, the $\RRrom\oplus\RRresh$ variant outperforms all other heuristics even in single trials. 
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.7\linewidth]{iclr2026_4Rs/figures/additional/relative_error_mean_std_sparsified_1e3.png}
+    
+    \caption{Mean and standard deviation of each heuristic over 5 trials. The combination of both heuristics \RRrom$\oplus$\RRresh achieves the smallest relative error in comparison to the other methods.}
+    \label{fig: add_experim2}
+\end{figure}
+
+\textbf{Wall-clock time Comparison of the different heuristics.} We, next, compare the wall-clock time of the different heuristics. All 4 variants have the same per iteration cost in terms of gradient evaluations, since the only difference between the classical SGD algorithm and the $\RRresh$ variant is the way that the mini-batch gradients are sampled, while in $\RRrom$ and \RRrom$\oplus$\RRresh the two chains of the Richardson extrapolation can be run in parallel. 
+
+Interestingly, SGDA with random reshuffling typically runs faster in wall-clock time than SGDA with with-replacement sampling. The following factors explain why random reshuffling can be run faster, as observed in our experiments:
+\begin{itemize}
+    \item $\RRresh$ performs only one random operation per epoch. With with-replacement sampling, each iteration requires a random draw $i_t \sim Uniform({1,…,n})$.
+    \item $\RRresh$ calls the PRNG once per epoch (through randperm(n) or equivalent), after which all iterations are sequential. This eliminates thousands of PRNG calls and reduces interpreter overhead.
+\end{itemize}
+We have reproduced the same experiment as in Figure \ref{fig:biases} and have reported the wall-clock time needed for each method. According to table \ref{tab: wall-clock-comparison}, the $\RRrom\oplus\RRresh$ heuristic runs in half the time required for the plain SGDA variant and comparable time with respect to random reshuffling. Hence, thanks to parallelization one can obtain the benefits from the synergy of the two heuristics without the need of a higher wall-clock time.
+
+\begin{table}[h!]
+\centering
+\caption{Wall-clock time comparison of SGDA variants.}
+\begin{tabular}{l c}
+\hline
+\textbf{Method}       & \textbf{Time (sec)} \\ 
+\hline
+SGDA                  & 107.59 \\
+SGDA-$\RRresh$              & 50.92  \\
+SGDA-$\RRrom$              & 107.59 \\
+SGDA-$\RRrom\oplus\RRresh$            & 51.94  \\
+\hline
+\end{tabular} \label{tab: wall-clock-comparison}
+\end{table}
