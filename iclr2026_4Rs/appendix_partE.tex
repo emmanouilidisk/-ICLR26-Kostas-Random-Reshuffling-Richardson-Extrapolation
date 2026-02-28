@@ -11,23 +11,21 @@ The matrices $A_i$ are sampled by first sampling an orthogonal matrix $P$ and th
 We provide additional experiments on the effect of each heuristic in the convergence of the algorithm. More specifically, we compare the classical with-replacement SGDA algorithm, the \RRresh variant, the \RRrom variant and the algorithm utilizing both heuristics. We run the experiment for multiple stepsizes $\gamma = \{10^{-3}, 10^{-4}, 10^{-5}\}$ and multiple condition numbers $\kappa = \{1, 5, 10\}$. 
 \begin{figure}[h]
     \centering
-    \includegraphics[width=0.3\linewidth]{iclr2026_4Rs/figures/relative_error_plots/new_plot_manolis_gamma_0.001_condition_num_1.pdf.pdf}
-    \includegraphics[width=0.3\linewidth]{iclr2026_4Rs/figures/relative_error_plots/new_plot_manolis_gamma_0.001_condition_num_5.pdf.pdf}
-    \includegraphics[width=0.3\linewidth]{iclr2026_4Rs/figures/relative_error_plots/new_plot_manolis_gamma_0.001_condition_num_10.pdf.pdf}\\
-    \includegraphics[width=0.3\linewidth]{iclr2026_4Rs/figures/relative_error_plots/new_plot_manolis_gamma_0.0001_condition_num_1.pdf.pdf}
-    \includegraphics[width=0.3\linewidth]{iclr2026_4Rs/figures/relative_error_plots/new_plot_manolis_gamma_0.0001_condition_num_5.pdf.pdf}
-    \includegraphics[width=0.3\linewidth]{iclr2026_4Rs/figures/relative_error_plots/new_plot_manolis_gamma_0.0001_condition_num_10.pdf.pdf}\\
-    \includegraphics[width=0.3\linewidth]{iclr2026_4Rs/figures/relative_error_plots/new_plot_manolis_gamma_1e-05_condition_num_1.pdf.pdf}
-    \includegraphics[width=0.3\linewidth]{iclr2026_4Rs/figures/relative_error_plots/new_plot_manolis_gamma_1e-05_condition_num_5.pdf.pdf}
-    \includegraphics[width=0.3\linewidth]{iclr2026_4Rs/figures/relative_error_plots/new_plot_manolis_gamma_1e-05_condition_num_10.pdf.pdf}\\
+    \includegraphics[width=0.3\linewidth]{./figures/relative_error_plots/new_plot_manolis_gamma_0.001_condition_num_1.pdf.pdf}
+    \includegraphics[width=0.3\linewidth]{./figures/relative_error_plots/new_plot_manolis_gamma_0.001_condition_num_5.pdf.pdf}
+    \includegraphics[width=0.3\linewidth]{./figures/relative_error_plots/new_plot_manolis_gamma_0.001_condition_num_10.pdf.pdf}\\
+    \includegraphics[width=0.3\linewidth]{./figures/relative_error_plots/new_plot_manolis_gamma_0.0001_condition_num_1.pdf.pdf}
+    \includegraphics[width=0.3\linewidth]{./figures/relative_error_plots/new_plot_manolis_gamma_0.0001_condition_num_5.pdf.pdf}
+    \includegraphics[width=0.3\linewidth]{./figures/relative_error_plots/new_plot_manolis_gamma_0.0001_condition_num_10.pdf.pdf}\\
+    \includegraphics[width=0.3\linewidth]{./figures/relative_error_plots/new_plot_manolis_gamma_1e-05_condition_num_1.pdf.pdf}
+    \includegraphics[width=0.3\linewidth]{./figures/relative_error_plots/new_plot_manolis_gamma_1e-05_condition_num_5.pdf.pdf}
+    \includegraphics[width=0.3\linewidth]{./figures/relative_error_plots/new_plot_manolis_gamma_1e-05_condition_num_10.pdf.pdf}\\
     
     \caption{Relative Error of the different variants of SGDA. Each row corresponds to a strongly monotone problem with condition number $\kappa = \{1, 5, 10\}$ and each row corresponds to a different step size $\gamma = \{10^{-3}, 10^{-4}, 10^{-5}\}$. The combination of both heuristics \RRrom$\oplus$\RRresh achieves the smallest relative error in comparison to the other methods.}
     \label{fig: add_experim}
 \end{figure}
 
 In Figure~\ref{fig: add_experim}, we observe that all variants converge linearly to a neighbourhood of the solution. Demonstrably, the variant leveraging both heuristics outperforms the other variants, reducing faster the relative error and validating the theoretical results established so far.
-
-\color{red}
 
 We, next, provide an ablation study on the effect of the proposed heuristic in a variety of common algorithms used in VI and machine learning settings.
 
@@ -41,9 +39,9 @@ In our experiments, the aim of the generator is to learn the mean $\mu$ of the t
 
 \begin{figure}[h]
     \centering
-    \includegraphics[width=0.3\linewidth]{iclr2026_4Rs/figures/additional/SEG_RR1_RR2_RR12_vs_SEG.pdf}
-    \includegraphics[width=0.3\linewidth]{iclr2026_4Rs/figures/relative_error_plots/SOMD_variants.pdf}
-    \includegraphics[width=0.3\linewidth]{iclr2026_4Rs/figures/additional/sco_plot_final (5).pdf}
+    \includegraphics[width=0.3\linewidth]{./figures/additional/SEG_RR1_RR2_RR12_vs_SEG.pdf}
+    \includegraphics[width=0.3\linewidth]{./figures/relative_error_plots/SOMD_variants.pdf}
+    \includegraphics[width=0.3\linewidth]{./figures/additional/sco_plot_final (5).pdf}
     
     \caption{Wasserstein GAN trained with different heuristics on top of a base algorithm. For all base algorithms, the generator trained with the combination of both heuristics \RRrom$\oplus$\RRresh converges closer to the optimal parameters than the generator trained with any other algorithmic variant.}
     \label{fig: wgan: variants}
@@ -61,7 +59,7 @@ Lastly, we test lightweight second order methods common in the literature of VIs
 For completeness, we report the variability of our experimental results over single runs, establishing a more refined description of the effect of each heuristic empirically. More specifically, in Figure \ref{fig: add_experim2} we plot the mean and standard deviations for each of the 4 variants over 5 runs. As shown in Figure \ref{fig: add_experim2}, the $\RRrom\oplus\RRresh$ variant outperforms all other heuristics even in single trials. 
 \begin{figure}[h]
     \centering
-    \includegraphics[width=0.7\linewidth]{iclr2026_4Rs/figures/additional/relative_error_mean_std_sparsified_1e3.png}
+    \includegraphics[width=0.7\linewidth]{./figures/additional/relative_error_mean_std_sparsified_1e3.png}
     
     \caption{Mean and standard deviation of each heuristic over 5 trials. The combination of both heuristics \RRrom$\oplus$\RRresh achieves the smallest relative error in comparison to the other methods.}
     \label{fig: add_experim2}

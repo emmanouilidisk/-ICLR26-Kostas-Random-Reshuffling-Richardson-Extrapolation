@@ -14,11 +14,11 @@ For the interested reader, additional details on the experimental setup and the 
 
 \textbf{On the Rate of Convergence.} In the first set of experiments, we aim to validate empirically the result of Theorem~\ref{thm: convergence_rate} by running SGDA with \RRresh\ and using the step sizes described by theory. We conduct experiments for multiple conditions $\kappa = \frac{L}{\mu}$ with value $\kappa = \{1, 5, 10\}$ and $\mu = 1$. In Figure~\ref{fig: rate_of_conv}, we observe that the algorithm with \RRresh\ converges linearly to a neighbourhood around the solution $x^*$ and the neighbourhood depends on the step size used, validating in this way the results of Theorem~\ref{thm: convergence_rate}. We have run experiments also for stepsizes that are larger than the ones predicted in theory, observing similar behaviour of the optimization algorithm. Additionally, we have performed an ablation study in Wasserstein GANs \citep{emmanouilidis2024stochastic, daskalakis2017training}, showing that the performance benefit of the proposed heuristic is universal in many other common optimization algorithms used in VIs (Appendix~\ref{app: additional_experiments}).
 
-\begin{figure}
+\begin{figure}[h]
     \centering
-    \includegraphics[width=0.3\linewidth]{iclr2026_4Rs/figures/relative_error_plots/new_plot_manolis_gamma_0.0013714594258871589_condition_num_1.pdf.pdf}
-    \includegraphics[width=0.3\linewidth]{iclr2026_4Rs/figures/relative_error_plots/new_plot_manolis_gamma_0.00037627352424815026_condition_num_5.pdf.pdf}
-    \includegraphics[width=0.3\linewidth]{iclr2026_4Rs/figures/relative_error_plots/new_plot_manolis_gamma_0.0001_condition_num_10.pdf.pdf}
+    \includegraphics[width=0.3\linewidth]{./figures/relative_error_plots/new_plot_manolis_gamma_0.0013714594258871589_condition_num_1.pdf.pdf}
+    \includegraphics[width=0.3\linewidth]{./figures/relative_error_plots/new_plot_manolis_gamma_0.00037627352424815026_condition_num_5.pdf.pdf}
+    \includegraphics[width=0.3\linewidth]{./figures/relative_error_plots/new_plot_manolis_gamma_0.0001_condition_num_10.pdf.pdf}
         \vspace{-1em}
     \caption{Comparison of different heuristics. The \RRresh\ combination of \RRrom$\oplus$\RRresh\ converges to linearly to neighborhood of the solution, validating the established theoretical results (Theorem~\ref{thm: convergence_rate}). Even when we are using the last iterates, the combination of \RRrom$\oplus$\RRresh\ converges to a smaller relative error a smaller relative error in comparison to the other variants (classical SGDA, \RRresh, \RRrom). This validates that bias of Algorithm~\ref{alg:rrrom-rrresh} is improved even when \RRresh-last iterates are used. }
     \label{fig: rate_of_conv}
@@ -40,8 +40,8 @@ For the interested reader, additional details on the experimental setup and the 
 \vspace{-0.5em}
 \begin{figure}[h]
     \centering
-    \includegraphics[width=0.35\linewidth]{iclr2026_4Rs/figures/concentration/fig3_sgda (4).pdf}
-    \includegraphics[width=0.3\linewidth]{iclr2026_4Rs/figures/concentration/fig4_sgda (4).pdf}
+    \includegraphics[width=0.35\linewidth]{./figures/concentration/fig3_sgda (4).pdf}
+    \includegraphics[width=0.3\linewidth]{./figures/concentration/fig4_sgda (4).pdf}
         \vspace{-1.5em}
     \caption{Validation of concentration around the mean and effect of the number of iterations and step sized selected. The average of the game values tend to concentrate more around the mean for larger number of iterations and smaller step sizes. The right plot indicates the effect of two different step sizes $\gamma \in \{0.1, 0.001\}$, showing that for smaller step sizes the corresponding distribution attains higher concentration around the mean of the values. 
     }

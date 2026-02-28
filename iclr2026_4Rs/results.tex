@@ -28,32 +28,9 @@ Richardson extrapolation.
 \begin{draftremark}\small
 Theorem~\ref{thm: convergence_rate} establishes linear convergence up to a bias of $\mathcal{O}(\gamma^2\sigma_*^2 + \tfrac{\lambda}{\mu})$, where the $\tfrac{8\lambda}{\mu}$ term is inherent \citep{yu2021analysis}. For fair comparison we focus on the quasi-strongly monotone case ($\lambda=0$), which already generalizes strong convexity. Our rate recovers known results for strongly monotone operators \citep{das2022sampling,emmanouilidis2024stochastic} and extends them to weak monotonicity.
 \\In this regime, reshuffling attains a much smaller bias than the $\mathcal{O}(\gamma\sigma_*^2)$ of with-replacement SGD \citep{loizou2020stochastic,gower2019sgd}, converging to a tighter neighborhood. This sharper bias also yields faster accuracy rates: with $\gamma = 1/(nK)$, with-replacement SGD reaches $\mathcal{O}(1/(nK))$ accuracy \citep{das2022sampling,mishchenko2020random}, while reshuffling accelerates to $\mathcal{O}(1/(nK^2))$, a further  support for its empirical success.
-\vspace{-1em}
+% \vspace{-1em}
 \end{draftremark}
 \newcommand{\codestepsize}{\eta}
-\begin{algorithm}[ht]
-\caption{\textsc{SGD--\RRrom$\oplus$\RRresh}}
-\label{alg:rrrom-rrresh}
-\begin{algorithmic}[1]
-\footnotesize
-\Require Initial point $x_0\in\R^d$; step size $\gamma>0$; epochs $I$; dataset size $n$;
-\Statex \hspace{\algorithmicindent} \textsc{StochOracle}$(x;i)$ returns $F_i(x)$ (minimization) or operator value (VI);
-\Statex \hspace{\algorithmicindent} \textsc{PreProcess}$(g;i)$ adds calibrated Gaussian smoothing on $g$ (e.g., $\;\;\noise_k \sim \mathcal{N}(0,\, \gamma^2 n \sigma_*^2 I)$).
-\For{$k=0,1,\dots,I-1$} \Comment{epoch $k$}
-  \For{$\codestepsize=\gamma,2\gamma$}   \Comment{Parallel iterations with two step-sizes}
-  \State Draw a random permutation $\omega_k$ of $[n]$
-  \For{$i=0,1,\dots,n-1$} \Comment{inner loop (reshuffled pass)}
-    \State $x^{i+1}_{k,[\codestepsize]}   \gets x^{i}_{k,[\codestepsize]}   - \codestepsize\, \textsc{PreProcess}( \textsc{StochOracle}(x^{i}_{k,[\codestepsize]},  \omega_k[i]))$
-  \EndFor
-    \State $x^{0}_{k+1,[\codestepsize]} \gets x^{n}_{k,[\codestepsize]}$ \Comment{baseline next-start (used for analysis)}%; output uses $\hat{x}$}
-  \EndFor
-  \State $\hat{x}_{k+1} \gets 2\,x^{n}_{k,[\gamma]} - x^{n}_{k,[2\gamma]}$   \Comment{outer loop ( extrapolation at epoch end)}
-  \Statex \ \ \ \  \ \ \ \ \ \ \ \ OR
-  \State $\hat{x}_{k+1} \gets (2\,\sum_{m\in[k]}x^{n}_{k,[\gamma]} - x^{n}_{m,[2\gamma]})/k$ \Comment{Alternative: ( extrapolation at epoch's averages)}
-\EndFor
-\State \textbf{return} $\hat{x}_{I}$ \Comment{(optionally average $\{\hat{x}_k\}$ across epochs)}
-\end{algorithmic}
-\end{algorithm}
 
 In the sequel, we view the algorithmic trajectory through the prism of Markov chain theory. This perspective enables a finer dissection of the reshuffling bias and, mutatis mutandis, equips us with the machinery to construct consistent estimators for performance statistics. The Markovian framework arises naturally, as the method progresses from $x_k$ to $x_{k+1}$ in a state-dependent fashion. The connection between stochastic approximation and Markov processes—traced back to early works such as \cite{robbins1951stochastic,pflug1986stochastic}—has fueled a rich literature for algorithms with unbiased oracles. Random reshuffling, however, generates systematically biased oracles, necessitating a genuine departure from this canonical line of analysis.
 
@@ -65,14 +42,14 @@ As in the finite-state case, it is highly desirable that this kernel remain inva
 
 At the step level, reshuffling destroys homogeneity: the transition kernel varies with the permutation index, making the process non-stationary.
 Fortunately, this irregularity vanishes at the epoch scale:\begin{center}
-\emph{``After one reshuffled pass, the law of the next iterate depends only on the epoch’s starting point and the drawn permutation, but not its position within the permutation.''}\end{center}\vspace{-1em}
+\emph{``After one reshuffled pass, the law of the next iterate depends only on the epoch’s starting point and the drawn permutation, but not its position within the permutation.''}\end{center}\vspace{-0.5em}
 Thus, the sequence of epoch-level iterates $(x^{[0]}_{{k}})_{_{{k}\ge0}}$ forms a bona fide time-homogeneous Markov chain,  forming the basis for the asymptotic analysis of the \RRrom\ extrapolation component \footnote{On the augmented space $\R^d\times\mathfrak{S}_n$, the chain $((x_k,\omega_k))_{k\ge0}$ is also time-homogeneous with kernel
 \(
 K\big((x,\omega),A\times B\big)
 =\int_A \phi\big(y;H(x,\omega),\Sigma I_d\big)\,dy\cdot \frac{|B|}{n!}.
 \)
 The above formulation is convenient for verifying Lyapunov–Foster and minorization criteria, since the coupling with uniform perturbation remains independent.}
-\vspace{-0.5em}
+
 \begin{lemma}[Epoch-level homogeneity and kernel]\label{lem:epoch-homog}
 Fix $\gamma>0$ and $n\in\mathbb{N}$. Then the \emph{Perturbed SGD-\RRresh\ } can be described at each epoch $k$ as:
 \emph{Draw $\omega_k$ uniformly from $\mathfrak{S}_n$ and set}
@@ -126,8 +103,8 @@ Then for the epoch-level iterates, it holds that:
 where $\sigma^2_{\pi_\gamma}(\ell)=\lim_{T\to\infty}\tfrac{1}{T}\ex_{\pi_\gamma}[S_T^2]$ and $S_T^2=\sum_{t=0}^{T-1}\big(\ell(x_t)-\ex_{x\sim\pi_\gamma}[\ell(x)]\big)^2$.
 \vspace{-0.25em}
 \end{theorem}
-\vspace{-0.5em}
-\subsection{Outer loop}\vspace{-0.75em}
+
+\subsection{Outer loop}
 Having established the role of \RRresh\ within stochastic algorithms, we now examine its interplay with \RRrom\ and the effect of combining these heuristics on bias.
 The previous results hold for the full class of weakly quasi-strongly monotone problems with $\lambda>0$.  
 To sharpen our understanding, we focus on the quasi-strongly monotone case ($\lambda=0$ in Assumption~\ref{assumpt: weak_quasi_strong_monotonicity}), which already covers a broad range of non-monotone regimes \citep{loizou2020stochastic}.  

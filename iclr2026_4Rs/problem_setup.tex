@@ -1,6 +1,6 @@
 % !TEX root = ./iclr2026_conference.tex
 \vspace{-0.5em}
-\section{Problem setup and blanket assumptions}
+\section{Problem setup and algorithmic framework}
 % \vspace{-0.5em}
 \paragraph{Variational inequalities.}  
 Let's recall first the basic framework of finite-sum variational inequalities (VIs), which will underlie our analysis. 
@@ -131,6 +131,56 @@ Let Assumptions~\ref{assumt: sol_set_non_empty}--\ref{assumpt: lipschitz} hold. 
 128\Big(\tfrac1n\sum_{i=1}^n L_i^4\Big)\|x-x^*\|^4 \;+\; 128\sigma_*^4.
 \end{align*}
 \end{proposition}
+
+\paragraph{Our algorithm.}  
+While there are many conceivable ways to interleave \RRrom\ and \RRresh, both intra- and inter-epoch, we adopt the most natural and practically motivated design. In modern pipelines, \RRresh\ is the workhorse at the low-level training stage, while \RRrom\ is often employed as a black-box refinement at a higher level, allowing parallelization and modular integration.
+
+Accordingly, we study stochastic gradient algorithms that sample via random reshuffling to generate stochastic oracles of gradients/operators. At the start of each epoch $k>0$, a random permutation $\omega_k$ of $[n]$ is drawn, prescribing the order in which data points are processed. The algorithm then performs the classical SGD update:
+\begin{equation}\tag{SGD-\RRrom$\oplus$\RRresh (inner-loop)}
+\footnotesize
+    x_k^{i+1} = x_k^i - \gamma \,\mathrm{PreProcess}\big[\mathrm{StochOracle}(x^i_k; \omega_k^i)\big],
+    \label{SGD-4R1}
+\end{equation}
+
+where $\mathrm{StochOracle}(x^i_k; \omega_k^i)$ denotes either the stochastic gradient (in minimization problems) or the operator value $F_{\omega_k^i}(x^i_k)$ (in the general VI case), indexed by the $\omega_k^i$ data point and $\mathrm{PreProcess}[\cdot]$ is a preprocessing routine implementing calibrated Gaussian smoothing to the input. Then, the final iterate of each epoch becomes the starting point of the next, and the procedure repeats.
+%
+%A key difficulty stems from the biased nature of reshuffling: after one epoch, the cumulative estimator is a biased proxy of the finite-sum gradient.
+%This precisely motivates the widespread use of sampling with replacement, which is unbiased and analytically simpler. Moreover, the noise induced by reshuffling is inherently discrete, with support tied to the space of permutations. To address this, we introduce a preprocessing routine that smooths the discrete noise distribution into a well-behaved proxy, while preserving its variance and moment structure. We show that a carefully calibrated Gaussian perturbation suffices; however, for large datasets the effect is already negligible, indicating that preprocessing may ultimately be unnecessary. Understanding its precise dependence on dataset size remains an open direction for future work.
+
+\begin{algorithm}[ht]
+\caption{\textsc{SGD--\RRrom$\oplus$\RRresh}}
+\label{alg:rrrom-rrresh}
+\begin{algorithmic}[1]
+\footnotesize
+\Require Initial point $x_0\in\R^d$; step size $\gamma>0$; epochs $I$; dataset size $n$;
+\Statex \hspace{\algorithmicindent} \textsc{StochOracle}$(x;i)$ returns $F_i(x)$ (minimization) or operator value (VI);
+\Statex \hspace{\algorithmicindent} \textsc{PreProcess}$(g;i)$ adds calibrated Gaussian smoothing on $g$ (e.g., $\;\;\noise_k \sim \mathcal{N}(0,\, \gamma^2 n \sigma_*^2 I)$).
+\For{$k=0,1,\dots,I-1$} \Comment{epoch $k$}
+  \For{$\codestepsize=\gamma,2\gamma$}   \Comment{Parallel iterations with two step-sizes}
+  \State Draw a random permutation $\omega_k$ of $[n]$
+  \For{$i=0,1,\dots,n-1$} \Comment{inner loop (reshuffled pass)}
+    \State $x^{i+1}_{k,[\codestepsize]}   \gets x^{i}_{k,[\codestepsize]}   - \codestepsize\, \textsc{PreProcess}( \textsc{StochOracle}(x^{i}_{k,[\codestepsize]},  \omega_k[i]))$
+  \EndFor
+    \State $x^{0}_{k+1,[\codestepsize]} \gets x^{n}_{k,[\codestepsize]}$ \Comment{baseline next-start (used for analysis)}%; output uses $\hat{x}$}
+  \EndFor
+  \State $\hat{x}_{k+1} \gets 2\,x^{n}_{k,[\gamma]} - x^{n}_{k,[2\gamma]}$   \Comment{outer loop ( extrapolation at epoch end)}
+  \Statex \ \ \ \  \ \ \ \ \ \ \ \ OR
+  \State $\hat{x}_{k+1} \gets (2\,\sum_{m\in[k]}x^{n}_{k,[\gamma]} - x^{n}_{m,[2\gamma]})/k$ \Comment{Alternative: ( extrapolation at epoch's averages)}
+\EndFor
+\State \textbf{return} $\hat{x}_{I}$ \Comment{(optionally average $\{\hat{x}_k\}$ across epochs)}
+\end{algorithmic}
+\end{algorithm}
+\emph{On the necessity of smoothing.}
+A key challenge with reshuffling is that, after one epoch, the cumulative gradient estimator is biased, unlike sampling with replacement, which is unbiased and analytically simpler. The induced noise is also discrete, tied to permutations. 
+To handle this, we introduce a calibrated Gaussian perturbation that smooths the discrete reshuffling noise into a well-behaved proxy while preserving variance, moments, and bias order. In practice, the perturbation has negligible effect across datasets; clarifying its precise dependence on dataset size is an interesting direction for future work. For completeness, the supplement also includes a brief sketch showing how our results extend even without this step.
+
+Finally, at the end of each epoch we apply \RRrom, yielding the extrapolated update:
+\begin{equation}\tag{SGD-\RRrom$\oplus$\RRresh (outer-loop)}
+    \hat{x}^N_{I+1} = 2\,x^{N}_{I,[\gamma]} - x^{N}_{I,[2\gamma]}\,.
+    \label{SGD-4R2}
+\end{equation}
+In Section~\ref{sec:results}, we prove that this combination achieves a provable $\mathcal{O}(\gamma^3)$ bias— to the best of our knowledge, the first such result. There we also provide the detailed description of Algorithm~\ref{alg:rrrom-rrresh} together with the formal statement specifying its exact parameter choices.\vspace{-1em}
+
 %%%%% ΟΛΔ%%%%%%%
 % \begin{assumption}[Lipschitz continuity] \label{assumpt: lipschitz}
 % Each $F_i$ is $L_i$-Lipschitz, i.e.,

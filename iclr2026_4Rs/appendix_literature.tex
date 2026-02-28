@@ -1,5 +1,6 @@
 % !TEX root = ./iclr2026_conference.tex
 \section{Additional Related Literature}
+\label{app:additional_related}
 Owing to its central role in optimization and machine learning, stochastic gradient descent (SGD) and its numerous variants have generated an extensive body of literature that spans several decades.  
 A complete survey is well beyond the scope of this paper, so we restrict ourselves to highlighting the most relevant threads and pointers.  
 
@@ -33,10 +34,55 @@ In large-scale saddle-point and VIP settings, most theoretical analyses assume w
 \paragraph{Overparameterization and global convergence phenomena.}
 Finally, SGD training dynamics in overparameterized neural networks reveal regimes where global convergence can emerge from structural properties such as width, depth, and initialization \citep{du2019gradient,zou2020gradient,nguyen2020global,liu2023aiming}. These results are powerful but specialized: they rely on problem-specific structure (e.g., width scaling or tailored initializations). Our focus is orthogonal—we seek guarantees for general non-convex or non-monotone landscapes under stochastic approximation, independent of architectural assumptions. For completeness, we refer the reviewer for the related work of the aforementioned work for further  surveys about these SGD \& overparameterization results in more detail.
 
+\textbf{Comparison to Prior Work and Overview of Our Contributions.}
+Before introducing the intuition behind our algorithmic design, we briefly contrast our results with those of \cite{emmanouilidis2024stochastic}, who study \RRresh-based improvements for the Stochastic Extragradient (SEG) method. 
+Our analysis uncovers a fundamentally different phenomenon: the joint use of $\RRresh \oplus \RRrom$ produces a \emph{bias cancellation mechanism} that eliminates the leading $\mathcal{O}(\gamma)$ term while preserving the condition number and asymptotic behavior of SGDA. 
+The key distinctions are summarized in Table~\ref{tab:comparison}. 
+Achieving the best of both worlds—optimal bias order together with a tight condition number, as SEG without reshuffling enjoys—remains an interesting direction for future work.
+
+% \vspace{-0.35cm}
+
+\begin{table}[h!]
+\centering
+\scalebox{0.92}{
+\footnotesize
+\begin{tabular}{lcc}
+\toprule
+\textbf{Aspect} & \textbf{\cite{emmanouilidis2024stochastic}} & \textbf{Our work} \\
+\midrule
+
+Baseline Algorithm & \textbf{SEG} & \textbf{SGDA} \\[2pt]
+
+Model Assumptions (Smoothness) &
+$F_i$--$L_i$ Lipschitz &
+$F_i$--$L_i$ Lipschitz
+\\[2pt]
+
+Model Assumptions (Drift) &
+$F$ $\mu$--strongly monotone &
+$F$ \emph{quasi}--strongly monotone
+\\[2pt]
+
+Main heuristic & \textbf{\RRresh\ only} & \textbf{\RRresh\ $\oplus$ \RRrom} \\[2pt]
+
+Asymptotic Bias order & $\mathcal{O}(\gamma + \gamma^3)$ & $\mathcal{O}(\gamma^3)$ \\[2pt]
+
+Asymptotic MSE order & $\mathcal{O}(\gamma^2)$ & $\mathcal{O}(\gamma^2)$ \\[2pt]
+
+Condition number & \textbf{Worse than vanilla-SEG} & \textbf{Same as vanilla-SGDA} \\[2pt]
+
+Mechanism & EG-structure + $\RRresh$ & Bias cancellation ($\RRresh \oplus \RRrom$) \\
+\bottomrule
+\end{tabular}
+} % end scalebox
+\caption{Summary of key differences between Emmanouilidis--Vidal--Loizou (2024) and our results.}
+\label{tab:comparison}
+\end{table}
+% \vspace{-2em}
+
 \medskip
 \noindent\textit{Summary.} 
 To summarize, there is a mature theory for with-replacement SGD (both asymptotic and non-asymptotic), well-developed statistical limits via averaging, and powerful diffusion/Markov perspectives for constant-step schemes. RR, despite being the practical default, poses distinctive analytical challenges due to its within-epoch bias, especially in min–max and VIP settings. Recent advances begin to bridge this gap, but a comprehensive understanding of how classical heuristics (constant steps, reshuffling, extrapolation) interact remains incomplete—precisely the juncture where our work contributes.
-
 %%%%% !TEX root = ./iclr2026_conference.tex
 %%%%\section{Additional Related Literature}
 %%%%

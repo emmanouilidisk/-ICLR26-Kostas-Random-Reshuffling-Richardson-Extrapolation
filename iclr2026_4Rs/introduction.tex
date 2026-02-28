@@ -37,18 +37,20 @@ so that $\mathrm{bias}(\hat x) \le \sqrt{\mathrm{MSE}(\hat x)}$. Under this triv
 
 $\blacktriangleright$ Orthogonal to reshuffling, another classical idea from numerical analysis has recently re-emerged in stochastic optimization: \emph{\citeauthor{richardson1911ix}–\citeauthor{romberg1955vereinfachte}} (\RRrom) \emph{extrapolation}. Its principle is simple yet powerful: \emph{Run the algorithm of your choice with two different step sizes and combine their outputs so that the leading bias term cancels.} Concretely, whenever the bias admits an expansion of the form $\text{bias}(\gamma) = \Delta \gamma + \mathcal{O}(\gamma^{\kappa})$ with $\kappa>1$, running the stochastic approximation at two step sizes gives:
 \vspace{-0.25em}\[\text{$x_{\infty}^{\gamma} - x^* = \Delta \gamma + \mathcal{O}(\gamma^{\kappa})$ and $x_{\infty}^{2\gamma} - x^* = 2\Delta \gamma + \mathcal{O}(\gamma^{\kappa})$.}\vspace{-0.25em}\] 
-Extrapolating these iterates then yields : \vspace{-0.25em} 
+Extrapolating these iterates then yields: \vspace{-0.25em} 
 \[
 x_{\text{extr}}- x^*
 = 2x_{\infty}^{\gamma} - x_{\infty}^{2\gamma} - x^*
 = \cancel{2\Delta \gamma} - \cancel{2\Delta \gamma} + \mathcal{O}(\gamma^{\kappa})
 = \mathcal{O}(\gamma^{\kappa}). \vspace{-0.25em}
 \]
-Originally introduced for accelerating discretization schemes in stochastic differential equations \citep{hildebrand1987introduction,talay1990expansion,bally1996law}, \RRrom\ has since been applied to optimization, improving constant-step methods from SGD \citep{durmus2016stochastic,dieuleveut2020bridging,mangold2024refined,sheshukova2024nonasymptotic} to Q-learning and two-timescale stochastic approximation \citep{huo2023bias,kwon2024two,zhang2024constant,allmeier2024computing}. {\color{red}Despite} its conceptual simplicity and empirical success, its theoretical foundations for stochastic VIPs remain nascent \citep{vlatakis2024stochastic}. 
+Originally introduced for accelerating discretization schemes in stochastic differential equations \citep{hildebrand1987introduction,talay1990expansion,bally1996law}, \RRrom\ has since been applied to optimization, improving constant-step methods from SGD \citep{durmus2016stochastic,dieuleveut2020bridging,mangold2024refined,sheshukova2024nonasymptotic} to Q-learning and two-timescale stochastic approximation methods \citep{huo2023bias,kwon2024two,zhang2024constant,allmeier2024computing}. {\color{red}Despite} its conceptual simplicity and empirical success, its theoretical foundations for stochastic VIPs remain nascent \citep{vlatakis2024stochastic}. 
+\kostas{Even though it remains conceptually simple and empirically successful, its theoretical foundations for stochastic VIPs remain nascent \citep{vlatakis2024stochastic}.}
 
-{\color{red}Despite} this progress, the known \emph{bias} rates of the heuristics  remain limited {\color{red}when applied in isolation. }
+{\color{red}Despite} this progress, the known \emph{bias} rates of the heuristics remain limited {\color{blue}only when they are applied separately.}
 For unconstrained strongly monotone VIPs, \RRrom\ alone attains $\mathcal{O}(\gamma^{3/2})$ bias \citep{vlatakis2024stochastic}\footnote{The $\mathcal{O}(\gamma^2)$ rate in \citet[Sec.~5, Thm.~6]{vlatakis2024stochastic} is obtained via a reduction to \citet[Sec.~3, Thm.~4]{dieuleveut2020bridging}, which requires additional noise assumptions not met in our setting.}, 
 whereas \RRresh\ is known to sharpen \emph{MSE} bounds (from $\mathcal{O}(\gamma)$ to $\mathcal{O}(\gamma^2)$) but does not, in general, guarantee an improved bias order.
+\kostas{However, it remains unclear whether one can combine effectively the aforementioned heuristics in a unified method that outperforms both. This raises the natural question:} 
 {\color{blue}This raises a natural question: can one synthesize these approaches into a unified framework that outperforms both,
 }
 %This raises a natural challenge: can one synthesize the two so as to surpass both, 
@@ -88,18 +90,18 @@ interact simultaneously?}
 %Addressing this question is non-trivial: \RRresh\ produces a biased stochastic oracle whose discrete noise structure lies outside the scope of existing analyses for mainly unbiased \RRrom\ methods \citep{dieuleveut2020bridging,sheshukova2024nonasymptotic,vlatakis2024stochastic}. \\\\
 Addressing this question is delicate. Reshuffling introduces a biased stochastic oracle whose discrete, permutation-driven noise structure lies outside the reach of existing analyses of extrapolation, which predominantly assume unbiased or continuously distributed perturbations \citep{dieuleveut2020bridging,sheshukova2024nonasymptotic,vlatakis2024stochastic}.\\
 
-\vspace{-0.75em}\textbf{Our model's assumptions.}
-While variational inequalities provide a unifying language for optimization, learning, and game dynamics, \emph{no single structural assumption can capture the full complexity of all modern nonconvex--nonconcave problems}. From a computational standpoint, even smooth VIs are intractable in full generality---being tightly connected to Nash equilibria~\citep{
-papadimitriou2022computational,goldberg2022ppad}, linear complementarity~\citep{ieor2011linear}, and constrained saddle-point problems~\citep{daskalakis2021complexity}. Consequently, much of the theoretical literature adopts \emph{structured} assumptions (strong convexity, quasi-strong monotonicity, quasar or weak convexity, PL/KL conditions, Minty conditions, error bounds, etc.), each expressive in specific regimes but not universal.
+% \vspace{-0.75em}\textbf{Our model's assumptions.}
+% While variational inequalities provide a unifying language for optimization, learning, and game dynamics, \emph{no single structural assumption can capture the full complexity of all modern nonconvex--nonconcave problems}. From a computational standpoint, even smooth VIs are intractable in full generality---being tightly connected to Nash equilibria~\citep{
+% papadimitriou2022computational,goldberg2022ppad}, linear complementarity~\citep{ieor2011linear}, and constrained saddle-point problems~\citep{daskalakis2021complexity}. Consequently, much of the theoretical literature adopts \emph{structured} assumptions (strong convexity, quasi-strong monotonicity, quasar or weak convexity, PL/KL conditions, Minty conditions, error bounds, etc.), each expressive in specific regimes but not universal.
 
-Our work is based on \emph{quasi-strong monotonicity} which falls squarely within this class: it captures stabilizing behaviors of many smooth systems, while remaining far more permissive than strong convexity or global monotonicity. At the same time, it is helpful to clarify that this assumption is not meant as a universal model for all adversarial or fully nonconvex--nonconcave settings. Certain modern ML applications---
-including GANs, adversarial robustness, and multi-agent RL---can exhibit fundamentally unstable or rotational dynamics~\citep{Jin2020LocalOptimality,Han2023RiemannianMinimax,KimSeo2022SemiImplicit,Bukharin2023RobustMARL}, where even \emph{local} monotonicity surrogates fail. As such, our theoretical guarantees should be viewed as pertaining to regimes where a minimum amount of local structure is present, rather than to the most adversarial or unstructured cases.
-\footnote{A complementary and key fact for our setting, established in \citep[Lemma~A.4]{hsieh2019convergence}, is that \emph{any smooth VI operator is locally quasi-strongly monotone in a neighborhood of a regular solution}. Combined with our Markov-chain recurrence result—which ensures that the iterates remain in such neighborhoods with probability~1—this provides a natural and widely adopted stability regime in which the $\RRresh$ and $\RRrom$ debiasing mechanisms are both theoretically justified and practically meaningful.
-}
+% Our work is based on \emph{quasi-strong monotonicity} which falls squarely within this class: it captures stabilizing behaviors of many smooth systems, while remaining far more permissive than strong convexity or global monotonicity. At the same time, it is helpful to clarify that this assumption is not meant as a universal model for all adversarial or fully nonconvex--nonconcave settings. Certain modern ML applications---
+% including GANs, adversarial robustness, and multi-agent RL---can exhibit fundamentally unstable or rotational dynamics~\citep{Jin2020LocalOptimality,Han2023RiemannianMinimax,KimSeo2022SemiImplicit,Bukharin2023RobustMARL}, where even \emph{local} monotonicity surrogates fail. As such, our theoretical guarantees should be viewed as pertaining to regimes where a minimum amount of local structure is present, rather than to the most adversarial or unstructured cases.
+% \footnote{A complementary and key fact for our setting, established in \citep[Lemma~A.4]{hsieh2019convergence}, is that \emph{any smooth VI operator is locally quasi-strongly monotone in a neighborhood of a regular solution}. Combined with our Markov-chain recurrence result—which ensures that the iterates remain in such neighborhoods with probability~1—this provides a natural and widely adopted stability regime in which the $\RRresh$ and $\RRrom$ debiasing mechanisms are both theoretically justified and practically meaningful.
+% }
 
-{\color{red}I don't get the point of the first two paragraphs. The first one, rather than stating our model assumptions, is a review of others. Then the second goes in many directions. Why not just jumpt to the contributions and state the assumptions in there. The details can go in the main body.}
+% {\color{red}I don't get the point of the first two paragraphs. The first one, rather than stating our model assumptions, is a review of others. Then the second goes in many directions. Why not just jumpt to the contributions and state the assumptions in there. The details can go in the main body.}
 
-{\color{orange}Manolis: Send the above two paragraphs in a appendix}
+% {\color{orange}Manolis: Send the above two paragraphs in a appendix}
 
 \textbf{Our contributions.}
 Motivated by this gap, we undertake in this work what is, to the best of our knowledge, the first systematic study demonstrating that these heuristics can be synthesized into a principled algorithmic framework.
@@ -111,58 +113,73 @@ To this end, we extend and refine previous analyses of both \RRresh\ and \RRrom,
 For quasi-strongly monotone smooth VIPs, our combined method (SGD-\RRrom$\oplus$\RRresh, Algorithm~\ref{alg:rrrom-rrresh}) cancels all lower-order terms in the bias expansion, yielding an asymptotic bias of order $\mathcal{O}(\gamma^3)$.
 \end{maininformal}
 
-{
-{\color{orange}Manolis: Write one sentence that for concision we present the discussion about the adopted our model assumption (e.g. quasi-storng monotonicity) in Appendix X}
+% \kostas{I think we can skip the sentence on the model assumptions in order to have better connection with the next paragraph.} 
+% {\color{orange}Manolis: Write one sentence that for concision we present the discussion about the adopted our model assumption (e.g. quasi-storng monotonicity) in Appendix X}
 
-To establish the above result, we first derive an intermediate finding: in isolation, \texttt{Perturbed SGD-\RRresh} achieves an asymptotic bias of $C\gamma+\mathcal{O}(\gamma^3)$—to the best of our knowledge, the first analysis of its kind. This is particularly striking: although without-replacement sampling induces a biased gradient estimator, it paradoxically yields an improved bias rate (see Figure~\ref{fig:biases}).
+To establish the above result, we first derive an intermediate finding: in isolation, \texttt{Perturbed SGD-\RRresh} achieves an asymptotic bias of $C\gamma+\mathcal{O}(\gamma^3)$—to the best of our knowledge, the first analysis of its kind. This is particularly striking: although without-replacement sampling induces a biased gradient estimator, it paradoxically yields an improved bias rate (see Figure~\ref{fig:biases}).\begin{wrapfigure}{r}{0.45\linewidth}
+    \centering
+    \includegraphics[width=0.75\linewidth]{./figures/relative_error_plots/new_plot_manolis_gamma_0.0001_condition_num_1.pdf}
+    \caption{\small
+    Illustration of bias behavior. 
+    Example on a min–max quadratic VIP with 
+    $F(x,y)=\tfrac{1}{N}\sum_{i\in[N]} x^\top A_i x + x^\top B_i y + y^\top C_i y$ 
+    for $N=1000$, where $A_i,B_i,C_i$ are quasi–strongly monotone. 
+    Already after the second epoch batch, the methods clearly separate: 
+    \textcolor{blue}{SGD}, \textcolor{orange}{\RRresh}, 
+    \textcolor{darkgreen}{\RRrom}, and 
+    \textcolor{red}{\RRresh$\oplus$\RRrom}. 
+    }
+    \vspace{-1.5em}
+    \label{fig:biases}
+\end{wrapfigure}
 
-\textbf{Comparison to Prior Work and Overview of Our Contributions.}
-Before introducing the intuition behind our algorithmic design, we briefly contrast our results with those of \cite{emmanouilidis2024stochastic}, who study \RRresh-based improvements for the Stochastic Extragradient (SEG) method. 
-Our analysis uncovers a fundamentally different phenomenon: the joint use of $\RRresh \oplus \RRrom$ produces a \emph{bias cancellation mechanism} that eliminates the leading $\mathcal{O}(\gamma)$ term while preserving the condition number and asymptotic behavior of SGDA. 
-The key distinctions are summarized in Table~\ref{tab:comparison}. 
-Achieving the best of both worlds—optimal bias order together with a tight condition number, as SEG without reshuffling enjoys—remains an interesting direction for future work.
+% \textbf{Comparison to Prior Work and Overview of Our Contributions.}
+% Before introducing the intuition behind our algorithmic design, we briefly contrast our results with those of \cite{emmanouilidis2024stochastic}, who study \RRresh-based improvements for the Stochastic Extragradient (SEG) method. 
+% Our analysis uncovers a fundamentally different phenomenon: the joint use of $\RRresh \oplus \RRrom$ produces a \emph{bias cancellation mechanism} that eliminates the leading $\mathcal{O}(\gamma)$ term while preserving the condition number and asymptotic behavior of SGDA. 
+% The key distinctions are summarized in Table~\ref{tab:comparison}. 
+% Achieving the best of both worlds—optimal bias order together with a tight condition number, as SEG without reshuffling enjoys—remains an interesting direction for future work.
 
-% \vspace{-0.35cm}
+% % \vspace{-0.35cm}
 
-\begin{table}[h!]
-\centering
-\scalebox{0.92}{
-\footnotesize
-\begin{tabular}{lcc}
-\toprule
-\textbf{Aspect} & \textbf{\cite{emmanouilidis2024stochastic}} & \textbf{Our work} \\
-\midrule
+% \begin{table}[h!]
+% \centering
+% \scalebox{0.92}{
+% \footnotesize
+% \begin{tabular}{lcc}
+% \toprule
+% \textbf{Aspect} & \textbf{\cite{emmanouilidis2024stochastic}} & \textbf{Our work} \\
+% \midrule
 
-Baseline Algorithm & \textbf{SEG} & \textbf{SGDA} \\[2pt]
+% Baseline Algorithm & \textbf{SEG} & \textbf{SGDA} \\[2pt]
 
-Model Assumptions (Smoothness) &
-$F_i$--$L_i$ Lipschitz &
-$F_i$--$L_i$ Lipschitz
-\\[2pt]
+% Model Assumptions (Smoothness) &
+% $F_i$--$L_i$ Lipschitz &
+% $F_i$--$L_i$ Lipschitz
+% \\[2pt]
 
-Model Assumptions (Drift) &
-$F$ $\mu$--strongly monotone &
-$F$ \emph{quasi}--strongly monotone
-\\[2pt]
+% Model Assumptions (Drift) &
+% $F$ $\mu$--strongly monotone &
+% $F$ \emph{quasi}--strongly monotone
+% \\[2pt]
 
-Main heuristic & \textbf{\RRresh\ only} & \textbf{\RRresh\ $\oplus$ \RRrom} \\[2pt]
+% Main heuristic & \textbf{\RRresh\ only} & \textbf{\RRresh\ $\oplus$ \RRrom} \\[2pt]
 
-Asymptotic Bias order & $\mathcal{O}(\gamma + \gamma^3)$ & $\mathcal{O}(\gamma^3)$ \\[2pt]
+% Asymptotic Bias order & $\mathcal{O}(\gamma + \gamma^3)$ & $\mathcal{O}(\gamma^3)$ \\[2pt]
 
-Asymptotic MSE order & $\mathcal{O}(\gamma^2)$ & $\mathcal{O}(\gamma^2)$ \\[2pt]
+% Asymptotic MSE order & $\mathcal{O}(\gamma^2)$ & $\mathcal{O}(\gamma^2)$ \\[2pt]
 
-Condition number & \textbf{Worse than vanilla-SEG} & \textbf{Same as vanilla-SGDA} \\[2pt]
+% Condition number & \textbf{Worse than vanilla-SEG} & \textbf{Same as vanilla-SGDA} \\[2pt]
 
-Mechanism & EG-structure + $\RRresh$ & Bias cancellation ($\RRresh \oplus \RRrom$) \\
-\bottomrule
-\end{tabular}
-} % end scalebox
-\caption{Summary of key differences between Emmanouilidis--Vidal--Loizou (2024) and our results.}
-\label{tab:comparison}
-\end{table}
-\vspace{-2em}
+% Mechanism & EG-structure + $\RRresh$ & Bias cancellation ($\RRresh \oplus \RRrom$) \\
+% \bottomrule
+% \end{tabular}
+% } % end scalebox
+% \caption{Summary of key differences between Emmanouilidis--Vidal--Loizou (2024) and our results.}
+% \label{tab:comparison}
+% \end{table}
+% \vspace{-2em}
 
-\newpage
+% \newpage
 % {\color{red}
 % \textbf{Comparison to Prior Work and Overview of Our Contributions}
 % Before presenting the high level intuition of our algorithm, we provide a concise comparison between our results and the recent work of \cite{emmanouilidis2024stochastic}, which analyzes \RRresh-based improvements for the Stochastic Extragradient (SEG) method. Our findings reveal a qualitatively different behavior: by combining \emph{two} complementary reshuffling operators (RR$_1$ and RR$_2$), we demonstrate a systematic \textit{bias cancellation mechanism} that preserves the favorable statistical properties of SGDA while eliminating the leading-order bias term. We summarize this contrast in Table~\ref{tab:comparison}, which highlights the conceptual and technical distinctions between the two approaches.
@@ -259,48 +276,48 @@ Mechanism & EG-structure + $\RRresh$ & Bias cancellation ($\RRresh \oplus \RRrom
 
 
 %We believe that our framework offers a principled design paradigm that extends naturally to other constant step-size stochastic methods—ranging from single-call to multi-call extragradient schemes, and encompassing extragradient, optimistic, and mirror-prox variants \citep{hsieh2019convergence, azizian2020tight}. We leave the full exploration of these directions to future work.\vspace{-0.5em}
-\paragraph{Our algorithm.}  
-While there are many conceivable ways to interleave \RRrom\ and \RRresh, both intra- and inter-epoch, we adopt the most natural and practically motivated design. In modern pipelines, \RRresh\ is the workhorse at the low-level training stage, while \RRrom\ is often employed as a black-box refinement at a higher level, allowing parallelization and modular integration.
+% \paragraph{Our algorithm.}  
+% While there are many conceivable ways to interleave \RRrom\ and \RRresh, both intra- and inter-epoch, we adopt the most natural and practically motivated design. In modern pipelines, \RRresh\ is the workhorse at the low-level training stage, while \RRrom\ is often employed as a black-box refinement at a higher level, allowing parallelization and modular integration.
 
-\begin{wrapfigure}{r}{0.45\linewidth}
-    \centering
-    \includegraphics[width=0.75\linewidth]{./figures/relative_error_plots/new_plot_manolis_gamma_0.0001_condition_num_1.pdf}
-    \caption{\small
-    Illustration of bias behavior. 
-    Example on a min–max quadratic VIP with 
-    $F(x,y)=\tfrac{1}{N}\sum_{i\in[N]} x^\top A_i x + x^\top B_i y + y^\top C_i y$ 
-    for $N=1000$, where $A_i,B_i,C_i$ are quasi–strongly monotone. 
-    Already after the second epoch batch, the methods clearly separate: 
-    \textcolor{blue}{SGD}, \textcolor{orange}{\RRresh}, 
-    \textcolor{darkgreen}{\RRrom}, and 
-    \textcolor{red}{\RRresh$\oplus$\RRrom}. 
-    }
-    \vspace{-1.5em}
-    \label{fig:biases}
-\end{wrapfigure}
+% \begin{wrapfigure}{r}{0.45\linewidth}
+%     \centering
+%     \includegraphics[width=0.75\linewidth]{./figures/relative_error_plots/new_plot_manolis_gamma_0.0001_condition_num_1.pdf}
+%     \caption{\small
+%     Illustration of bias behavior. 
+%     Example on a min–max quadratic VIP with 
+%     $F(x,y)=\tfrac{1}{N}\sum_{i\in[N]} x^\top A_i x + x^\top B_i y + y^\top C_i y$ 
+%     for $N=1000$, where $A_i,B_i,C_i$ are quasi–strongly monotone. 
+%     Already after the second epoch batch, the methods clearly separate: 
+%     \textcolor{blue}{SGD}, \textcolor{orange}{\RRresh}, 
+%     \textcolor{darkgreen}{\RRrom}, and 
+%     \textcolor{red}{\RRresh$\oplus$\RRrom}. 
+%     }
+%     \vspace{-1.5em}
+%     \label{fig:biases}
+% \end{wrapfigure}
 
-Accordingly, we study stochastic gradient algorithms that sample via random reshuffling to generate stochastic oracles of gradients/operators. At the start of each epoch $k>0$, a random permutation $\omega_k$ of $[n]$ is drawn, prescribing the order in which data points are processed. The algorithm then performs the classical SGD update:
-\begin{equation}\tag{SGD-\RRrom$\oplus$\RRresh (inner-loop)}
-\footnotesize
-    x_k^{i+1} = x_k^i - \gamma \,\mathrm{PreProcess}\big[\mathrm{StochOracle}(x^i_k; \omega_k^i)\big],
-    \label{SGD-4R1}
-\end{equation}
+% Accordingly, we study stochastic gradient algorithms that sample via random reshuffling to generate stochastic oracles of gradients/operators. At the start of each epoch $k>0$, a random permutation $\omega_k$ of $[n]$ is drawn, prescribing the order in which data points are processed. The algorithm then performs the classical SGD update:
+% \begin{equation}\tag{SGD-\RRrom$\oplus$\RRresh (inner-loop)}
+% \footnotesize
+%     x_k^{i+1} = x_k^i - \gamma \,\mathrm{PreProcess}\big[\mathrm{StochOracle}(x^i_k; \omega_k^i)\big],
+%     \label{SGD-4R1}
+% \end{equation}
 
-where $\mathrm{StochOracle}(x^i_k; \omega_k^i)$ denotes either the stochastic gradient (in minimization problems) or the operator value $F_{\omega_k^i}(x^i_k)$ (in the general VI case), indexed by the $\omega_k^i$ data point and $\mathrm{PreProcess}[\cdot]$ is a preprocessing routine implementing calibrated Gaussian smoothing to the input. Then, the final iterate of each epoch becomes the starting point of the next, and the procedure repeats.
-%
-%A key difficulty stems from the biased nature of reshuffling: after one epoch, the cumulative estimator is a biased proxy of the finite-sum gradient.
-%This precisely motivates the widespread use of sampling with replacement, which is unbiased and analytically simpler. Moreover, the noise induced by reshuffling is inherently discrete, with support tied to the space of permutations. To address this, we introduce a preprocessing routine that smooths the discrete noise distribution into a well-behaved proxy, while preserving its variance and moment structure. We show that a carefully calibrated Gaussian perturbation suffices; however, for large datasets the effect is already negligible, indicating that preprocessing may ultimately be unnecessary. Understanding its precise dependence on dataset size remains an open direction for future work.
+% where $\mathrm{StochOracle}(x^i_k; \omega_k^i)$ denotes either the stochastic gradient (in minimization problems) or the operator value $F_{\omega_k^i}(x^i_k)$ (in the general VI case), indexed by the $\omega_k^i$ data point and $\mathrm{PreProcess}[\cdot]$ is a preprocessing routine implementing calibrated Gaussian smoothing to the input. Then, the final iterate of each epoch becomes the starting point of the next, and the procedure repeats.
+% %
+% %A key difficulty stems from the biased nature of reshuffling: after one epoch, the cumulative estimator is a biased proxy of the finite-sum gradient.
+% %This precisely motivates the widespread use of sampling with replacement, which is unbiased and analytically simpler. Moreover, the noise induced by reshuffling is inherently discrete, with support tied to the space of permutations. To address this, we introduce a preprocessing routine that smooths the discrete noise distribution into a well-behaved proxy, while preserving its variance and moment structure. We show that a carefully calibrated Gaussian perturbation suffices; however, for large datasets the effect is already negligible, indicating that preprocessing may ultimately be unnecessary. Understanding its precise dependence on dataset size remains an open direction for future work.
 
-\emph{On the necessity of smoothing.}
-A key challenge with reshuffling is that, after one epoch, the cumulative gradient estimator is biased, unlike sampling with replacement, which is unbiased and analytically simpler. The induced noise is also discrete, tied to permutations. 
-To handle this, we introduce a calibrated Gaussian perturbation that smooths the discrete reshuffling noise into a well-behaved proxy while preserving variance, moments, and bias order. In practice, the perturbation has negligible effect across datasets; clarifying its precise dependence on dataset size is an interesting direction for future work. For completeness, the supplement also includes a brief sketch showing how our results extend even without this step.
+% \emph{On the necessity of smoothing.}
+% A key challenge with reshuffling is that, after one epoch, the cumulative gradient estimator is biased, unlike sampling with replacement, which is unbiased and analytically simpler. The induced noise is also discrete, tied to permutations. 
+% To handle this, we introduce a calibrated Gaussian perturbation that smooths the discrete reshuffling noise into a well-behaved proxy while preserving variance, moments, and bias order. In practice, the perturbation has negligible effect across datasets; clarifying its precise dependence on dataset size is an interesting direction for future work. For completeness, the supplement also includes a brief sketch showing how our results extend even without this step.
 
-Finally, at the end of each epoch we apply \RRrom, yielding the extrapolated update:
-\begin{equation}\tag{SGD-\RRrom$\oplus$\RRresh (outer-loop)}
-    \hat{x}^N_{I+1} = 2\,x^{N}_{I,[\gamma]} - x^{N}_{I,[2\gamma]}\,.
-    \label{SGD-4R2}
-\end{equation}
-In Section~\ref{sec:results}, we prove that this combination achieves a provable $\mathcal{O}(\gamma^3)$ bias— to the best of our knowledge, the first such result. There we also provide the detailed description of Algorithm~\ref{alg:rrrom-rrresh} together with the formal statement specifying its exact parameter choices.\vspace{-1em}
+% Finally, at the end of each epoch we apply \RRrom, yielding the extrapolated update:
+% \begin{equation}\tag{SGD-\RRrom$\oplus$\RRresh (outer-loop)}
+%     \hat{x}^N_{I+1} = 2\,x^{N}_{I,[\gamma]} - x^{N}_{I,[2\gamma]}\,.
+%     \label{SGD-4R2}
+% \end{equation}
+% In Section~\ref{sec:results}, we prove that this combination achieves a provable $\mathcal{O}(\gamma^3)$ bias— to the best of our knowledge, the first such result. There we also provide the detailed description of Algorithm~\ref{alg:rrrom-rrresh} together with the formal statement specifying its exact parameter choices.\vspace{-1em}
 \paragraph{Proof outline and technical innovations.}
 We now sketch the main ingredients of our analysis, deferring complete statements and proofs to Section~\ref{sec:results} and the appendix. 
 As our optimization landscape, we consider variational inequality problems (VIPs) satisfying weak quasi-strong monotonicity, a class broad enough to cover many structured non-monotone and non-convex problems. 
