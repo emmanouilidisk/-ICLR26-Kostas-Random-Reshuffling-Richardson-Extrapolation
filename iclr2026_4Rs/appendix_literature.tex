@@ -42,42 +42,7 @@ Achieving the best of both worlds—optimal bias order together with a tight con
 
 % \vspace{-0.35cm}
 
-\begin{table}[h!]
-\centering
-\scalebox{0.92}{
-\footnotesize
-\begin{tabular}{lcc}
-\toprule
-\textbf{Aspect} & \textbf{\cite{emmanouilidis2024stochastic}} & \textbf{Our work} \\
-\midrule
 
-Baseline Algorithm & \textbf{SEG} & \textbf{SGDA} \\[2pt]
-
-Model Assumptions (Smoothness) &
-$F_i$--$L_i$ Lipschitz &
-$F_i$--$L_i$ Lipschitz
-\\[2pt]
-
-Model Assumptions (Drift) &
-$F$ $\mu$--strongly monotone &
-$F$ \emph{quasi}--strongly monotone
-\\[2pt]
-
-Main heuristic & \textbf{\RRresh\ only} & \textbf{\RRresh\ $\oplus$ \RRrom} \\[2pt]
-
-Asymptotic Bias order & $\mathcal{O}(\gamma + \gamma^3)$ & $\mathcal{O}(\gamma^3)$ \\[2pt]
-
-Asymptotic MSE order & $\mathcal{O}(\gamma^2)$ & $\mathcal{O}(\gamma^2)$ \\[2pt]
-
-Condition number & \textbf{Worse than vanilla-SEG} & \textbf{Same as vanilla-SGDA} \\[2pt]
-
-Mechanism & EG-structure + $\RRresh$ & Bias cancellation ($\RRresh \oplus \RRrom$) \\
-\bottomrule
-\end{tabular}
-} % end scalebox
-\caption{Summary of key differences between Emmanouilidis--Vidal--Loizou (2024) and our results.}
-\label{tab:comparison}
-\end{table}
 % \vspace{-2em}
 
 \medskip

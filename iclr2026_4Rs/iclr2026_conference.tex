@@ -34,6 +34,7 @@
     pdfborder={0 0 0}
 }
 \usepackage{url}
+\usepackage{enumitem}
 \usepackage[sort&compress,capitalize,nameinlink]{cleveref}		% for cleveref formatting
 
 %--------------------------------------------------
@@ -70,7 +71,7 @@
   mdframed={
     skipabove=8pt, skipbelow=8pt,
     hidealllines=true,
-    backgroundcolor={shadecolor},
+    % backgroundcolor={shadecolor},
     innerleftmargin=4pt,
     innerrightmargin=4pt}
 ]{shaded}
@@ -88,8 +89,8 @@
 % Editing / debugging helpers
 %--------------------------------------------------
 \newcommand{\debug}[1]{#1}
-\newcommand{\kostas}[1]{\textcolor{blue}{[Kostas: #1]}}
-
+\newcommand{\kostas}[1]{#1}%Kostas:
+\newcommand{\manolis}[1]{\textcolor{orange}{[#1]}}
 %--------------------------------------------------
 % Handy wrappers for operators/macros
 %--------------------------------------------------
@@ -640,7 +641,9 @@
 %%%%%%%%%\DeclareMathOperator{\vol}{vol}		% for volume
 %%%%%%%%%
 %%%%%%%%%\newcommand{\kostas}[1]{\textcolor{blue}{[Kostas: #1]}}
+\usepackage{xcolor}
 
+\newcommand{\bluecomment}[1]{\begingroup#1\endgroup}%% \color{blue}
 \makeatletter
 % Disable writing to .toc
 \newcommand{\onlyappendixintoc}{%
@@ -701,20 +704,22 @@ $^*$University of Pennsylvania, $^\#$University of Wisconsin-Madison\\
 
 \maketitle
 
-
 \begin{abstract}
-From adversarial robustness to multi-agent learning, many machine learning tasks can be cast as finite-sum min–max optimization  or, more generally, as variational inequality problems (VIPs). Owing to their simplicity and scalability, stochastic gradient methods with constant step size are widely used, despite the fact that they converge only up to a bias term. Among the many heuristics adopted in practice, two classical techniques have recently attracted attention to mitigate this issue: \emph{Random Reshuffling} of data and \emph{Richardson–Romberg extrapolation} across iterates. In this work, we show that their composition not only cancels the leading linear bias term, but also yields an asymptotic cubic refinement. To the best of our knowledge, our work provides the first theoretical guarantees for such a synergy in structured non-monotone VIPs. Our analysis proceeds in two steps: (i)
+From adversarial robustness to multi-agent learning, many machine learning tasks can be cast as finite-sum min–max optimization  or, more generally, as variational inequality problems (VIPs). Owing to their simplicity and scalability, stochastic gradient methods with constant step size are widely used, despite the fact that they converge only up to a \kostas{constant} term. Among the many heuristics adopted in practice, two classical techniques have recently attracted attention to mitigate this issue: \emph{Random Reshuffling} of data and \emph{Richardson–Romberg extrapolation} across iterates. \kostas{Random Reshuffling sharpens the mean-squared error (MSE) of the estimated solution, while Richardson-Romberg extrapolation acts orthogonally, providing a second order reduction in its bias. In this work, we show that their composition is strictly better than both, not only maintaining the enhanced MSE guarantees but also yielding an even greater cubic refinement in the bias.}
+To the best of our knowledge, our work provides the first theoretical guarantees for such a synergy in structured non-monotone VIPs. Our analysis proceeds in two steps: (i)
 we smooth the discrete noise induced by reshuffling
-to leverage tools from continuous-state Markov chain theory establishing a novel law of large numbers and a central limit theorem for its iterates; and (ii) we employ spectral tensor techniques to prove that extrapolation 
+% \manolis{which allows us to} 
+and leverage tools from continuous-state Markov chain theory to establish a novel law of large numbers and a central limit theorem for its iterates; and (ii) we employ spectral tensor techniques to prove that extrapolation 
 debiases and sharpens the asymptotic behavior %accelerates convergence 
 even under the biased gradient oracle induced by reshuffling. Finally, extensive experiments validate our theory, consistently demonstrating substantial speedups in practice.
 \end{abstract}
+\vspace{-1em}
 \input{./introduction}
 \input{./problem_setup}
 \input{./results}
 \input{./experiments}
 \input{./conclusion}
-\newpage
+% \newpage
 \input{./acknowledgments}
 
 \bibliographystyle{iclr2026_conference}

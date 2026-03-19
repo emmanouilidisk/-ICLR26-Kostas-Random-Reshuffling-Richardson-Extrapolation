@@ -1,36 +1,80 @@
 % !TEX root = ./iclr2026_conference.tex
-\section{Our Results}\label{sec:results}
+\bluecomment{\section{Theoretical Guarantees}\label{sec:results}}
 %\vspace{-0.75em}
-We begin by formally presenting our main algorithm, \textsc{SGD–\RRrom$\oplus$\RRresh}.
-Omitting lines~2,9,10 and using a single step size reduces it to \textsc{SGD–\RRresh} under perturbation.
+% We begin by formally presenting our main algorithm, \textsc{SGD–\RRrom$\oplus$\RRresh}.
+% Omitting lines~2,9,10 and using a single step size reduces it to \textsc{SGD–\RRresh} under perturbation.
+\kostas{We present the theoretical guarantees for the synergy of both heuristics in our algorithm, establishing a cubic refinement in the bias attained. We start by analyzing the \RRresh\ component (inner loop of Algorithm~\ref{alg:rrrom-rrresh}), which serves as the basis for performing \RRrom\ (outer loop of Algorithm~\ref{alg:rrrom-rrresh}) on the produced iterates and describe the interplay of both heuristics in the bias of Algorithm~\ref{alg:rrrom-rrresh}.}
+
 %\vspace{-1.1em}
 %\vspace{-1.25em}
-\begin{draftremark}\small
- Empirically, for sufficiently large datasets 
+\begin{table}[h!]
+\centering
+\scalebox{0.92}{
+\footnotesize
+\begin{tabular}{lcc}
+\toprule
+\textbf{Aspect} & \textbf{\cite{emmanouilidis2024stochastic}} & \textbf{Our work} \\
+\midrule
+
+Baseline Algorithm & \textbf{SEG} & \textbf{SGDA} \\[2pt]
+
+Model Assumptions (Smoothness) &
+$F_i$--$L_i$ Lipschitz &
+$F_i$--$L_i$ Lipschitz
+\\[2pt]
+
+Model Assumptions (Drift) &
+$F$ $\mu$--strongly monotone &
+$F$ \emph{quasi}--strongly monotone
+\\[2pt]
+
+Main heuristic & \textbf{\RRresh\ only} & \textbf{\RRresh\ $\oplus$ \RRrom} \\[2pt]
+
+Asymptotic Bias order & $\mathcal{O}(\gamma + \gamma^3)$ & $\mathcal{O}(\gamma^3)$ \\[2pt]
+
+Asymptotic MSE order & $\mathcal{O}(\gamma^2)$ & $\mathcal{O}(\gamma^2)$ \\[2pt]
+
+Condition number & \textbf{Worse than vanilla-SEG} & \textbf{Same as vanilla-SGDA} \\[2pt]
+
+Mechanism & EG-structure + $\RRresh$ & Bias cancellation ($\RRresh \oplus \RRrom$) \\
+\bottomrule
+\end{tabular}
+} % end scalebox
+\caption{Summary of key differences between \cite{emmanouilidis2024stochastic} and our results.}
+\label{tab:comparison}
+\vspace{-0.5cm}
+\end{table}
+% \vspace{-1.25em}
+\subsection{Convergence Guarantees for \RRresh} 
+% \vspace{-0.75em}
+\kostas{Our first result concerns the convergence of the \RRresh\ component for $\lambda$-weak $\mu$-quasi strongly monotone VIPs. More specifically, in order to effectively utilize Markov Chain tools we study the \RRresh\ variant under preprocessing perturbations\footnote{Empirically, for sufficiently large datasets 
 the effect of discrete noise in smooth problems is negligible, making the preprocessing 
 step unnecessary. A detailed study of this effect lies beyond the scope of this paper, 
 whose focus is instead the first systematic treatment of the interaction between Random reshuffling and 
-Richardson extrapolation.
-\end{draftremark}
-\vspace{-1.25em}
-\subsection{Inner Loop}
-\vspace{-0.75em}
- Our first result concerns the \emph{Perturbed SGD–\RRresh} variant (see \eqref{SGD-4R1}) for $\lambda$-weak $\mu$-quasi strongly monotone VIPs.
+Richardson extrapolation.} (inner loop of Algorithm~\ref{alg:rrrom-rrresh}), attributing for simplicity of exposition of our results the name Perturbed SGD–\RRresh. }
+
+% \begin{draftremark}
+%  Empirically, for sufficiently large datasets 
+% the effect of discrete noise in smooth problems is negligible, making the preprocessing 
+% step unnecessary. A detailed study of this effect lies beyond the scope of this paper, 
+% whose focus is instead the first systematic treatment of the interaction between Random reshuffling and 
+% Richardson extrapolation.
+% \end{draftremark}
 \begin{theorem}\label{thm: convergence_rate}
-    Let Assumptions~\ref{assumt: sol_set_non_empty}-\ref{assumpt: lipschitz} hold. %If $\gamma \leq \gamma_{max}$, 
-    Then the iterates of {Perturbed SGD–\RRresh} satisfy for $\gamma \leq \gamma_{max}$,\vspace{-0.5em}
+    Let Assumptions~\ref{assumt: sol_set_non_empty}-\ref{assumpt: lipschitz} hold. If $\gamma \leq \gamma_{max}$, 
+    then the iterates of {Perturbed SGD–\RRresh} satisfy \vspace{-0.5em}
     \begin{eqnarray}
         \ex\left[\|x_{k+1}^0 - x_*\|^2\right] &\leq& \left(1 - \frac{\gamma  n\mu}{2}\right)^{k+1} \|x^0_0 - x^*\|^2 + \frac{8 n \gamma^2 L_{max}^2}{\mu^2} \sigma_*^2 + \frac{8\lambda}{\mu} \nonumber
     \end{eqnarray}\vspace{-0.5em}
-   {\small where  $\sigma_*^2 = \frac{1}{n} \sum_{i=0}^{n-1} \|F_i(x^*)\|^2$ and $\gamma_{max} = \min\left\{\frac{1}{3nL_{max}}, \frac{\sqrt{1+6 \mu^2 L_{max}^2} -1}{12nL_{max}^2}\right\}$. }
+   where  $\sigma_*^2 = \frac{1}{n} \sum_{i=0}^{n-1} \|F_i(x^*)\|^2$ and $\gamma_{max} = \min\left\{\frac{1}{3nL_{max}}, \frac{\sqrt{1+6 \mu^2 L_{max}^2} -1}{12nL_{max}^2}\right\}$.
 \end{theorem}
 % \vspace{-0.75em}
-\begin{draftremark}\small
-Theorem~\ref{thm: convergence_rate} establishes linear convergence up to a bias of $\mathcal{O}(\gamma^2\sigma_*^2 + \tfrac{\lambda}{\mu})$, where the $\tfrac{8\lambda}{\mu}$ term is inherent \citep{yu2021analysis}. For fair comparison we focus on the quasi-strongly monotone case ($\lambda=0$), which already generalizes strong convexity. Our rate recovers known results for strongly monotone operators \citep{das2022sampling,emmanouilidis2024stochastic} and extends them to weak monotonicity.
-\\In this regime, reshuffling attains a much smaller bias than the $\mathcal{O}(\gamma\sigma_*^2)$ of with-replacement SGD \citep{loizou2020stochastic,gower2019sgd}, converging to a tighter neighborhood. This sharper bias also yields faster accuracy rates: with $\gamma = 1/(nK)$, with-replacement SGD reaches $\mathcal{O}(1/(nK))$ accuracy \citep{das2022sampling,mishchenko2020random}, while reshuffling accelerates to $\mathcal{O}(1/(nK^2))$, a further  support for its empirical success.
+\begin{draftremark}
+Theorem~\ref{thm: convergence_rate} establishes exponential convergence up to a bias of $\mathcal{O}(\gamma^2\sigma_*^2 + \tfrac{\lambda}{\mu})$, where the $\tfrac{8\lambda}{\mu}$ term is inherent \citep{yu2021analysis}. For fair comparison we focus on the quasi-strongly monotone case ($\lambda=0$), which already generalizes strong convexity. Our rate recovers known results for strongly monotone operators \citep{das2022sampling,emmanouilidis2024stochastic} and extends them to weak monotonicity.
+In this regime, reshuffling attains a much smaller bias than the $\mathcal{O}(\gamma\sigma_*^2)$ of with-replacement SGD \citep{loizou2020stochastic,gower2019sgd}, converging to a tighter neighborhood. This sharper bias also yields faster accuracy rates: with $\gamma = 1/(nK)$, with-replacement SGD reaches $\mathcal{O}(1/(nK))$ accuracy \citep{das2022sampling,mishchenko2020random}, while reshuffling accelerates to $\mathcal{O}(1/(nK^2))$, a further  support for its empirical success.
 % \vspace{-1em}
 \end{draftremark}
-\newcommand{\codestepsize}{\eta}
+% \newcommand{\codestepsize}{\eta}
 
 In the sequel, we view the algorithmic trajectory through the prism of Markov chain theory. This perspective enables a finer dissection of the reshuffling bias and, mutatis mutandis, equips us with the machinery to construct consistent estimators for performance statistics. The Markovian framework arises naturally, as the method progresses from $x_k$ to $x_{k+1}$ in a state-dependent fashion. The connection between stochastic approximation and Markov processes—traced back to early works such as \cite{robbins1951stochastic,pflug1986stochastic}—has fueled a rich literature for algorithms with unbiased oracles. Random reshuffling, however, generates systematically biased oracles, necessitating a genuine departure from this canonical line of analysis.
 
@@ -59,7 +103,7 @@ x_{k+1}
 H(x_k,\omega_k)\;+\;U_k, 
 \quad U_k\sim \mathcal N(0,\Sigma),
 \vspace{-0.25em}\]
-where $H(x,\omega)$ denotes the endpoint of one reshuffled pass started at $x$ with permutation $\omega$ (i.e., the map induced by $n$ inner updates with step size $\gamma$).\\Then $(x_k)_{k\ge 0}$ is a time-homogeneous Markov chain on $\R^d$ with transition kernel
+where $H(x,\omega)$ denotes the endpoint of one reshuffled pass started at $x$ with permutation $\omega$ (i.e., the map induced by $n$ inner updates with step size $\gamma$). Then $(x_k)_{k\ge 0}$ is a time-homogeneous Markov chain on $\R^d$ with transition kernel
 \[
 P(x,A)
 \;=\;
@@ -81,7 +125,7 @@ Under Assumptions~\ref{assumt: sol_set_non_empty}--\ref{assumpt: lipschitz}, run
 \end{align*}
 for some $c<\infty$, $\rho\in(0,1)$, $C=\Theta(\mathrm{MSE}(\texttt{SGD}-{\RRresh}))$ and $\gamma_{\max}$ defined in Theorem~\ref{thm: convergence_rate}%$\gamma_{\max}=\gammaub$
 \end{theorem}
-\begin{draftremark}\small
+\begin{draftremark}
 Item (i) of Theorem~\ref{thm: efficient_stats} shows that Perturbed SGD-\RRresh converges geometrically in total variation to $\pi_\gamma$.
 Item (ii) bounds the gap between the expectation of a measurement under $\pi_\gamma$ and its value at the solution $x^*$. Intuitively, if the method converged exactly to $x^*$, these expectations would coincide.
 \end{draftremark}
@@ -90,22 +134,20 @@ The result of Theorem~\ref{thm: efficient_stats} follows from a Foster–Lyapuno
 Beyond geometric ergodicity, one may also ask whether the chain admits asymptotic statistical estimation of functionals of its trajectory. By invoking the Birkhoff--Khinchin ergodic theorem for continuous-state Markov chains, we establish both a Law of Large Numbers (LLN) and a Central Limit Theorem (CLT) for empirical averages of test functions evaluated along the epoch iterates.
 
 \begin{theorem}[LLN and CLT for Perturbed SGD--\RRresh]\label{thm: LLN_CLT_res} 
-Suppose Assumptions~\ref{assumt: sol_set_non_empty}--\ref{assumpt: lipschitz} hold and run Perturbed SGD--\RRresh with $\gamma \le \gamma_{\max}$, (cf.\ Theorem~\ref{thm: convergence_rate}). \\ 
-\\Let $\ell:\R^d\to\R$ be any test function such that $|\ell(x)|\le L_\ell(1+\|x\|^2)$ and $\ex_{x\sim\pi_\gamma}[\ell(x)]<\infty$.\\
-Then for the epoch-level iterates, it holds that:
-\[
-\underbrace{\frac{1}{T}\sum_{t=0}^{T-1}\ell(x_t) 
-  \;\xrightarrow{\text{a.s.}}\; \ex_{x\sim\pi_\gamma}[\ell(x)]}_{\text{(LLN)}}
-\qquad
-\underbrace{T^{-1/2}\sum_{t=0}^{T-1}\!\Big(\ell(x_t)-\ex_{x\sim\pi_\gamma}[\ell(x)]\Big) 
-  \;\xrightarrow{d}\; \mathcal N(0,\sigma^2_{\pi_\gamma}(\ell))}_{\text{(CLT)}},
-  \]
+Suppose Assumptions~\ref{assumt: sol_set_non_empty}--\ref{assumpt: lipschitz} hold and run Perturbed SGD--\RRresh\ with $\gamma \le \gamma_{\max}$, (cf.\ Theorem~\ref{thm: convergence_rate}). Let $\ell:\R^d\to\R$ be any test function such that $|\ell(x)|\le L_\ell(1+\|x\|^2)$ and $\ex_{x\sim\pi_\gamma}[\ell(x)]<\infty$.
+Then for the epoch-level iterates it holds that:
+\begin{eqnarray}
+   &&\underbrace{\frac{1}{T}\sum_{t=0}^{T-1}\ell(x_t) 
+  \;\xrightarrow{\text{a.s.}}\; \ex_{x\sim\pi_\gamma}[\ell(x)]}_{\text{(LLN)}}\qquad
+ \underbrace{T^{-1/2}\sum_{t=0}^{T-1}\!\Big(\ell(x_t)-\ex_{x\sim\pi_\gamma}[\ell(x)]\Big) 
+  \;\xrightarrow{d}\; \mathcal N(0,\sigma^2_{\pi_\gamma}(\ell))}_{\text{(CLT)}},\nonumber
+\end{eqnarray}
 where $\sigma^2_{\pi_\gamma}(\ell)=\lim_{T\to\infty}\tfrac{1}{T}\ex_{\pi_\gamma}[S_T^2]$ and $S_T^2=\sum_{t=0}^{T-1}\big(\ell(x_t)-\ex_{x\sim\pi_\gamma}[\ell(x)]\big)^2$.
 \vspace{-0.25em}
 \end{theorem}
 
-\subsection{Outer loop}
-Having established the role of \RRresh\ within stochastic algorithms, we now examine its interplay with \RRrom\ and the effect of combining these heuristics on bias.
+\subsection{Convergence Guarantees for \RRrom$\oplus$\RRresh}% The Outer loop
+Having established the role of \RRresh\ within stochastic algorithms, we now examine its interplay with \RRrom\ and the effect of combining these heuristics on the bias term.
 The previous results hold for the full class of weakly quasi-strongly monotone problems with $\lambda>0$.  
 To sharpen our understanding, we focus on the quasi-strongly monotone case ($\lambda=0$ in Assumption~\ref{assumpt: weak_quasi_strong_monotonicity}), which already covers a broad range of non-monotone regimes \citep{loizou2020stochastic}.  
 A key step in our analysis is to bound higher-order moments of the deviation between \RRresh\ iterates and the solution of \eqref{VIP}, thereby showing that the bias of Perturbed SGD--\RRresh\ is linear in the step size with quadratic corrections. 
@@ -114,9 +156,9 @@ A key step in our analysis is to bound higher-order moments of the deviation bet
 Technically, our analysis relies on two delicate ingredients that go beyond straightforward generalizations.  
 (i) A \emph{spectral study of the full-pass operator} (Lemma~\ref{lemma: eigenvalues_operator}), which approximates the underlying map $F$ of the VIP.  
 This connection between \RRresh\ and the multi-step extragradient literature may be of independent interest, but its proof requires a nontrivial handling of spectral properties across reshuffled passes.  
-(ii) A \emph{combinatorial lemma} (Lemma~\ref{lemma: 4th-order-property}) that bounds fourth moments of finite-sum subsets of vectors.  
+(ii) A \emph{combinatorial lemma} (Lemma~\ref{lemma: 4th-order-property}) that bounds fourth order moments of finite-sum subsets of vectors.  
 While reminiscent of \citet[ Lemma~1, Sec.~7]{mishchenko2020revisiting}, our result demands substantially more intricate manipulations to accommodate the dependencies introduced by sampling without replacement.
-\vspace{-0.5em}
+% \vspace{-0.5em}
 \begin{lemma}\label{lem: rr_1}
 Let $\lambda=0$ and Assumptions~\ref{assumt: sol_set_non_empty}--\ref{assumpt: 4th-moment bounded} hold.  
 If $\gamma\le\gamma_{\max}$ (cf.\  Lemma~\ref{lemma strongly monotone 4th-moment}), then
@@ -126,39 +168,35 @@ If $\gamma\le\gamma_{\max}$ (cf.\  Lemma~\ref{lemma strongly monotone 4th-moment
 = C(x^*)\gamma+\mathcal{O}(\gamma^3).
 \]
 \end{lemma}
-\vspace{-0.5em}
+% \vspace{-0.5em}
 
-\begin{draftremark}\small
+\begin{draftremark}
 For classical \texttt{SGD}, the bias takes the form 
 $\mathrm{bias}(\texttt{SGD})=C(x^*)\gamma+\mathcal{O}(\gamma^{1.5})$ \citep{dieuleveut2020bridging}.  
 Hence, while \RRresh\ retains the same first-order term, it improves the higher-order contribution and simultaneously yields sharper mean-squared error guarantees.
 \end{draftremark}
-\vspace{-0.5em}
+% \vspace{-0.5em}
 
 Building on this fact, we construct a refined trajectory via the debiasing scheme \RRrom.  
 Our final result shows that the combined scheme attains exponentially fast a provable asymptotic $\mathcal{O}(\gamma^3)$ bias:
-\vspace{-0.5em}
+% \vspace{-0.5em}
 
 \begin{theorem}\label{thm: rr_1_rr_2}
-Under the assumptions of Lemma~\ref{lem: rr_1}, Algorithm~\ref{alg:rrrom-rrresh} output satisfies
-%\[
-%\limsup_{k\to\infty}\|\ex[x_k]-x^*\|
-%= \mathcal{O}(\gamma^3),
-%\]
-%and moreover
-\[
-\begin{aligned}
-&\text{Last-iterate version (line 9):} 
-&& \|\ex[x_k]-x^*\|\;\le\;c(1-\rho)^k+\mathcal{O}(\gamma^3), \\[0.5em]
-&\text{Averaged-iterate version (line 10):} 
-&& \Biggl\|\ex\!\left[\tfrac{1}{k}\sum_{m=1}^k x_m\right]-x^*\Biggr\|\;\le\;\tfrac{c/\rho}{k}+\mathcal{O}(\gamma^3).
-\end{aligned}
-\]
-where $\rho\in(0,1),\;c<\infty \text{ (cf.\ Theorem~\ref{thm: efficient_stats}).}$
-\end{theorem}
-\vspace{-0.5em}
+% Under the assumptions of Lemma~\ref{lem: rr_1}, Algorithm~\ref{alg:rrrom-rrresh}
+The output of SGD-{RE$\oplus$RR} satisfies
+\begin{eqnarray}
+   % &\text{Last-iterate version:} 
+&& \|\ex[x_k]-x^*\|\;\le\;c(1-\rho)^k+\mathcal{O}(\gamma^3), \nonumber\\[0.5em]
+&& \Expe{\|x_k - x^*\|^2} \;\leq\; c'(1-\rho')^k + \mathcal{O}(\gamma^2) \nonumber
+% &\text{Averaged-iterate version (line 10):} 
+% && \Biggl\|\ex\!\left[\tfrac{1}{k}\sum_{m=1}^k x_m\right]-x^*\Biggr\|\;\le\;\tfrac{c/\rho}{k}+\mathcal{O}(\gamma^3). 
+\end{eqnarray}
 
-\begin{draftremark}\small
+where $\rho, \rho'\in(0,1),\;c, c'<\infty .$
+\end{theorem}
+% \vspace{-0.5em}
+
+\begin{draftremark}
 Although the \emph{last-iterate} estimator is often preferred in theory, in practice a trade-off emerges vs \emph{ergodic-average}: full-epoch or tailed averaging (the Polyak--Ruppert scheme~\citep{polyak1992acceleration}) achieves improved variance properties, asymptotically captured by Theorem~\ref{thm: LLN_CLT_res}.
 \end{draftremark}
 \vspace{-1.em}
